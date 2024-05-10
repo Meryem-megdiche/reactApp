@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import './LoginForm.css';
-
 import { useNavigate } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+
 const LoginForm = () =>
 {
     const [email, setEmail] = useState('');
