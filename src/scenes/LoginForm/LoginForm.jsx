@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './LoginForm.css';
-import { FaUserLock } from "react-icons/fa";
-import { FaUnlockAlt } from "react-icons/fa";
+
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 const LoginForm = () =>
@@ -53,13 +52,13 @@ const LoginForm = () =>
             <input type="text" placeholder='email' required  
             value={email} onChange={(e) => setEmail(e.target.value)} 
                        />
-            <FaUserLock  className='icon' />
+            
             </div>
             <div className="input-box">
             <input type="password" placeholder='Password' required  value={password} onChange={(e) => setPassword(e.target.value)}
              
               />
-            <FaUnlockAlt className='icon'/>
+            
             </div>
             <div className="remember-forgot">
                 <label ><input type="checkbox" />Remember me</label>
