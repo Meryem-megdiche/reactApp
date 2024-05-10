@@ -23,7 +23,7 @@ const Invoices = () => {
 
   const handleAddconfig = async (values) => {
     try {
-      const response = await axios.post('http://localhost:3001/config/configs', values);
+      const response = await axios.post('https://nodeapp-2h1p.onrender.com/config/configs', values);
       setSuccessMessage("Configuration ajoutée avec succès !");
       setErrorMessage(null);
         
@@ -37,7 +37,7 @@ const Invoices = () => {
     }
   };
   const handleAddOrUpdateConfig = async (values) => {
-    const endpoint = equipmentId ? `http://localhost:3001/config/configs/${equipmentId}` : 'http://localhost:3001/config/configs';
+    const endpoint = equipmentId ? `https://nodeapp-2h1p.onrender.com/config/configs/${equipmentId}` : 'https://nodeapp-2h1p.onrender.com/config/configs';
     const method = equipmentId ? 'put' : 'post';
 
     try {
@@ -69,7 +69,7 @@ const Invoices = () => {
 
   useEffect(() => {
     if (equipmentId) {
-      axios.get(`http://localhost:3001/config/configs/${equipmentId}`)
+      axios.get(`https://nodeapp-2h1p.onrender.com/config/configs/${equipmentId}`)
         .then(response => {
           const { Type, seuil, adresseMail, equipment } = response.data;
           setInitialFormValues({ Type, seuil, adresseMail, equipment });

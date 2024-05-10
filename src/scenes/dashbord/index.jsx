@@ -60,7 +60,7 @@ socket.on('newAlert', (alert) => {
   const fetchBarChartData = async () => {
     try {
       if (selectedEquipments.length > 0 && startDate && endDate) {
-        const response = await axios.post('http://localhost:3001/api/barChartData', {
+        const response = await axios.post('https://nodeapp-2h1p.onrender.com/api/barChartData', {
           startDate: startDate,
           endDate: endDate,
           equipmentIds: selectedEquipments
@@ -131,7 +131,7 @@ socket.on('newAlert', (alert) => {
   const fetchEquipments = async () => {
     try {
       
-      const response = await axios.get('http://localhost:3001/equip');
+      const response = await axios.get('https://nodeapp-2h1p.onrender.com/equip');
       setEquipments(response.data);
     } catch (error) {
       console.error('Error fetching equipments:', error);
@@ -146,7 +146,7 @@ socket.on('newAlert', (alert) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/api/interventions");
+        const response = await axios.get("https://nodeapp-2h1p.onrender.com/api/interventions");
         setInterventions(response.data);
       } catch (error) {
         console.error("Erreur lors de la récupération des données :", error);
@@ -159,7 +159,7 @@ socket.on('newAlert', (alert) => {
 
   useEffect(() => {
     // Connexion à socket.io
-    const socket = io('http://localhost:3001'); // Assurez-vous que l'adresse correspond à votre serveur socket.io
+    const socket = io('https://nodeapp-2h1p.onrender.com'); // Assurez-vous que l'adresse correspond à votre serveur socket.io
 
     // Gestion de la nouvelle alerte
     socket.on('newAlert', (newAlert) => {
@@ -212,7 +212,7 @@ socket.on('newAlert', (alert) => {
   const fetchPingCount = async () => {
     try {
       if (selectedEquipments.length > 0 && startDate && endDate) {
-        const response = await axios.post('http://localhost:3001/api/pingResults/equip/count', {
+        const response = await axios.post('https://nodeapp-2h1p.onrender.com/api/pingResults/equip/count', {
           startDate: startDate,
           endDate: endDate,
           equipmentIds: selectedEquipments
@@ -237,7 +237,7 @@ useEffect(() => {
 
 const fetchInterventionCount = async () => {
   try {
-    const response = await axios.post('http://localhost:3001/api/interventions/equip/count', {
+    const response = await axios.post('https://nodeapp-2h1p.onrender.com/api/interventions/equip/count', {
       startDate: startDate,
       endDate: endDate,
       equipmentIds: selectedEquipments
@@ -261,7 +261,7 @@ useEffect(() => {
 const fetchData = async () => {
 try {
   if (selectedEquipments.length > 0 && startDate && endDate) {
-    const response = await axios.post("http://localhost:3001/api/erij", {
+    const response = await axios.post("https://nodeapp-2h1p.onrender.com/api/erij", {
       startDate: startDate,
       endDate: endDate,
       equipmentIds: selectedEquipments
@@ -286,7 +286,7 @@ useEffect(() => {
 const fetchInterventions = async () => {
   try {
     if (selectedEquipments.length > 0 && startDate && endDate) {
-      const response = await axios.post('http://localhost:3001/api/interventions/filter', {
+      const response = await axios.post('https://nodeapp-2h1p.onrender.com/api/interventions/filter', {
         startDate: startDate,
         endDate: endDate,
         equipmentIds: selectedEquipments
@@ -305,7 +305,7 @@ const fetchInterventions = async () => {
 const fetchResolvedAlertsCount = async () => {
   if (selectedEquipments.length > 0 && startDate && endDate) {
     try {
-      const response = await axios.post('http://localhost:3001/api/alerts/resolved/count', {
+      const response = await axios.post('https://nodeapp-2h1p.onrender.com/api/alerts/resolved/count', {
         startDate: startDate,
         endDate: endDate,
         equipmentIds: selectedEquipments
@@ -327,7 +327,7 @@ useEffect(() => {
 const generateAndDownloadReport = async (format) => {
   setIsGenerating(true);
   try {
-    const response = await axios.post('http://localhost:3001/api/reports/generate', {
+    const response = await axios.post('https://nodeapp-2h1p.onrender.com/api/reports/generate', {
       startDate, endDate, equipmentIds: selectedEquipments,
     });
     setIsGenerating(false);

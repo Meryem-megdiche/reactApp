@@ -19,13 +19,13 @@ const Config = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/config");
+        const response = await axios.get("https://nodeapp-2h1p.onrender.com/config");
         console.log(response.data);
         setConfigs(response.data);
   
         const equipconfigs = await Promise.all(response.data.map(async (config) => {
           try {
-            const equipResponse = await axios.get(`http://localhost:3001/config/equip/${config.equipment} `);
+            const equipResponse = await axios.get(`https://nodeapp-2h1p.onrender.com/config/equip/${config.equipment} `);
            
             if (equipResponse.data && equipResponse.data.Nom) {
               
@@ -67,7 +67,7 @@ const Config = () => {
 
   const deleteConfig = async (id) => {
     try {
-      await axios.delete(`http://localhost:3001/config/configs/${id}`);
+      await axios.delete(`https://nodeapp-2h1p.onrender.com/config/configs/${id}`);
       setConfigs(configs.filter((config) => config.id !== id));
       console.log("Configuration deleted successfully");
     } catch (error) {
