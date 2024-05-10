@@ -4,16 +4,14 @@ import { Autocomplete,Checkbox } from '@mui/material';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
-import EmailIcon from "@mui/icons-material/Email";
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import TrafficIcon from "@mui/icons-material/Traffic";
+
+import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
+import WifiTetheringIcon from '@mui/icons-material/WifiTethering';
 import Header from "../../components/Header";
 import LineChart from "../../components/LineChart";
-import GeographyChart from "../../components/GeographyChart";
+
 import BarChart from "../../components/barChart";
 import StatBox from "../../components/StatBox";
-import ProgressCircle from "../../components/ProgressCircle";
 import { useEffect, useState } from "react";
 import io from 'socket.io-client';
 import axios from "axios";
@@ -21,13 +19,14 @@ import { NavLink } from 'react-router-dom';
 import {TextField}  from '@mui/material';
 import { Menu, MenuItem, FormGroup, FormControlLabel } from "@mui/material";
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'; // Importez l'icône appropriée
-import { Alert } from '@mui/material'; // Importez les composants Alert de MUI
+import { Alert, AlertTitle } from '@mui/material'; // Importez les composants Alert de MUI
 import { useSnackbar } from 'notistack';
-
-
+import TTLStatsPieChart from "../../components/Pie";
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 const Dashboard = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [alerts, setAlerts] = useState([]);
+  const [resolvedAlertsCount, setResolvedAlertsCount] = useState(null); 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -40,21 +39,22 @@ const Dashboard = () => {
   const [InterventionCount, setInterventionCount] = useState(null);
   const [barChartData, setBarChartData] = useState({});
   const [lineData, setLineData] = useState(null);
+  const [selectAll, setSelectAll] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportSummary, setReportSummary] = useState('');
-
-
-  const generatRapport = async (format) => {
-    
-  }
-
+  const [exportFile, setExportFile] = useState(null);
   const socket = io('http://localhost:3000'); // Assurez-vous que l'URL correspond à votre serveur
-socket.on('newAlert', (alert) => {
-  console.log('Nouvelle alerte reçue lors de l intervention:', alert);
  
+
+  // Écoute de l'événement 'newAlert' pour recevoir les nouvelles alertes
+socket.on('newAlert', (alert) => {
+  // Mettez à jour votre interface utilisateur pour afficher la nouvelle alerte
+  console.log('Nouvelle alerte reçue lors de l intervention:', alert);
+  // Mettez à jour l'interface utilisateur avec l'alerte reçue
 });
  
 
+  // Vérifier si tous les équipements sont sélectionnés
   const isAllSelected = equipments.length > 0 && selectedEquipments.length === equipments.length;
 
   const fetchBarChartData = async () => {
@@ -300,6 +300,29 @@ const fetchInterventions = async () => {
     console.error('Error fetching interventions:', error);
   }
 };
+
+// Mettez à jour la fonction fetchResolvedAlertsCount pour envoyer une requête POST
+const fetchResolvedAlertsCount = async () => {
+  if (selectedEquipments.length > 0 && startDate && endDate) {
+    try {
+      const response = await axios.post('http://localhost:3001/api/alerts/resolved/count', {
+        startDate: startDate,
+        endDate: endDate,
+        equipmentIds: selectedEquipments
+      });
+      setResolvedAlertsCount(response.data.resolvedAlertCount);
+    } catch (error) {
+      console.error('Error fetching resolved alerts count:', error);
+    }
+  }
+};
+
+
+useEffect(() => {
+  fetchResolvedAlertsCount();
+}, [selectedEquipments, startDate, endDate]); // Dépendances pour recharger le compte lors de leur changement
+
+
 // Fonction pour générer le rapport
 const generateAndDownloadReport = async (format) => {
   setIsGenerating(true);
@@ -349,412 +372,365 @@ const generateSummary = async () => {
   setReportSummary(summary);
 };
 
-
-
 return (
-  <Box m="20px">
-   <Box sx={{ position: 'fixed', bottom: 0, right: 0, m: 2 }}>
-
+    <Box m="20px">
+     <Box sx={{ position: 'fixed', bottom: 0, right: 0, m: 2 }}>
+  
 </Box>
-    <Box display="flex" justifyContent="space-between" alignItems="center">
-      <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
-      <Box gridColumn="span 12" p="20px">
-      <Typography variant="h6" color="inherit">
-Alertes récentes
-</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Header  subtitle="Welcome to your dashboard" />
+        <Box gridColumn="span 12" p="20px">
+        <Typography variant="h6" color="inherit">
+             Alertes récentes
+          </Typography>
 {alerts.map((alert, index) => (
-<Alert
-  key={index}
-  severity={alert.notificationColor} // Utilisation de la couleur assignée dans l'écouteur socket
-  icon={<ErrorOutlineIcon fontSize="inherit" />}
-  sx={{ my: 2 }}
->
-  {alert.message} 
-</Alert>
+  <Alert
+    key={index}
+    severity={alert.notificationColor} // Utilisation de la couleur assignée dans l'écouteur socket
+    icon={<ErrorOutlineIcon fontSize="inherit" />}
+    sx={{ my: 2 }}
+  >
+    {alert.message} 
+  </Alert>
 ))}
 </Box>
-     
+       
 <Box
-    display="flex"
-    alignItems="center"
-    color="text.primary"
-    fontSize="14px"
-    fontWeight="bold"
-    p="10px 20px"
-    borderRadius="5px"
-  >
-    <TextField
-      id="startDate"
-      label="Date début"
-      type="date"
-      value={startDate}
-      onChange={handleStartDateChange}
-      InputLabelProps={{
-        shrink: true,
-      }}
-      sx={{ mr: 2, "& .MuiInputLabel-root": { color: colors.grey[100] } }}
-      InputProps={{
-        style: {
-          color: colors.grey[100],
-        },
-      }}
-    />
-    <TextField
-      id="endDate"
-      label="Date fin"
-      type="date"
-      value={endDate}
-      onChange={handleEndDateChange}
-      InputLabelProps={{
-        shrink: true,
-      }}
-      sx={{ mr: 2, "& .MuiInputLabel-root": { color: colors.grey[100] } }}
-      InputProps={{
-        style: {
-          color: colors.grey[100],
-        },
-      }}
-    />
- <Autocomplete
-multiple
-id="checkboxes-tags-demo"
-options={equipments}  // Vos équipements chargés depuis l'API
-disableCloseOnSelect
-getOptionLabel={(option) => option.Nom}  // Assurez-vous que 'Nom' est la propriété contenant le nom de l'équipement
-renderOption={(props, option, { selected }) => (
-  <li {...props}>
-    <Checkbox
-      icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-      checkedIcon={<CheckBoxIcon fontSize="small" />}
-      style={{ marginRight: 8 }}
-      checked={selected}
-    />
-    {option.Nom}
-  </li>
-)}
-style={{ width: 400 }}
-renderInput={(params) => (
-  <TextField {...params} label="Rechercher et sélectionner des équipements" placeholder="Équipements" />
-)}
-value={selectedEquipments.map(id => equipments.find(e => e._id === id))}
-onChange={(event, newValue) => {
-  setSelectedEquipments(newValue.map(item => item._id));
-}}
-/>
- <FormGroup>
-      <FormControlLabel
-        control={<Checkbox checked={isAllSelected} onChange={handleSelectAll} />}
-        label=""
-      />
-    </FormGroup>
-  </Box>
-
-
-  <Button 
-         sx={{
-          backgroundColor: colors.blueAccent[700],
-          color: colors.grey[100],
-          fontSize: "14px",
-          padding: "10px 20px",
-        }}variant="contained" onClick={generatRapport} color="secondary">
-            rapport sur dashboard
-          </Button>
-
-    </Box>
-    <Box
-      display="grid"
-      gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="140px"
-      gap="20px"
+      display="flex"
+      alignItems="center"
+      color="text.primary"
+      fontSize="14px"
+      fontWeight="bold"
+      p="10px 20px"
+      borderRadius="5px"
     >
+      <TextField
+        id="startDate"
+        label="Date début"
+        type="date"
+        value={startDate}
+        onChange={handleStartDateChange}
+        InputLabelProps={{
+          shrink: true,
+        }}
+        sx={{ mr: 2, "& .MuiInputLabel-root": { color: colors.grey[100] } }}
+        InputProps={{
+          style: {
+            color: colors.grey[100],
+          },
+        }}
+      />
+      <TextField
+        id="endDate"
+        label="Date fin"
+        type="date"
+        value={endDate}
+        onChange={handleEndDateChange}
+        InputLabelProps={{
+          shrink: true,
+        }}
+        sx={{ mr: 2, "& .MuiInputLabel-root": { color: colors.grey[100] } }}
+        InputProps={{
+          style: {
+            color: colors.grey[100],
+          },
+        }}
+      />
     
-      <Box
-        gridColumn="span 3"
-        backgroundColor={colors.primary[400]}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <StatBox
-          title="12,361"
-          subtitle="Emails Sent"
-          progress="0.75"
-          increase="+14%"
-          icon={
-            <EmailIcon
-              sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-            />
-          }
+   <Autocomplete
+  multiple
+  id="checkboxes-tags-demo"
+  options={equipments}  // Vos équipements chargés depuis l'API
+  disableCloseOnSelect
+  getOptionLabel={(option) => option.Nom}  // Assurez-vous que 'Nom' est la propriété contenant le nom de l'équipement
+  renderOption={(props, option, { selected }) => (
+    <li {...props}>
+      <Checkbox
+        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+        checkedIcon={<CheckBoxIcon fontSize="small" />}
+        style={{ marginRight: 1 }}
+        checked={selected}
+      />
+      {option.Nom}
+    </li>
+  )}
+  style={{ width: 300 }}
+  renderInput={(params) => (
+    <TextField {...params} label="Rechercher et sélectionner des équipements" placeholder="Équipements" />
+  )}
+  value={selectedEquipments.map(id => equipments.find(e => e._id === id))}
+  onChange={(event, newValue) => {
+    setSelectedEquipments(newValue.map(item => item._id));
+  }}
+/>
+   <FormGroup>
+        <FormControlLabel
+          control={<Checkbox checked={isAllSelected} onChange={handleSelectAll} />}
+          label=""
         />
+      </FormGroup>
+
+ 
+    </Box>
+
       </Box>
       <Box
-        gridColumn="span 3"
-        backgroundColor={colors.primary[400]}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
+        display="grid"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gridAutoRows="140px"
+        gap="20px"
       >
-        <StatBox
-          title="431,225"
-          subtitle="Sales Obtained"
-          progress="0.50"
-          increase="+21%"
-          icon={
-            <PointOfSaleIcon
-              sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-            />
-          }
-        />
-      </Box>
       
-      <Box
-gridColumn="span 3"
-backgroundColor={colors.primary[400]}
-display="flex"
-alignItems="center"
-justifyContent="center"
+       
+          
+ 
+        
+        <Box
+  gridColumn="span 4"
+  backgroundColor={colors.primary[400]}
+  display="flex"
+  alignItems="center"
+  justifyContent="center"
 >
 <StatBox
-  title={pingCount !== null ? pingCount:"-"} // Utiliser le nombre de ping de l'équipement sélectionné
-  subtitle="Nombre de ping"
-  progress="0.80"
-  increase="" // pourcentage
-  icon={
-    <TrafficIcon
-      sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-    />
-  }
-/>
+    title={pingCount !== null ? pingCount:"-"} // Utiliser le nombre de ping de l'équipement sélectionné
+    subtitle="Nombre de ping"
+   
+    increase="" // pourcentage
+    icon={
+      <WifiTetheringIcon 
+        sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
+      />
+    }
+  />
 
 </Box>
 {
-reportSummary && (
-  <Typography variant="body1" gutterBottom>
-    {reportSummary}
-  </Typography>
-)
+  reportSummary && (
+    <Typography variant="body1" gutterBottom>
+      {reportSummary}
+    </Typography>
+  )
 }
 <Box
-        gridColumn="span 3"
-        backgroundColor={colors.primary[400]}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
-<StatBox
-title={InterventionCount !== null ? InterventionCount : "-"}
-subtitle="Nombre des interventions"
-progress=""
-increase=""
-icon={
-  <PersonAddIcon
-    sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-  />
-}
-/>
-      </Box>      
-      <Box
-        gridColumn="span 8"
-        gridRow="span 2"
-        backgroundColor={colors.primary[400]}
-      >
-        <Box
-          mt="25px"
-          p="0 30px"
-          display="flex "
-          justifyContent="space-between"
+          gridColumn="span 4"
+          backgroundColor={colors.primary[400]}
+          display="flex"
           alignItems="center"
+          justifyContent="center"
         >
-           <Box>
-
-
-<Menu
-  anchorEl={anchorEl}
-  open={Boolean(anchorEl)}
-  onClose={handleClose} // This will just close the menu without clearing selections
->
-  <FormGroup>
-    <FormControlLabel
-      control={
-        <Checkbox
-          checked={selectedEquipments.length === equipments.length}
-          onChange={handleSelectAll}
-          name="selectAll"
-        />
-      }
-      label="Select All"
-    />
+  <StatBox
+  title={InterventionCount !== null ? InterventionCount : "-"}
+  subtitle="Nombre des interventions"
   
-    {equipments.map((equipment) => (
+ 
+  icon={
+    <AddCircleOutlineIcon 
+    sx={{ color: colors.greenAccent[600], fontSize: "26px" }}/>
+   
+  }
+  
+/>
+        </Box>  
+        <Box
+          gridColumn="span 4"
+          backgroundColor={colors.primary[400]}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <StatBox
+            title={resolvedAlertsCount !== null ? resolvedAlertsCount : "-"}
+            subtitle=" Alertes résolues"
+
+            icon={
+              <NotificationsOutlinedIcon 
+                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
+              />
+            }
+          />
+        </Box>    
+        <Box
+          gridColumn="span 8"
+          gridRow="span 2"
+          backgroundColor={colors.primary[400]}
+        >
+          <Box
+            mt="25px"
+            p="0 30px"
+            display="flex "
+            justifyContent="space-between"
+            alignItems="center"
+          >
+             <Box>
+  
+
+  <Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={handleClose} // This will just close the menu without clearing selections
+  >
+    <FormGroup>
       <FormControlLabel
-        key={equipment._id}
         control={
           <Checkbox
-            checked={selectedEquipments.includes(equipment._id)}
-            onChange={handleCheckboxChange}
-            name={equipment._id}
+            checked={selectedEquipments.length === equipments.length}
+            onChange={handleSelectAll}
+            name="selectAll"
           />
         }
-        label={equipment.Nom}
+        label="Select All"
       />
-    ))}
-  </FormGroup>
-  <MenuItem onClick={handleClose}>Done</MenuItem>
-</Menu>
+    
+      {equipments.map((equipment) => (
+        <FormControlLabel
+          key={equipment._id}
+          control={
+            <Checkbox
+              checked={selectedEquipments.includes(equipment._id)}
+              onChange={handleCheckboxChange}
+              name={equipment._id}
+            />
+          }
+          label={equipment.Nom}
+        />
+      ))}
+    </FormGroup>
+    <MenuItem onClick={handleClose}>Done</MenuItem>
+  </Menu>
 </Box>
 <Box>
-            <Typography
-              variant="h5"
-              fontWeight="600"
-              color={colors.grey[100]}
-            >
-              Courbe
-            </Typography>
-            <Typography
-              variant="h3"
-              fontWeight="bold"
-              color={colors.greenAccent[500]}
-            >
-              TTL
-            </Typography>
+             <Typography
+                variant="h3"
+                fontWeight="bold"
+                color={colors.greenAccent[500]}
+              >
+                TTL
+              </Typography>
+              
+            </Box>
+            <Box>
+              <IconButton>
+                <DownloadOutlinedIcon
+                  sx={{ fontSize: "26px", color: colors.greenAccent[500] }}
+                />
+              </IconButton>
+            </Box>
           </Box>
-          <Box>
-            <IconButton>
-              <DownloadOutlinedIcon
-                sx={{ fontSize: "26px", color: colors.greenAccent[500] }}
-              />
-            </IconButton>
-          </Box>
-        </Box>
-        <Box height="250px" m="-20px 0 0 0">
-        <Box height="250px" m="-20px 0 0 0">
-        <LineChart
-isDashboard={false}
-selectedEquipments={selectedEquipments}
-startDate={startDate}
-endDate={endDate}
+          <Box height="250px" m="-20px 0 0 0">
+          <Box height="250px" m="-20px 0 0 0">
+          <LineChart
+  isDashboard={false}
+  selectedEquipments={selectedEquipments}
+  startDate={startDate}
+  endDate={endDate}
 />
 </Box>
 
+          </Box>
         </Box>
-      </Box>
-      <Box gridColumn="span 4" gridRow="span 2" backgroundColor={colors.primary[400]} overflow="auto">
-      <div style={{ display: 'flex', gap: '10px' }}> 
-
-<Button
-  sx={{
-    backgroundColor: colors.blueAccent[700],
-    color: colors.grey[100],
-    fontSize: "14px",
-    fontWeight: "bold",
-    padding: "10px 20px",
-    justifyContent:"center", // Centrez horizontalement
-  alignItems:"center",
-  }}
-  onClick={() => generateAndDownloadReport('pdf')}
-  disabled={isGenerating}
->
-  {isGenerating ? 'Génération rapport en cours...' : 'Télécharger rapport en  PDF'}
-</Button>
+        <Box gridColumn="span 4" gridRow="span 2" backgroundColor={colors.primary[400]} overflow="auto">
+        <div style={{ display: 'flex', gap: '10px' }}> 
+  
+  <Button
+    sx={{
+      backgroundColor: colors.blueAccent[700],
+      color: colors.grey[100],
+      fontSize: "14px",
+      fontWeight: "bold",
+      padding: "10px 20px",
+      justifyContent:"center", // Centrez horizontalement
+    alignItems:"center",
+    }}
+    onClick={() => generateAndDownloadReport('pdf')}
+    disabled={isGenerating}
+  >
+    {isGenerating ? 'Génération rapport en cours...' : 'Télécharger rapport en  PDF'}
+  </Button>
 </div>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          borderBottom={`4px solid ${colors.primary[500]}`}
-          colors={colors.grey[100]}
-          p="15px"
-        >
-            
-            <Typography color={colors.grey[100]} variant="h5" fontWeight="600">
-    Dernières interventions
-  </Typography>
-  <NavLink to="/listes">
-    Voir toutes
-  </NavLink>
-</Box>
-{interventions.slice(0, 5).map((intervention) => (
-  <Box key={intervention._id} py="5px">
-    <Typography color={colors.grey[100]}>
-      {intervention.type} - {intervention.date}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            borderBottom={`4px solid ${colors.primary[500]}`}
+            colors={colors.grey[100]}
+            p="15px"
+          >
+              
+              <Typography color={colors.greenAccent[500]} variant="h5" fontWeight="600">
+      Dernières interventions
     </Typography>
-    <NavLink to={`/listes/${intervention._id}`}>
-      Voir détails
+    <NavLink to="/listes">
+      Voir toutes
     </NavLink>
   </Box>
-))}
+  {interventions.slice(0, 5).map((intervention) => (
+    <Box key={intervention._id} py="5px">
+      <Typography color={colors.grey[100]}>
+        {intervention.type} - {new Date(intervention.date).toLocaleDateString("fr-FR")}
+      </Typography>
+      <NavLink to={`/listes/${intervention._id}`}>
+        Voir détails
+      </NavLink>
+    </Box>
+  ))}
 </Box>
-  
-    
-      <Box
-        gridColumn="span 4"
-        gridRow="span 2"
-        backgroundColor={colors.primary[400]}
-        p="30px"
-      >
-        <Typography variant="h5" fontWeight="600">
-          Campaign
-        </Typography>
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          mt="25px"
+<Box
+          gridColumn="span 6"
+          gridRow="span 2"
+          backgroundColor={colors.primary[400]}
         >
-          <ProgressCircle size="125" />
           <Typography
             variant="h5"
+            fontWeight="bold"
             color={colors.greenAccent[500]}
-            sx={{ mt: "15px" }}
+            sx={{ padding: "30px 30px 0 30px" }}
           >
-            $48,352 revenue generated
+            PieChart
           </Typography>
-          <Typography>Includes extra misc expenditures and costs</Typography>
+          <Box height="250px" mt="-20px">
+          <TTLStatsPieChart
+  isDashboard={false}
+  equipmentIds={selectedEquipments}
+  startDate={startDate}
+  endDate={endDate}
+
+/>
+          </Box>
         </Box>
-      </Box>
-      <Box
-        gridColumn="span 4"
-        gridRow="span 2"
-        backgroundColor={colors.primary[400]}
-      >
-        <Typography
-          variant="h5"
-          fontWeight="600"
-          sx={{ padding: "30px 30px 0 30px" }}
+      
+       
+        <Box
+          gridColumn="span 6"
+          gridRow="span 2"
+          backgroundColor={colors.primary[400]}
         >
-        </Typography>
-        <Box height="250px" mt="-20px">
-        {selectedEquipments.length > 0 ? (
-    <BarChart
-      equipmentIds={selectedEquipments}
-      startDate={startDate}
-      endDate={endDate}
-      isDashboard={true}
-    />
-  ) : (
-    <Typography variant="body2">Aucun équipement sélectionné pour afficher le graphique.</Typography>
-  )}
+
+
+         <Typography
+            variant="h5"
+            fontWeight="bold"
+            color={colors.greenAccent[500]}
+            sx={{ padding: "30px 30px 0 30px" }}
+          >
+            BarChart
+          </Typography>
+          <Box height="250px" mt="-20px">
+          {selectedEquipments.length > 0 ? (
+      <BarChart
+        equipmentIds={selectedEquipments}
+        startDate={startDate}
+        endDate={endDate}
+        isDashboard={true}
+      />
+    ) : (
+      <Typography variant="body2"></Typography>
+    )}
+          </Box>
         </Box>
-      </Box>
-      <Box
-        gridColumn="span 4"
-        gridRow="span 2"
-        backgroundColor={colors.primary[400]}
-        padding="30px"
-      >
-        <Typography
-          variant="h5"
-          fontWeight="600"
-          sx={{ marginBottom: "15px" }}
-        >
-          Geography Based Traffic
-        </Typography>
-        <Box height="200px">
-          <GeographyChart isDashboard={true} />
-        </Box>
+        
       </Box>
     </Box>
-  </Box>
-);
+  );
 };
 export default Dashboard;

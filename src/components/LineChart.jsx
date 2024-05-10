@@ -24,11 +24,13 @@ const LineChart = ({ selectedEquipments, startDate, endDate, isDashboard = false
       return 'every 1 day';
     }
   };
+  
   useEffect(() => {
+    console.log("Fetching data for LineChart with", { selectedEquipments, startDate, endDate });
     const fetchData = async () => {
       if (selectedEquipments.length > 0 && startDate && endDate) {
         try {
-          const response = await axios.post('http://localhost:3001/api/line', {
+          const response = await axios.post('http://localhost:3001/api/erij', {
             startDate,
             endDate,
             equipmentIds: selectedEquipments.map(id => id.toString()),
@@ -104,11 +106,10 @@ const LineChart = ({ selectedEquipments, startDate, endDate, isDashboard = false
   };
 
   return (
-    <div style={{ height: 250 }}>
+    <div id="linechart" style={{ height: 250 }}>
       <ResponsiveLine {...nivoProperties} data={data} />
     </div>
   );
 };
 
 export default LineChart;
-

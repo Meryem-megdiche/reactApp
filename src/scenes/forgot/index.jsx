@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { FaLock, FaKey } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
-import '/projet-pfe/react/src/component/LoginForm/LoginForm.css'; // Réutilisez le même CSS que pour LoginForm
+import '../LoginForm/LoginForm.css'; // Réutilisez le même CSS que pour LoginForm
 
 const ResetPasswordForm = () => {
   const [token, setToken] = useState('');

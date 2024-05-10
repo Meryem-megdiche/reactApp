@@ -9,11 +9,11 @@ import Contacts from "./scenes/contacts";
 import Invoices from "./scenes/invoices";
 import Form from "./scenes/form";
 import Calendar from "./scenes/calendar";
-import FAQ from "./scenes/faq";
+
 import Bar from "./scenes/bar";
 import Pie from "./scenes/pie";
 import Line from "./scenes/line";
-import Geography from "./scenes/geography";
+
 import Ping from "./scenes/ping";
 
 // ... (Other imports)
@@ -27,12 +27,12 @@ import Topologie from "./scenes/Topologie";
 import InterventionDetails from "./scenes/InterventionDetails"; // Importez le nouveau composant
 import { SnackbarProvider } from 'notistack';
 import Alert from "./scenes/alert"
-import LoginForm  from './component/LoginForm/LoginForm';
+import LoginForm  from './scenes/LoginForm/LoginForm';
 import { useLocation } from "react-router-dom";
 import User from "./scenes/user";
 import ResetPasswordForm from "./scenes/forgot";
 import ForgotPasswordForm from "./scenes/password";
- // Update the path accordingly
+ import TTLStatsPieChart  from "./components/Pie"
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -59,11 +59,11 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/form" element={<Form />} />
                 <Route path="/calendar" element={<Calendar />} />
-                <Route path="/faq" element={<FAQ />} />
+              
                 <Route path="/bar" element={<Bar />} />
                 <Route path="/pie" element={<Pie />} />
                 <Route path="/line" element={<Line />} />
-                <Route path="/geography" element={<Geography />} />
+                
                 <Route path="/ping" element={<Ping />} />
                 <Route path="/ping/:equipmentId" element={<Ping />} />
                 <Route path="/modify/:id" element={<ModifyEquipment />} />
@@ -74,7 +74,7 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
                 <Route path="/liste" element={<Listes />} />
                 <Route path="/listes" element={<Listes />} />
               
-
+                <Route path="/pie" element={<TTLStatsPieChart />} />
 
                 <Route path="/listes/:id" element={<InterventionDetails />} />
                 <Route path="/Topologie" element={<Topologie/>} />

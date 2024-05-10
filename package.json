@@ -2,7 +2,6 @@
   "name": "admin",
   "version": "0.1.0",
   "private": true,
-  "homepage":"https://Meryem-megdiche.github.io/reactApp",
   "dependencies": {
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
@@ -30,6 +29,7 @@
     "formik": "^2.4.5",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
+    "jwt-decode": "^4.0.0",
     "notistack": "^3.0.1",
     "query-string": "^9.0.0",
     "react": "^18.2.0",
@@ -53,9 +53,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "predeploy" :"npm run build",
-    "deploy" :"gh-pages -d build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
