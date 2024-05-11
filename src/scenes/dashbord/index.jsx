@@ -373,12 +373,12 @@ const generateSummary = async () => {
 };
 
 return (
-    <Box m="20px">
+   <Box m={2}>
      <Box sx={{ position: 'fixed', bottom: 0, right: 0, m: 2 }}>
   
 </Box>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Header  title="Dashboard" subtitle="Welcome to your dashboard" />
+        <Header  subtitle="Welcome to your dashboard" />
         <Box gridColumn="span 12" p="20px">
         <Typography variant="h6" color="inherit">
              Alertes récentes

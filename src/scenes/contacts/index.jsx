@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react'; // Ajout de useEffect ici
 import { Box, Button, TextField } from "@mui/material";
 import { Formik } from "formik";
@@ -6,27 +5,59 @@ import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
+// Define the RfidScanner component outside of the Contacts component
+const RfidScanner = ({ setRfid }) => {
+  const { enqueueSnackbar } = useSnackbar();
+
+  const readNfcTag = async () => {
+      if ("NDEFReader" in window) {
+          try {
+              const reader = new NDEFReader();
+              await reader.scan();
+              reader.onreading = event => {
+                  const decoder = new TextDecoder();
+                  for (const record of event.message.records) {
+                      setRfid(decoder.decode(record.data));
+                  }
+              };
+          } catch (error) {
+              console.error("Error reading NFC tag:", error);
+              enqueueSnackbar("Error reading NFC tag: " + error.message, { variant: 'error' });
+          }
+      } else {
+          enqueueSnackbar("NFC is not supported on this device or browser.", { variant: 'warning' });
+      }
+  };
+
+  return (
+      <Button onClick={readNfcTag} variant="contained" color="primary">
+          Scan RFID
+      </Button>
+  );
+};
 
 const Contacts = () => {
-  const navigate = useNavigate(); // Ajouter ceci
+  const [rfid, setRfid] = useState('');
   const [successMessage, setSuccessMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
-
   const isNonMobile = useMediaQuery("(min-width:600px)");
-
+  const navigate = useNavigate();
+  
   const handleAddEquipment = async (values) => {
     try {
       const connecteAIds = values.ConnecteA.split(',').map(id => id.trim()); // Créer un tableau à partir de la chaîne
       const newEquipment = {
         Nom: values.Nom,
         Type: values.Type,
+        RFID: values.RFID,
         AdresseIp: values.AdresseIp,
         Emplacement: values.Emplacement,
         Etat: values.Etat,
         ConnecteA:connecteAIds,
-    
-        RFID: values.RFID,
+        Pays:values.Pays,
+     
       };
 
       console.log("Nouvel équipement :", newEquipment);
@@ -38,10 +69,9 @@ const Contacts = () => {
       if (response.data.success) {
         setSuccessMessage("Équipement ajouté avec succès");
         setErrorMessage(null);
-        // Ajout d'une temporisation avant de rediriger l'utilisateur
         setTimeout(() => {
           navigate('/team'); // Remplacez ceci par le chemin réel de votre liste d'équipements
-        }, 800);
+        }, 800); 
       } else {
         if (response.data.message === "Equipement déjà existant") {
           setErrorMessage("L'adresse IP ou le RFID existe déjà dans la base de données. L'équipement ne peut pas être ajouté.");
@@ -57,14 +87,9 @@ const Contacts = () => {
     }
   };
 
-  const navigateToConfigList = () => {
-    navigate('/team'); // Remplacez par le chemin correct
-  };
-
   return (
     <Box m="20px">
-      <Header title="Ajouter un équipement" subtitle="Voir la liste des équipements" 
-      onSubtitleClick={navigateToConfigList}/>
+      <Header title="Ajouter un équipement" subtitle="Voir la liste des équipements" />
       {successMessage && (
         <Box bgcolor="success.main" color="success.contrastText" p={2} mb={2} borderRadius={4}>
           {successMessage}
@@ -138,17 +163,16 @@ const Contacts = () => {
                 helperText={touched.AdresseIp && errors.AdresseIp}
                 sx={{ gridColumn: "span 4" }}
               />
-               <TextField
+                <RfidScanner setRfid={setRfid} />
+              <TextField
                 fullWidth
                 variant="filled"
                 type="text"
                 label="RFID"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.RFID}
+                value={rfid}
                 name="RFID"
-                error={!!touched.RFID && !!errors.RFID}
-                helperText={touched.RFID && errors.RFID}
+                error={!!errors.RFID}
+                helperText={errors.RFID}
                 sx={{ gridColumn: "span 4" }}
               />
               <TextField
@@ -191,7 +215,19 @@ const Contacts = () => {
                 helperText={touched.ConnecteA && errors.ConnecteA}
                 sx={{ gridColumn: "span 4" }}
               />
-              
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Pays"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                value={values.Pays}
+                name="Pays"
+                error={!!touched.Pays && !!errors.Pays}
+                helperText={touched.Pays && errors.Pays}
+                sx={{ gridColumn: "span 4" }}
+              />
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button type="submit" color="secondary" variant="contained">
@@ -212,11 +248,11 @@ const checkoutSchema = yup.object().shape({
   Nom: yup.string().required("required"),
   Type: yup.string().required("required"),
   AdresseIp: yup.string().required("required"),
-  RFID: yup.string().required("required"),
+  RFID: yup.string().required("required"), // Assurez-vous que le champ RFID est requis
   Emplacement: yup.string().required("required"),
   Etat: yup.string().required("required"),
   ConnecteA: yup.string().required("L'ID de l'équipement connecté est requis"),
-  
+  Pays: yup.string().required("required") // Ce champ n'est pas obligatoire
 });
 
 const initialValues = {
@@ -227,7 +263,7 @@ const initialValues = {
   Emplacement: "",
   Etat: "",
   ConnecteA:"",
- 
+  Pays:"",
 };
 
 export default Contacts;
