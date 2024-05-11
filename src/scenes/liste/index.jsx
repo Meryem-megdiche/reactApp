@@ -19,13 +19,13 @@ const Listes = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://nodeapp-4c68.onrender.com/api/interventions");
+        const response = await axios.get("https://nodeapp-0ome.onrender.com/api/interventions");
         console.log(response.data);
         setInterventions(response.data);
   
         const equippedInterventions = await Promise.all(response.data.map(async (intervention) => {
           try {
-            const equipResponse = await axios.get(`https://nodeapp-4c68.onrender.com/api/interventions/equip/${intervention.equipment} `);
+            const equipResponse = await axios.get(`https://nodeapp-0ome.onrender.com/api/interventions/equip/${intervention.equipment} `);
             // Assurez-vous que la structure de réponse est correcte et contient le champ "Nom"
             if (equipResponse.data && equipResponse.data.Nom) {
               // Mettre à jour l'intervention avec le nom de l'équipement

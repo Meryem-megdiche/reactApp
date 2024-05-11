@@ -31,7 +31,7 @@ const Contacts = () => {
 
       console.log("Nouvel équipement :", newEquipment);
 
-      const response = await axios.post('https://nodeapp-4c68.onrender.com/equip/add', newEquipment);
+      const response = await axios.post('https://nodeapp-0ome.onrender.com/equip/add', newEquipment);
 
       console.log("Réponse du serveur :", response.data);
 
