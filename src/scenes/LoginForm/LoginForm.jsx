@@ -11,7 +11,7 @@ const LoginForm = () =>
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch('https://nodeapp-2h1p.onrender.com/auth/login', {
+      const response = await fetch('https://nodeapp-4c68.onrender.com/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ const LoginForm = () =>
     
     return (
         <div className='wrapper'> 
-        <form form onSubmit={handleSubmit}>
+        <form  onSubmit={handleSubmit}>
             <h1>Login</h1>
             <div className="input-box">
             <input type="text" placeholder='email' required  

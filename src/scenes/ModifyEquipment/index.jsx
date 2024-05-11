@@ -41,7 +41,7 @@ const ModifyEquipment = () => {
   useEffect(() => {
     const fetchEquipmentData = async () => {
       try {
-        const response = await axios.get(`https://nodeapp-2h1p.onrender.com/equip/equip/${id}`);
+        const response = await axios.get(`https://nodeapp-4c68.onrender.com/equip/equip/${id}`);
         console.log("Données de l'équipement existant :", response.data);
         setEquipmentData(response.data);
       } catch (error) {
@@ -57,7 +57,7 @@ const ModifyEquipment = () => {
 
   const handleModifyEquipment = async (values) => {
     try {
-      const response = await axios.put(`https://nodeapp-2h1p.onrender.com/equip/equip/${id}`, values);
+      const response = await axios.put(`https://nodeapp-4c68.onrender.com/equip/equip/${id}`, values);
   
       if (response.data.success) {
         setSuccessMessage("Équipement modifié avec succès");

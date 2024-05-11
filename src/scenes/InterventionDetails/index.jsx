@@ -12,7 +12,7 @@ const InterventionDetails = () => {
   useEffect(() => {
     const fetchInterventionDetails = async () => {
       try {
-        const response = await axios.get(`https://nodeapp-2h1p.onrender.com/api/interventions/${id}`);
+        const response = await axios.get(`https://nodeapp-4c68.onrender.com/api/interventions/${id}`);
         setIntervention(response.data);
       } catch (error) {
         console.error("Erreur lors de la récupération des détails de l'intervention :", error);
