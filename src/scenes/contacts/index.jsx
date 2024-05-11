@@ -20,10 +20,11 @@ const RfidScanner = ({ setRfid }) => {
                   const decoder = new TextDecoder();
                   for (const record of event.message.records) {
                       setRfid(decoder.decode(record.data));
-                      
+                      enqueueSnackbar("mariem");
                   }
-              };
-              enqueueSnackbar("salem");
+                  enqueueSnackbar("salem");
+                };
+              
           } catch (error) {
               console.error("Error reading NFC tag:", error);
               enqueueSnackbar("Error reading NFC tag: " + error.message, { variant: 'error' });
