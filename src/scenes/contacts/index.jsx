@@ -13,16 +13,18 @@ const RfidScanner = ({ setRfid }) => {
 
   const readNfcTag = async () => {
       if ("NDEFReader" in window) {
+        let scannedData = '';
           try {
               const reader = new NDEFReader();
               await reader.scan();
               reader.onreading = event => {
                   const decoder = new TextDecoder();
                   for (const record of event.message.records) {
-                      setRfid(decoder.decode(record.data));
-                      enqueueSnackbar("mariem");
+                      //setRfid(decoder.decode(record.data));
+                      scannedData = decoder.decode(record.data);
+                      enqueueSnackbar();
                   }
-                  enqueueSnackbar("salem");
+                  enqueueSnackbar(scannedData);
                 };
               
           } catch (error) {
