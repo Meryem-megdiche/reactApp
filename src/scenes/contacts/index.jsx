@@ -20,7 +20,7 @@ const RfidScanner = ({ setRfid }) => {
                   const decoder = new TextDecoder();
                   for (const record of event.message.records) {
                       setRfid(decoder.decode(record.data));
-                      enqueueSnackbar(decoder.decode(record.data));
+                      enqueueSnackbar("salem");
                   }
               };
           } catch (error) {
