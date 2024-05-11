@@ -20,6 +20,7 @@ const RfidScanner = ({ setRfid }) => {
                   const decoder = new TextDecoder();
                   for (const record of event.message.records) {
                       setRfid(decoder.decode(record.data));
+                      alert(decoder.decode(record.data));
                   }
               };
           } catch (error) {
