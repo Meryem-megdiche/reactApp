@@ -25,7 +25,7 @@ const Contacts = () => {
         Emplacement: values.Emplacement,
         Etat: values.Etat,
         ConnecteA:connecteAIds,
-        Port:values.Port,
+    
         RFID: values.RFID,
       };
 
@@ -191,19 +191,7 @@ const Contacts = () => {
                 helperText={touched.ConnecteA && errors.ConnecteA}
                 sx={{ gridColumn: "span 4" }}
               />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Port"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.Port}
-                name="Port"
-                error={!!touched.Port && !!errors.Port}
-                helperText={touched.Port && errors.Port}
-                sx={{ gridColumn: "span 4" }}
-              />
+              
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button type="submit" color="secondary" variant="contained">
@@ -228,7 +216,7 @@ const checkoutSchema = yup.object().shape({
   Emplacement: yup.string().required("required"),
   Etat: yup.string().required("required"),
   ConnecteA: yup.string().required("L'ID de l'équipement connecté est requis"),
-  Port: yup.string(), // Ce champ n'est pas obligatoire
+  
 });
 
 const initialValues = {
@@ -239,7 +227,7 @@ const initialValues = {
   Emplacement: "",
   Etat: "",
   ConnecteA:"",
-  Port:"",
+ 
 };
 
 export default Contacts;

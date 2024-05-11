@@ -1,8 +1,6 @@
-
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, IconButton, Typography, useTheme, useMediaQuery } from "@mui/material";
 import { Link } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../theme";
@@ -10,7 +8,6 @@ import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-
 import HubIcon from '@mui/icons-material/Hub';
 import SettingsApplicationsOutlinedIcon from '@mui/icons-material/SettingsApplicationsOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -39,6 +36,14 @@ const Sidebar = () => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
+  
+  // Utiliser useMediaQuery pour vérifier la taille de l'écran
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Ajuster automatiquement la barre latérale en fonction de la taille de l'écran
+  useEffect(() => {
+    setIsCollapsed(isMobile);
+  }, [isMobile]);
 
   return (
     <Box
@@ -88,15 +93,8 @@ const Sidebar = () => {
             )}
           </MenuItem>
 
-          {!isCollapsed && (
-            <Box mb="25px">
-             
-             
-            </Box>
-          )}
-
           <Box paddingLeft={isCollapsed ? undefined : "3%"}>
-            <Item
+          <Item
               title="Dashboard"
               to="/dashboard"
               icon={<HomeOutlinedIcon />}
@@ -153,13 +151,6 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
-          
-           
-          
-           
-           
-          
-          
           </Box>
         </Menu>
       </ProSidebar>

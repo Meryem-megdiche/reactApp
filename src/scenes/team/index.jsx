@@ -60,9 +60,7 @@ const Team = () => {
   
     // Si l'état de l'équipement est fonctionnel, vérifiez s'il est déjà configuré
     try {
-      const response = await axios.get(`https://nodeapp-0ome.onrender.com
-
-/api/config/isConfigured/${row.id}`);
+      const response = await axios.get(`https://nodeapp-0ome.onrender.com/api/config/isConfigured/${row.id}`);
       if (response.data.isConfigured) {
         alert("L'équipement est déjà configuré.");
       } else {
@@ -130,7 +128,7 @@ const Team = () => {
     const equipId = row.id;
   
     try {
-      const response = await axios.post(`https://nodeapp-0ome.onrender.com/pingtest/manual`, { ip: equipIp, equipId });
+      const response = await axios.post(`http://localhost:3001/pingtest/manual`, { ip: equipIp, equipId });
   
       if (response.status === 200) {
         if (response.data.success) {
@@ -219,6 +217,7 @@ const Team = () => {
   );
   
   const columns = [
+   
    
     {
       field: "Nom",

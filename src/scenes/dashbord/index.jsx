@@ -378,7 +378,7 @@ return (
   
 </Box>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Header  subtitle="Welcome to your dashboard" />
+        <Header  title="Dashboard" subtitle="Welcome to your dashboard" />
         <Box gridColumn="span 12" p="20px">
         <Typography variant="h6" color="inherit">
              Alertes récentes
