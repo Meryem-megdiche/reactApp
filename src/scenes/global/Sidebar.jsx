@@ -38,7 +38,7 @@ const Sidebar = () => {
   const [selected, setSelected] = useState("Dashboard");
   
   // Utiliser useMediaQuery pour vérifier la taille de l'écran
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
 
   // Ajuster automatiquement la barre latérale en fonction de la taille de l'écran
   useEffect(() => {
