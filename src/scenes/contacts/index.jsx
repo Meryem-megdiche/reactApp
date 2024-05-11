@@ -8,33 +8,34 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 // Define the RfidScanner component outside of the Contacts component
-const RfidScanner = ({ setRfid }) => {
+const RfidScanner = ({ setFieldValue }) => {
   const { enqueueSnackbar } = useSnackbar();
 
   const readNfcTag = async () => {
     if ("NDEFReader" in window) {
       try {
-          const reader = new NDEFReader();
-          await reader.scan();
-          reader.onreading = event => {
-              const decoder = new TextDecoder();
-              const scannedData = decoder.decode(event.message.records[0].data);
-              setRfid(scannedData); // Met à jour l'état RFID avec la donnée scannée
-              enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
-          };
+        const reader = new NDEFReader();
+        await reader.scan();
+        reader.onreading = event => {
+          const decoder = new TextDecoder();
+          const scannedData = decoder.decode(event.message.records[0].data);
+          setFieldValue('RFID', scannedData);  // Mise à jour directe dans Formik
+          enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
+        };
       } catch (error) {
-          console.error("Erreur de lecture du tag NFC :", error);
-          enqueueSnackbar("Erreur de lecture du tag NFC: " + error.message, { variant: 'error' });
+        console.error("Erreur de lecture du tag NFC :", error);
+        enqueueSnackbar("Erreur de lecture du tag NFC: " + error.message, { variant: 'error' });
       }
     } else {
-        enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
+      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
     }
-};
-return (
-  <Button onClick={readNfcTag} variant="contained" color="primary">
+  };
+
+  return (
+    <Button onClick={readNfcTag} variant="contained" color="primary">
       Scanner RFID
-  </Button>
-);
+    </Button>
+  );
 };
 
 const Contacts = () => {
@@ -112,6 +113,7 @@ const Contacts = () => {
           handleBlur,
           handleChange,
           handleSubmit,
+          setFieldValue,
         
         }) => (
           <form onSubmit={handleSubmit} method="POST">
@@ -162,18 +164,18 @@ const Contacts = () => {
                 helperText={touched.AdresseIp && errors.AdresseIp}
                 sx={{ gridColumn: "span 4" }}
               />
-               <TextField
-  fullWidth
-  variant="filled"
-  type="text"
-  label="RFID"
-  value={rfid}
-  name="RFID"
-  error={!!errors.RFID}
-  helperText={errors.RFID}
-  sx={{ gridColumn: "span 4" }}
-/>
-<RfidScanner setRfid={setRfid} />
+               <RfidScanner setFieldValue={setFieldValue} />
+      <TextField
+        fullWidth
+        variant="filled"
+        type="text"
+        label="RFID"
+        value={values.RFID}  // Utilisation de la valeur de Formik
+        name="RFID"
+        error={!!errors.RFID}
+        helperText={errors.RFID}
+        sx={{ gridColumn: "span 4" }}
+      />
 
               <TextField
                 fullWidth
