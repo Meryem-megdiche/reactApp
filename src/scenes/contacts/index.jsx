@@ -12,36 +12,29 @@ const RfidScanner = ({ setRfid }) => {
   const { enqueueSnackbar } = useSnackbar();
 
   const readNfcTag = async () => {
-      if ("NDEFReader" in window) {
-        let scannedData = '';
-          try {
-              const reader = new NDEFReader();
-              await reader.scan();
-              reader.onreading = event => {
-                  const decoder = new TextDecoder();
-                  for (const record of event.message.records) {
-                      //setRfid(decoder.decode(record.data));
-                      scannedData = decoder.decode(record.data);
-                      enqueueSnackbar();
-                  }
-                  enqueueSnackbar(scannedData);
-                };
-              
-          } catch (error) {
-              console.error("Error reading NFC tag:", error);
-              enqueueSnackbar("Error reading NFC tag: " + error.message, { variant: 'error' });
-            
-          }
-      } else {
-          enqueueSnackbar("NFC is not supported on this device or browser.", { variant: 'warning' });
+    if ("NDEFReader" in window) {
+      try {
+          const reader = new NDEFReader();
+          await reader.scan();
+          reader.onreading = event => {
+              const decoder = new TextDecoder();
+              const scannedData = decoder.decode(event.message.records[0].data);
+              setRfid(scannedData); // Met à jour l'état RFID avec la donnée scannée
+              enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
+          };
+      } catch (error) {
+          console.error("Erreur de lecture du tag NFC :", error);
+          enqueueSnackbar("Erreur de lecture du tag NFC: " + error.message, { variant: 'error' });
       }
-  };
-
-  return (
-      <Button onClick={readNfcTag} variant="contained" color="primary">
-          Scan RFID
-      </Button>
-  );
+    } else {
+        enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
+    }
+};
+return (
+  <Button onClick={readNfcTag} variant="contained" color="primary">
+      Scanner RFID
+  </Button>
+);
 };
 
 const Contacts = () => {
@@ -169,18 +162,19 @@ const Contacts = () => {
                 helperText={touched.AdresseIp && errors.AdresseIp}
                 sx={{ gridColumn: "span 4" }}
               />
-                <RfidScanner setRfid={setRfid} />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="RFID"
-                value={rfid}
-                name="RFID"
-                error={!!errors.RFID}
-                helperText={errors.RFID}
-                sx={{ gridColumn: "span 4" }}
-              />
+               <TextField
+  fullWidth
+  variant="filled"
+  type="text"
+  label="RFID"
+  value={rfid}
+  name="RFID"
+  error={!!errors.RFID}
+  helperText={errors.RFID}
+  sx={{ gridColumn: "span 4" }}
+/>
+<RfidScanner setRfid={setRfid} />
+
               <TextField
                 fullWidth
                 variant="filled"
