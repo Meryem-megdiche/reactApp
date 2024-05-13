@@ -317,17 +317,15 @@ const fetchResolvedAlertsCount = async () => {
   }
 };
 
-
 useEffect(() => {
   fetchResolvedAlertsCount();
 }, [selectedEquipments, startDate, endDate]); // Dépendances pour recharger le compte lors de leur changement
 
 
-// Fonction pour générer le rapport
 const generateAndDownloadReport = async (format) => {
   setIsGenerating(true);
   try {
-    const response = await axios.post('https://nodeapp-0ome.onrender.com/api/reports/generate', {
+    const response = await axios.post('https://nodeapp-0ome.onrender.com/reports/generate', {
       startDate, endDate, equipmentIds: selectedEquipments,
     });
     setIsGenerating(false);
@@ -378,7 +376,7 @@ return (
   
 </Box>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Header  subtitle="Welcome to your dashboard" />
+        <Header  title="Dashboard" subtitle="Welcome to your dashboard" />
         <Box gridColumn="span 12" p="20px">
         <Typography variant="h6" color="inherit">
              Alertes récentes
@@ -632,21 +630,21 @@ return (
         <Box gridColumn="span 4" gridRow="span 2" backgroundColor={colors.primary[400]} overflow="auto">
         <div style={{ display: 'flex', gap: '10px' }}> 
   
-  <Button
-    sx={{
-      backgroundColor: colors.blueAccent[700],
-      color: colors.grey[100],
-      fontSize: "14px",
-      fontWeight: "bold",
-      padding: "10px 20px",
-      justifyContent:"center", // Centrez horizontalement
-    alignItems:"center",
-    }}
-    onClick={() => generateAndDownloadReport('pdf')}
-    disabled={isGenerating}
-  >
-    {isGenerating ? 'Génération rapport en cours...' : 'Télécharger rapport en  PDF'}
-  </Button>
+        <Button
+  sx={{
+    backgroundColor: colors.blueAccent[700],
+    color: colors.grey[100],
+    fontSize: "14px",
+    fontWeight: "bold",
+    padding: "10px 20px",
+    justifyContent:"center", // Centrez horizontalement
+  alignItems:"center",
+  }}
+  onClick={() => generateAndDownloadReport('pdf')}
+  disabled={isGenerating}
+>
+  {isGenerating ? 'Génération rapport en cours...' : 'Télécharger rapport en  PDF'}
+</Button>
 </div>
           <Box
             display="flex"

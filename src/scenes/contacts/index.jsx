@@ -8,36 +8,45 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 // Define the RfidScanner component outside of the Contacts component
-const RfidScanner = ({ setFieldValue }) => {
-  const { enqueueSnackbar } = useSnackbar();
 
-  const readNfcTag = async () => {
-    if ("NDEFReader" in window) {
-      try {
-        const reader = new NDEFReader();
-        await reader.scan();
-        reader.onreading = event => {
-          const decoder = new TextDecoder();
-          const scannedData = decoder.decode(event.message.records[0].data);
-          setFieldValue('RFID', scannedData);  // Mise à jour directe dans Formik
-          enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
-        };
-      } catch (error) {
-        console.error("Erreur de lecture du tag NFC :", error);
-        enqueueSnackbar("Erreur de lecture du tag NFC: " + error.message, { variant: 'error' });
+
+  const RfidScanner = ({ setFieldValue }) => {
+    const { enqueueSnackbar } = useSnackbar();
+  
+    const readNfcTag = async () => {
+      console.log("Tentative de démarrage du scan NFC");
+      if ("NDEFReader" in window) {
+        try {
+          const reader = new NDEFReader();
+          await reader.scan();
+          console.log("Scan NFC démarré");
+          reader.onreading = event => {
+            const decoder = new TextDecoder();
+            const scannedData = decoder.decode(event.message.records[0].data);
+            console.log("Donnée NFC lue :", scannedData);
+            setFieldValue('RFID', scannedData);
+            enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
+          };
+        } catch (error) {
+          console.error("Erreur de lecture du tag NFC :", error);
+          enqueueSnackbar("Erreur de lecture du tag NFC: " + error.message, { variant: 'error' });
+        }
+      } else {
+        console.log("NFC n'est pas supporté");
+        enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
       }
-    } else {
-      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
-    }
+    };
+  
+
+    return (
+      <Button onClick={readNfcTag} variant="contained" color="primary">
+        Scanner RFID
+      </Button>
+    );
   };
 
-  return (
-    <Button onClick={readNfcTag} variant="contained" color="primary">
-      Scanner RFID
-    </Button>
-  );
-};
 
+  
 const Contacts = () => {
   const [rfid, setRfid] = useState('');
   const [successMessage, setSuccessMessage] = useState(null);
