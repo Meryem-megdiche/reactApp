@@ -12,6 +12,11 @@ import { useSnackbar } from 'notistack';
 
 const RfidScanner = ({ setFieldValue }) => {
   const { enqueueSnackbar } = useSnackbar();
+  const [open, setOpen] = useState(false);  // Ajout d'un état pour contrôler l'affichage de l'alerte
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const readNfcTag = async () => {
     if ("NDEFReader" in window) {
@@ -21,43 +26,28 @@ const RfidScanner = ({ setFieldValue }) => {
         reader.onreading = event => {
           const decoder = new TextDecoder();
           const scannedData = decoder.decode(event.message.records[0].data);
-          setFieldValue('RFID', scannedData);  // Mise à jour du champ RFID dans Formik
-          enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, {
-            variant: 'success',
-            anchorOrigin: {
-              vertical: 'top',
-              horizontal: 'center',
-            }
-          });
-          // Déclenchement d'une vibration pour feedback physique (si supporté par l'appareil)
+          setFieldValue('RFID', scannedData);
+          enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
+          setOpen(true);  // Ouvrir l'alerte modale ou Snackbar
           if (navigator.vibrate) {
             navigator.vibrate(200); // Vibration de 200 ms
           }
         };
       } catch (error) {
-        enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, {
-          variant: 'error',
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'center',
-          }
-        });
+        enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, { variant: 'error' });
       }
     } else {
-      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", {
-        variant: 'warning',
-        anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'center',
-        }
-      });
+      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
     }
   };
 
   return (
-    <Button onClick={readNfcTag} variant="contained" color="primary">
-      Scanner RFID
-    </Button>
+    <>
+      <Button onClick={readNfcTag} variant="contained" color="primary">
+        Scanner RFID
+      </Button>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} message="RFID scanné avec succès" />
+    </>
   );
 };
 
