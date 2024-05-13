@@ -14,34 +14,43 @@ const RfidScanner = ({ setFieldValue }) => {
   const { enqueueSnackbar } = useSnackbar();
 
   const readNfcTag = async () => {
-    console.log("Tentative de démarrage du scan NFC");
     if ("NDEFReader" in window) {
       try {
         const reader = new NDEFReader();
         await reader.scan();
-        console.log("Scan NFC démarré");
-
         reader.onreading = event => {
           const decoder = new TextDecoder();
           const scannedData = decoder.decode(event.message.records[0].data);
-          console.log("Donnée NFC lue :", scannedData);
-          setFieldValue('RFID', scannedData); // Mise à jour du champ RFID dans Formik
-          
-          // Affichage de la notification de succès
-          enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
-          
+          setFieldValue('RFID', scannedData);  // Mise à jour du champ RFID dans Formik
+          enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, {
+            variant: 'success',
+            anchorOrigin: {
+              vertical: 'top',
+              horizontal: 'center',
+            }
+          });
           // Déclenchement d'une vibration pour feedback physique (si supporté par l'appareil)
           if (navigator.vibrate) {
             navigator.vibrate(200); // Vibration de 200 ms
           }
         };
       } catch (error) {
-        console.error("Erreur de lecture du tag NFC :", error);
-        enqueueSnackbar("Erreur de lecture du tag NFC: " + error.message, { variant: 'error' });
+        enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, {
+          variant: 'error',
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'center',
+          }
+        });
       }
     } else {
-      console.log("NFC n'est pas supporté");
-      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
+      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", {
+        variant: 'warning',
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'center',
+        }
+      });
     }
   };
 
@@ -51,7 +60,6 @@ const RfidScanner = ({ setFieldValue }) => {
     </Button>
   );
 };
-
 
 const Contacts = () => {
   const [rfid, setRfid] = useState('');
