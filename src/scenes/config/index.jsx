@@ -17,9 +17,11 @@ const RfidScanner = ({ setFieldValue }) => {
   useEffect(() => {
     if ("NDEFReader" in window) {
       setNfcSupported(true);
+      console.log("NFC supporté");
     } else {
       setNfcSupported(false);
       enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
+      console.log("NFC non supporté");
     }
   }, [enqueueSnackbar]);
 
@@ -32,7 +34,9 @@ const RfidScanner = ({ setFieldValue }) => {
       try {
         const reader = new NDEFReader();
         await reader.scan();
+        console.log("En attente de la lecture du tag NFC...");
         reader.onreading = event => {
+          console.log("Tag NFC détecté !");
           const decoder = new TextDecoder();
           const scannedData = decoder.decode(event.message.records[0].data);
           setFieldValue('RFID', scannedData);
@@ -44,6 +48,7 @@ const RfidScanner = ({ setFieldValue }) => {
           }
         };
       } catch (error) {
+        console.error(`Erreur de lecture du tag NFC: ${error.message}`);
         setMessage(`Erreur de lecture du tag NFC: ${error.message}`);
         setOpen(true);
         enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, { variant: 'error' });
