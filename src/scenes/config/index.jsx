@@ -38,12 +38,18 @@ const RfidScanner = ({ setFieldValue }) => {
         reader.onreading = event => {
           console.log("Tag NFC détecté !");
           const decoder = new TextDecoder();
+          console.log("Décoder initialisé");
 
           event.message.records.forEach(record => {
+            console.log("Record Data Type:", typeof record.data);
+            console.log("Record Data:", record.data);
+
             let scannedData = '';
             if (record.data instanceof ArrayBuffer) {
+              console.log("Type de données: ArrayBuffer");
               scannedData = decoder.decode(record.data);
             } else if (record.data.buffer instanceof ArrayBuffer) {
+              console.log("Type de données: ArrayBufferView");
               scannedData = decoder.decode(record.data.buffer);
             } else {
               console.error("Type de données non pris en charge:", record.data);
