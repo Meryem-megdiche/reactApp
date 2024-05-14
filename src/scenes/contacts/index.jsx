@@ -1,25 +1,33 @@
-import React, { useState, useEffect } from 'react'; // Ajout de useEffect ici
-import { Box, Button, TextField } from "@mui/material";
+import React, { useState, useEffect } from 'react';
+import { Box, Button, TextField, Snackbar } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-// Define the RfidScanner component outside of the Contacts component
-
 
 const RfidScanner = ({ setFieldValue }) => {
   const { enqueueSnackbar } = useSnackbar();
-  const [open, setOpen] = useState(false);  // Ajout d'un état pour contrôler l'affichage de l'alerte
+  const [open, setOpen] = useState(false);
+  const [nfcSupported, setNfcSupported] = useState(false);
+
+  useEffect(() => {
+    if ("NDEFReader" in window) {
+      setNfcSupported(true);
+    } else {
+      setNfcSupported(false);
+      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
+    }
+  }, [enqueueSnackbar]);
 
   const handleClose = () => {
     setOpen(false);
   };
 
   const readNfcTag = async () => {
-    if ("NDEFReader" in window) {
+    if (nfcSupported) {
       try {
         const reader = new NDEFReader();
         await reader.scan();
@@ -28,7 +36,7 @@ const RfidScanner = ({ setFieldValue }) => {
           const scannedData = decoder.decode(event.message.records[0].data);
           setFieldValue('RFID', scannedData);
           enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
-          setOpen(true);  // Ouvrir l'alerte modale ou Snackbar
+          setOpen(true);
           if (navigator.vibrate) {
             navigator.vibrate(200); // Vibration de 200 ms
           }
@@ -36,8 +44,6 @@ const RfidScanner = ({ setFieldValue }) => {
       } catch (error) {
         enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, { variant: 'error' });
       }
-    } else {
-      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
     }
   };
 
@@ -57,10 +63,10 @@ const Contacts = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const navigate = useNavigate();
-  
+
   const handleAddEquipment = async (values) => {
     try {
-      const connecteAIds = values.ConnecteA.split(',').map(id => id.trim()); // Créer un tableau à partir de la chaîne
+      const connecteAIds = values.ConnecteA.split(',').map(id => id.trim());
       const newEquipment = {
         Nom: values.Nom,
         Type: values.Type,
@@ -68,23 +74,18 @@ const Contacts = () => {
         AdresseIp: values.AdresseIp,
         Emplacement: values.Emplacement,
         Etat: values.Etat,
-        ConnecteA:connecteAIds,
-        Pays:values.Pays,
-     
+        ConnecteA: connecteAIds,
+        Pays: values.Pays,
       };
 
-      console.log("Nouvel équipement :", newEquipment);
-
       const response = await axios.post('https://nodeapp-0ome.onrender.com/equip/add', newEquipment);
-
-      console.log("Réponse du serveur :", response.data);
 
       if (response.data.success) {
         setSuccessMessage("Équipement ajouté avec succès");
         setErrorMessage(null);
         setTimeout(() => {
-          navigate('/team'); // Remplacez ceci par le chemin réel de votre liste d'équipements
-        }, 800); 
+          navigate('/team');
+        }, 800);
       } else {
         if (response.data.message === "Equipement déjà existant") {
           setErrorMessage("L'adresse IP ou le RFID existe déjà dans la base de données. L'équipement ne peut pas être ajouté.");
@@ -108,7 +109,6 @@ const Contacts = () => {
           {successMessage}
         </Box>
       )}
-
       {errorMessage && (
         <Box bgcolor="error.main" color="error.contrastText" p={2} mb={2} borderRadius={4}>
           {errorMessage}
@@ -127,7 +127,6 @@ const Contacts = () => {
           handleChange,
           handleSubmit,
           setFieldValue,
-        
         }) => (
           <form onSubmit={handleSubmit} method="POST">
             <Box
@@ -177,19 +176,18 @@ const Contacts = () => {
                 helperText={touched.AdresseIp && errors.AdresseIp}
                 sx={{ gridColumn: "span 4" }}
               />
-               <RfidScanner setFieldValue={setFieldValue} />
-      <TextField
-        fullWidth
-        variant="filled"
-        type="text"
-        label="RFID"
-        value={values.RFID}  // Utilisation de la valeur de Formik
-        name="RFID"
-        error={!!errors.RFID}
-        helperText={errors.RFID}
-        sx={{ gridColumn: "span 4" }}
-      />
-
+              <RfidScanner setFieldValue={setFieldValue} />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="RFID"
+                value={values.RFID}
+                name="RFID"
+                error={!!errors.RFID}
+                helperText={errors.RFID}
+                sx={{ gridColumn: "span 4" }}
+              />
               <TextField
                 fullWidth
                 variant="filled"
@@ -216,8 +214,7 @@ const Contacts = () => {
                 helperText={touched.Etat && errors.Etat}
                 sx={{ gridColumn: "span 4" }}
               />
-             
-               <TextField
+              <TextField
                 fullWidth
                 variant="filled"
                 type="text"
@@ -263,22 +260,22 @@ const checkoutSchema = yup.object().shape({
   Nom: yup.string().required("required"),
   Type: yup.string().required("required"),
   AdresseIp: yup.string().required("required"),
-  RFID: yup.string().required("required"), // Assurez-vous que le champ RFID est requis
+  RFID: yup.string().required("required"),
   Emplacement: yup.string().required("required"),
   Etat: yup.string().required("required"),
   ConnecteA: yup.string().required("L'ID de l'équipement connecté est requis"),
-  Pays: yup.string().required("required") // Ce champ n'est pas obligatoire
+  Pays: yup.string().required("required")
 });
 
 const initialValues = {
   Nom: "",
   Type: "",
   AdresseIp: "",
-  RFID:"",
+  RFID: "",
   Emplacement: "",
   Etat: "",
-  ConnecteA:"",
-  Pays:"",
+  ConnecteA: "",
+  Pays: "",
 };
 
 export default Contacts;
