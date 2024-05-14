@@ -38,14 +38,22 @@ const RfidScanner = ({ setFieldValue }) => {
         reader.onreading = event => {
           console.log("Tag NFC détecté !");
           const decoder = new TextDecoder();
-          const scannedData = decoder.decode(event.message.records[0].data);
-          setFieldValue('RFID', scannedData);
-          setMessage(`RFID scanné avec succès: ${scannedData}`);
-          setOpen(true);
-          enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
-          if (navigator.vibrate) {
-            navigator.vibrate(200); // Vibration de 200 ms
-          }
+
+          event.message.records.forEach(record => {
+            if (record.data instanceof ArrayBuffer) {
+              const scannedData = decoder.decode(record.data);
+              console.log("Données scannées:", scannedData);
+              setFieldValue('RFID', scannedData);
+              setMessage(`RFID scanné avec succès: ${scannedData}`);
+              setOpen(true);
+              enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
+              if (navigator.vibrate) {
+                navigator.vibrate(200); // Vibration de 200 ms
+              }
+            } else {
+              console.error("Type de données non pris en charge:", record.data);
+            }
+          });
         };
       } catch (error) {
         console.error(`Erreur de lecture du tag NFC: ${error.message}`);
