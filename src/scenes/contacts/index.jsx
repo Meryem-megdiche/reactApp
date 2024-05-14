@@ -41,34 +41,31 @@ const RfidScanner = ({ setFieldValue }) => {
           console.log("Décoder initialisé");
 
           event.message.records.forEach(record => {
-            console.log("Record Data Type:", typeof record.data);
-            console.log("Record Data:", record.data);
-
-            if (!record.data) {
-              console.error("Record data is null or undefined");
-              enqueueSnackbar("Le tag NFC ne contient pas de données valides.", { variant: 'warning' });
-              return;
-            }
+            console.log("Type de données du record:", typeof record.data);
+            console.log("Données du record:", record.data);
 
             let scannedData = '';
             if (record.data instanceof ArrayBuffer) {
               console.log("Type de données: ArrayBuffer");
               scannedData = decoder.decode(record.data);
-            } else if (record.data.buffer instanceof ArrayBuffer) {
+            } else if (record.data && record.data.buffer instanceof ArrayBuffer) {
               console.log("Type de données: ArrayBufferView");
               scannedData = decoder.decode(record.data.buffer);
             } else {
-              console.error("Type de données non pris en charge:", record.data);
+              console.error("Type de données non pris en charge ou null:", record.data);
+              enqueueSnackbar("Le tag NFC ne contient pas de données valides.", { variant: 'warning' });
               return;
             }
 
-            console.log("Données scannées:", scannedData);
-            setFieldValue('RFID', scannedData);
-            setMessage(`RFID scanné avec succès: ${scannedData}`);
-            setOpen(true);
-            enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
-            if (navigator.vibrate) {
-              navigator.vibrate(200); // Vibration de 200 ms
+            if (scannedData) {
+              console.log("Données scannées:", scannedData);
+              setFieldValue('RFID', scannedData);
+              setMessage(`RFID scanné avec succès: ${scannedData}`);
+              setOpen(true);
+              enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
+              if (navigator.vibrate) {
+                navigator.vibrate(200); // Vibration de 200 ms
+              }
             }
           });
         };
