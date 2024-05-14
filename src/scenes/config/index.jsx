@@ -1,282 +1,188 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Button, TextField, Snackbar } from "@mui/material";
-import { Formik } from "formik";
-import * as yup from "yup";
-import useMediaQuery from "@mui/material/useMediaQuery";
+import { Box, Button } from "@mui/material";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { tokens } from "../../theme";
+import { Link, useNavigate } from 'react-router-dom';
 import Header from "../../components/Header";
+import { useTheme } from "@mui/material";
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
+import React, { useState, useEffect } from 'react';
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+const Config = () => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const [configs, setConfigs] = useState([]);
 
-const RfidScanner = ({ setFieldValue }) => {
-  const { enqueueSnackbar } = useSnackbar();
-  const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  const [nfcSupported, setNfcSupported] = useState(false);
-
-  useEffect(() => {
-    if ("NDEFReader" in window) {
-      setNfcSupported(true);
-      console.log("NFC supporté");
-    } else {
-      setNfcSupported(false);
-      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
-      console.log("NFC non supporté");
-    }
-  }, [enqueueSnackbar]);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const readNfcTag = async () => {
-    if (nfcSupported) {
-      try {
-        const reader = new NDEFReader();
-        await reader.scan();
-        console.log("En attente de la lecture du tag NFC...");
-        reader.onreading = event => {
-          console.log("Tag NFC détecté !");
-          const decoder = new TextDecoder();
-          console.log("Décoder initialisé");
-
-          event.message.records.forEach(record => {
-            console.log("Record Data Type:", typeof record.data);
-            console.log("Record Data:", record.data);
-
-            let scannedData = '';
-            if (record.data instanceof ArrayBuffer) {
-              console.log("Type de données: ArrayBuffer");
-              scannedData = decoder.decode(record.data);
-            } else if (record.data.buffer instanceof ArrayBuffer) {
-              console.log("Type de données: ArrayBufferView");
-              scannedData = decoder.decode(record.data.buffer);
-            } else {
-              console.error("Type de données non pris en charge:", record.data);
-              return;
-            }
-
-            console.log("Données scannées:", scannedData);
-            setFieldValue('RFID', scannedData);
-            setMessage(`RFID scanné avec succès: ${scannedData}`);
-            setOpen(true);
-            enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
-            if (navigator.vibrate) {
-              navigator.vibrate(200); // Vibration de 200 ms
-            }
-          });
-        };
-      } catch (error) {
-        console.error(`Erreur de lecture du tag NFC: ${error.message}`);
-        setMessage(`Erreur de lecture du tag NFC: ${error.message}`);
-        setOpen(true);
-        enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, { variant: 'error' });
-      }
-    }
-  };
-
-  return (
-    <>
-      <Button onClick={readNfcTag} variant="contained" color="primary">
-        Scanner RFID
-      </Button>
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} message={message} />
-    </>
-  );
-};
-
-const Contacts = () => {
-  const isNonMobile = useMediaQuery("(min-width:600px)");
   const navigate = useNavigate();
 
-  const handleAddEquipment = async (values) => {
-    try {
-      const connecteAIds = values.ConnecteA.split(',').map(id => id.trim());
-      const newEquipment = {
-        Nom: values.Nom,
-        Type: values.Type,
-        RFID: values.RFID,
-        AdresseIp: values.AdresseIp,
-        Emplacement: values.Emplacement,
-        Etat: values.Etat,
-        ConnecteA: connecteAIds,
-        Pays: values.Pays,
-      };
-
-      const response = await axios.post('https://nodeapp-0ome.onrender.com/equip/add', newEquipment);
-
-      if (response.data.success) {
-        navigate('/team'); 
-      } else {
-        console.error(response.data.message || "Erreur inattendue lors de l'ajout de l'équipement");
-      }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("https://nodeapp-0ome.onrender.com/config");
+        console.log(response.data);
+        setConfigs(response.data);
+  
+        const equipconfigs = await Promise.all(response.data.map(async (config) => {
+          try {
+            const equipResponse = await axios.get(`https://nodeapp-0ome.onrender.com/config/equip/${config.equipment} `);
+           
+            if (equipResponse.data && equipResponse.data.Nom) {
+              
+              config.equipmentName = equipResponse.data.Nom;
+            } else { // En cas de réponse incorrecte, définissez le nom de l'équipement sur "Unavailable"
+              config.equipmentName = 'Unavailable';
+            }
+            return config;
+          } catch (error) {
+            console.error('Failed to fetch equipment details:', error);
+            // En cas d'erreur, définissez le nom de l'équipement sur "Unavailable"
+            config.equipmentName = 'Unavailable';
+            return config;
+          }
+        }));
+        setConfigs(equipconfigs);
     } catch (error) {
-      console.error('Erreur lors de l\'ajout de l\'équipement :', error);
+      console.error("Error fetching configs:", error);
     }
   };
+
+  fetchData();
+}, []);
+
+  const handleEditClick = (id) => {
+    const configToEdit = configs.find((config) => config.id === id);
+    // Naviguer vers la page de modification avec les valeurs de la configuration à modifier
+    navigate(`/Modify-config${id}`, { state: { config: configToEdit } });
+  };
+
+
+
+  const deleteConfig = async (id) => {
+    try {
+      await axios.delete(`https://nodeapp-0ome.onrender.com/config/configs/${id}`);
+      setConfigs(configs.filter((config) => config.id !== id));
+      console.log("Configuration deleted successfully");
+    } catch (error) {
+      console.error("Error deleting configuration:", error);
+    }
+  };
+  
+  
+  const handleDeleteClick = (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this configuration?");
+    if (confirmDelete) {
+      deleteConfig(id);
+    }
+  };
+  
+  const handleWatchClick = (id) => {
+    console.log("Surveiller l'élément avec l'ID :", id);
+  };
+
+  const columns = [
+   
+    {
+      field: "equipmentName",
+      headerName: "equipment",
+      flex: 1,
+      cellClassName: "name-column--cell",
+    },
+    {
+      field: "Type",
+      headerName: "donnée",
+      flex: 0.5,
+      headerAlign: "left",
+      align: "left",
+    },
+    {
+      field: "seuil",
+      headerName: "seuil",
+      flex: 0.5,
+    },
+   
+    {
+      field: "adresseMail",
+      headerName: "addresseMail",
+      flex: 1,
+    },
+    {
+      field: "activité",
+      headerName: "activité",
+      sortable: false,
+      flex: 1.3,
+      renderCell: (params) => {
+        return (
+          <Box display="flex" justifyContent="center">
+            <Link to={`/modify-config/${params.row.id}`} state={{ initialValues: params.row }}>
+  <Button
+   startIcon={<EditIcon />}
+  
+  variant="contained" color="secondary">Modifier</Button>
+</Link>
+            <Button 
+            startIcon={<DeleteIcon />}
+            
+            variant="contained" onClick={() => handleDeleteClick(params.row.id)} color="error">Supprimer</Button>
+            <Button 
+            startIcon={<VisibilityIcon /> }variant="contained" onClick={() => handleWatchClick(params.row.id)} color="secondary"  
+              component={Link}
+              to={`/alert/${params.row.equipment}`}>
+              Surveiller
+            </Button>
+          </Box>
+        );
+      },
+    },
+  ];
 
   return (
     <Box m="20px">
-      <Header title="Ajouter un équipement" subtitle="Voir la liste des équipements" />
-      <Formik
-        onSubmit={handleAddEquipment}
-        initialValues={initialValues}
-        validationSchema={checkoutSchema}
+      <Header
+        title="Liste des configurations"
+      />
+      <Box
+        m="40px 0 0 0"
+        height="75vh"
+        sx={{
+          "& .MuiDataGrid-root": {
+            border: "none",
+          },
+          "& .MuiDataGrid-cell": {
+            borderBottom: "none",
+          },
+          "& .name-column--cell": {
+            color: colors.greenAccent[300],
+          },
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: colors.blueAccent[700],
+            borderBottom: "none",
+          },
+          "& .MuiDataGrid-virtualScroller": {
+            backgroundColor: colors.primary[400],
+          },
+          "& .MuiDataGrid-footerContainer": {
+            borderTop: "none",
+            backgroundColor: colors.blueAccent[700],
+          },
+          "& .MuiCheckbox-root": {
+            color: `${colors.greenAccent[200]} !important`,
+          },
+          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+            color: `${colors.grey[100]} !important`,
+          },
+        }}
       >
-        {({
-          values,
-          errors,
-          touched,
-          handleBlur,
-          handleChange,
-          handleSubmit,
-          setFieldValue,
-        }) => (
-          <form onSubmit={handleSubmit} method="POST">
-            <Box
-              display="grid"
-              gap="30px"
-              gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-              sx={{
-                "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
-              }}
-            >
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Nom"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.Nom}
-                name="Nom"
-                error={!!touched.Nom && !!errors.Nom}
-                helperText={touched.Nom && errors.Nom}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Type"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.Type}
-                name="Type"
-                error={!!touched.Type && !!errors.Type}
-                helperText={touched.Type && errors.Type}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Adresse IP"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.AdresseIp}
-                name="AdresseIp"
-                error={!!touched.AdresseIp && !!errors.AdresseIp}
-                helperText={touched.AdresseIp && errors.AdresseIp}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <RfidScanner setFieldValue={setFieldValue} />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="RFID"
-                value={values.RFID}
-                name="RFID"
-                error={!!errors.RFID}
-                helperText={errors.RFID}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Emplacement"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.Emplacement}
-                name="Emplacement"
-                error={!!touched.Emplacement && !!errors.Emplacement}
-                helperText={touched.Emplacement && errors.Emplacement}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="État"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.Etat}
-                name="Etat"
-                error={!!touched.Etat && !!errors.Etat}
-                helperText={touched.Etat && errors.Etat}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="ConnecteA"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.ConnecteA}
-                name="ConnecteA"
-                error={!!touched.ConnecteA && !!errors.ConnecteA}
-                helperText={touched.ConnecteA && errors.ConnecteA}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Pays"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.Pays}
-                name="Pays"
-                error={!!touched.Pays && !!errors.Pays}
-                helperText={touched.Pays && errors.Pays}
-                sx={{ gridColumn: "span 4" }}
-              />
-            </Box>
-            <Box display="flex" justifyContent="end" mt="20px">
-              <Button type="submit" color="secondary" variant="contained">
-                Ajouter
-              </Button>
-            </Box>
-          </form>
-        )}
-      </Formik>
+        <DataGrid
+          rows={configs}
+      
+          columns={columns}
+          getRowId={(row) => row._id}
+          components={{ Toolbar: GridToolbar }}
+        />
+      </Box>
     </Box>
   );
 };
 
-const checkoutSchema = yup.object().shape({
-  Nom: yup.string().required("required"),
-  Type: yup.string().required("required"),
-  AdresseIp: yup.string().required("required"),
-  RFID: yup.string().required("required"),
-  Emplacement: yup.string().required("required"),
-  Etat: yup.string().required("required"),
-  ConnecteA: yup.string().required("L'ID de l'équipement connecté est requis"),
-  Pays: yup.string().required("required")
-});
-
-const initialValues = {
-  Nom: "",
-  Type: "",
-  AdresseIp: "",
-  RFID: "",
-  Emplacement: "",
-  Etat: "",
-  ConnecteA: "",
-  Pays: "",
-};
-
-export default Contacts;
+export default Config;

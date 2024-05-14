@@ -43,7 +43,7 @@ const Dashboard = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportSummary, setReportSummary] = useState('');
   const [exportFile, setExportFile] = useState(null);
-  const socket = io('http://localhost:3000'); // Assurez-vous que l'URL correspond à votre serveur
+  const socket = io('https://nodeapp-0ome.onrender.com'); // Assurez-vous que l'URL correspond à votre serveur
  
 
   // Écoute de l'événement 'newAlert' pour recevoir les nouvelles alertes

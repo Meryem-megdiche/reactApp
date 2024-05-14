@@ -11,14 +11,17 @@ import { useSnackbar } from 'notistack';
 const RfidScanner = ({ setFieldValue }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
   const [nfcSupported, setNfcSupported] = useState(false);
 
   useEffect(() => {
     if ("NDEFReader" in window) {
       setNfcSupported(true);
+      console.log("NFC supporté");
     } else {
       setNfcSupported(false);
       enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
+      console.log("NFC non supporté");
     }
   }, [enqueueSnackbar]);
 
@@ -31,17 +34,48 @@ const RfidScanner = ({ setFieldValue }) => {
       try {
         const reader = new NDEFReader();
         await reader.scan();
+        console.log("En attente de la lecture du tag NFC...");
         reader.onreading = event => {
+          console.log("Tag NFC détecté !");
           const decoder = new TextDecoder();
-          const scannedData = decoder.decode(event.message.records[0].data);
-          setFieldValue('RFID', scannedData);
-          enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
-          setOpen(true);
-          if (navigator.vibrate) {
-            navigator.vibrate(200); // Vibration de 200 ms
-          }
+          console.log("Décoder initialisé");
+
+          event.message.records.forEach(record => {
+            console.log("Record Data Type:", typeof record.data);
+            console.log("Record Data:", record.data);
+
+            if (!record.data) {
+              console.error("Record data is null or undefined");
+              enqueueSnackbar("Le tag NFC ne contient pas de données valides.", { variant: 'warning' });
+              return;
+            }
+
+            let scannedData = '';
+            if (record.data instanceof ArrayBuffer) {
+              console.log("Type de données: ArrayBuffer");
+              scannedData = decoder.decode(record.data);
+            } else if (record.data.buffer instanceof ArrayBuffer) {
+              console.log("Type de données: ArrayBufferView");
+              scannedData = decoder.decode(record.data.buffer);
+            } else {
+              console.error("Type de données non pris en charge:", record.data);
+              return;
+            }
+
+            console.log("Données scannées:", scannedData);
+            setFieldValue('RFID', scannedData);
+            setMessage(`RFID scanné avec succès: ${scannedData}`);
+            setOpen(true);
+            enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
+            if (navigator.vibrate) {
+              navigator.vibrate(200); // Vibration de 200 ms
+            }
+          });
         };
       } catch (error) {
+        console.error(`Erreur de lecture du tag NFC: ${error.message}`);
+        setMessage(`Erreur de lecture du tag NFC: ${error.message}`);
+        setOpen(true);
         enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, { variant: 'error' });
       }
     }
@@ -52,15 +86,12 @@ const RfidScanner = ({ setFieldValue }) => {
       <Button onClick={readNfcTag} variant="contained" color="primary">
         Scanner RFID
       </Button>
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} message="RFID scanné avec succès" />
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} message={message} />
     </>
   );
 };
 
 const Contacts = () => {
-  const [rfid, setRfid] = useState('');
-  const [successMessage, setSuccessMessage] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const navigate = useNavigate();
 
@@ -81,39 +112,18 @@ const Contacts = () => {
       const response = await axios.post('https://nodeapp-0ome.onrender.com/equip/add', newEquipment);
 
       if (response.data.success) {
-        setSuccessMessage("Équipement ajouté avec succès");
-        setErrorMessage(null);
-        setTimeout(() => {
-          navigate('/team');
-        }, 800);
+        navigate('/team'); 
       } else {
-        if (response.data.message === "Equipement déjà existant") {
-          setErrorMessage("L'adresse IP ou le RFID existe déjà dans la base de données. L'équipement ne peut pas être ajouté.");
-        } else {
-          setErrorMessage(response.data.message || "Erreur inattendue lors de l'ajout de l'équipement");
-        }
-        setSuccessMessage(null);
+        console.error(response.data.message || "Erreur inattendue lors de l'ajout de l'équipement");
       }
     } catch (error) {
       console.error('Erreur lors de l\'ajout de l\'équipement :', error);
-      setErrorMessage("Erreur lors de l'ajout de l'équipement. Veuillez réessayer plus tard.");
-      setSuccessMessage(null);
     }
   };
 
   return (
     <Box m="20px">
       <Header title="Ajouter un équipement" subtitle="Voir la liste des équipements" />
-      {successMessage && (
-        <Box bgcolor="success.main" color="success.contrastText" p={2} mb={2} borderRadius={4}>
-          {successMessage}
-        </Box>
-      )}
-      {errorMessage && (
-        <Box bgcolor="error.main" color="error.contrastText" p={2} mb={2} borderRadius={4}>
-          {errorMessage}
-        </Box>
-      )}
       <Formik
         onSubmit={handleAddEquipment}
         initialValues={initialValues}
@@ -249,9 +259,6 @@ const Contacts = () => {
           </form>
         )}
       </Formik>
-
-      {successMessage && <div style={{ color: 'green' }}>{successMessage}</div>}
-      {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
     </Box>
   );
 };
