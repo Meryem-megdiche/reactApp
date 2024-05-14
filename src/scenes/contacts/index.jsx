@@ -59,12 +59,21 @@ const RfidScanner = ({ setFieldValue }) => {
 
             if (scannedData) {
               console.log("Données scannées:", scannedData);
-              setFieldValue('RFID', scannedData);
-              setMessage(`RFID scanné avec succès: ${scannedData}`);
-              setOpen(true);
-              enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
-              if (navigator.vibrate) {
-                navigator.vibrate(200); // Vibration de 200 ms
+              // Assumons que les données scannées contiennent le Serial No comme "Serial No: VALUE"
+              const serialMatch = scannedData.match(/Serial No:\s*([A-Za-z0-9:]+)/);
+              if (serialMatch && serialMatch[1]) {
+                const serialNo = serialMatch[1];
+                console.log("Serial No extrait:", serialNo);
+                setFieldValue('RFID', serialNo);
+                setMessage(`RFID scanné avec succès: ${serialNo}`);
+                setOpen(true);
+                enqueueSnackbar(`RFID scanné avec succès: ${serialNo}`, { variant: 'success' });
+                if (navigator.vibrate) {
+                  navigator.vibrate(200); // Vibration de 200 ms
+                }
+              } else {
+                console.error("Le tag NFC ne contient pas de Serial No valide.");
+                enqueueSnackbar("Le tag NFC ne contient pas de Serial No valide.", { variant: 'warning' });
               }
             }
           });
