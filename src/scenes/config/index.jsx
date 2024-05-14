@@ -40,18 +40,23 @@ const RfidScanner = ({ setFieldValue }) => {
           const decoder = new TextDecoder();
 
           event.message.records.forEach(record => {
+            let scannedData = '';
             if (record.data instanceof ArrayBuffer) {
-              const scannedData = decoder.decode(record.data);
-              console.log("Données scannées:", scannedData);
-              setFieldValue('RFID', scannedData);
-              setMessage(`RFID scanné avec succès: ${scannedData}`);
-              setOpen(true);
-              enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
-              if (navigator.vibrate) {
-                navigator.vibrate(200); // Vibration de 200 ms
-              }
+              scannedData = decoder.decode(record.data);
+            } else if (record.data.buffer instanceof ArrayBuffer) {
+              scannedData = decoder.decode(record.data.buffer);
             } else {
               console.error("Type de données non pris en charge:", record.data);
+              return;
+            }
+
+            console.log("Données scannées:", scannedData);
+            setFieldValue('RFID', scannedData);
+            setMessage(`RFID scanné avec succès: ${scannedData}`);
+            setOpen(true);
+            enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
+            if (navigator.vibrate) {
+              navigator.vibrate(200); // Vibration de 200 ms
             }
           });
         };
