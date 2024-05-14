@@ -59,7 +59,6 @@ const RfidScanner = ({ setFieldValue }) => {
 
             if (scannedData) {
               console.log("Données scannées:", scannedData);
-              // Assumons que les données scannées contiennent le Serial No comme "Serial No: VALUE"
               const serialMatch = scannedData.match(/Serial No:\s*([A-Za-z0-9:]+)/);
               if (serialMatch && serialMatch[1]) {
                 const serialNo = serialMatch[1];
@@ -75,6 +74,9 @@ const RfidScanner = ({ setFieldValue }) => {
                 console.error("Le tag NFC ne contient pas de Serial No valide.");
                 enqueueSnackbar("Le tag NFC ne contient pas de Serial No valide.", { variant: 'warning' });
               }
+            } else {
+              console.error("Aucune donnée scannée.");
+              enqueueSnackbar("Aucune donnée scannée.", { variant: 'warning' });
             }
           });
         };
