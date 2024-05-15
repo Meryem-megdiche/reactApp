@@ -101,7 +101,7 @@ const Listes = () => {
     { field: "equipmentName", headerName: "Equipment", flex: 1 },
     { field: "type", headerName: "Type", flex: 1 },
     { field: "date", headerName: "Date", flex: 1 },
-    { field: "statut", headerName: "Statut", flex: 1 },
+   
     { field: 'description', headerName: "Description", flex: 1 },
     { field: "parentIntervention", headerName: 'Parent Intervention', flex: 1 },
   ];
