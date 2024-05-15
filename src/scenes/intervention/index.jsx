@@ -18,6 +18,7 @@ const Intervention = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const scannedEquipmentName = location.state ? location.state.equipmentName : '';
+
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
@@ -43,12 +44,14 @@ const Intervention = () => {
       fetchInterventions();
     }
   }, [search]);
-// Find the equipment ID based on the scanned equipment name
-const scannedEquipment = equipments.find(equip => equip.Nom === scannedEquipmentName);
-const scannedEquipmentId = scannedEquipment ? scannedEquipment._id : '';
+
+  // Find the equipment ID based on the scanned equipment name
+  const scannedEquipment = equipments.find(equip => equip.Nom === scannedEquipmentName);
+  const scannedEquipmentId = scannedEquipment ? scannedEquipment._id : '';
 
   const initialValues = {
     equipmentName: scannedEquipmentName,
+    equipment: scannedEquipmentId,  // Ajout de l'ID de l'équipement ici
     type: "",
     date: "",
     description: "",
@@ -98,7 +101,7 @@ const scannedEquipmentId = scannedEquipment ? scannedEquipment._id : '';
                 variant="filled"
                 type="text"
                 label="Nom de l'équipement"
-                name="scannedEquipmentName"
+                name="equipmentName"
                 value={values.equipmentName}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -161,8 +164,6 @@ const scannedEquipmentId = scannedEquipment ? scannedEquipment._id : '';
                 helperText={touched.parentIntervention && errors.parentIntervention}
                 sx={{ gridColumn: "span 4" }}
               />
-             
-           
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button type="submit" color="secondary" variant="contained">
