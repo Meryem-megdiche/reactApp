@@ -39,17 +39,27 @@ import { useSnackbar } from 'notistack';
           console.log("En attente de la lecture du tag NFC...");
           reader.onreading = event => {
             console.log("Tag NFC détecté !");
-            const decoder = new TextDecoder();
-            console.log("Décoder initialisé");
-  
             event.message.records.forEach(record => {
-              console.log("Type de données du record:", typeof record.data);
-              console.log("Données du record:", record.data);
-              console.log("Données du record1:", record);
+              console.log("Record:", record);
+  
+              // Vérifiez si le type de record est supporté
+              if (record.recordType === "empty") {
+                console.log("Type de record vide.");
+                enqueueSnackbar("Le tag NFC ne contient pas de données valides.", { variant: 'warning' });
+                return;
+              }
+  
+              // Assurez-vous que les données ne sont pas nulles
+              if (!record.data) {
+                console.error("Type de données non pris en charge ou null:", record.data);
+                enqueueSnackbar("Le tag NFC ne contient pas de données valides.", { variant: 'warning' });
+                return;
+              }
   
               let scannedData = '';
               if (record.data instanceof ArrayBuffer) {
                 console.log("Type de données: ArrayBuffer");
+                const decoder = new TextDecoder();
                 scannedData = decoder.decode(record.data);
               } else if (record.data instanceof DataView) {
                 console.log("Type de données: DataView");
@@ -57,6 +67,7 @@ import { useSnackbar } from 'notistack';
                 scannedData = Array.from(buffer).map(byte => byte.toString(16).padStart(2, '0')).join('');
               } else if (record.data && record.data.buffer instanceof ArrayBuffer) {
                 console.log("Type de données: ArrayBufferView");
+                const decoder = new TextDecoder();
                 scannedData = decoder.decode(record.data.buffer);
               } else {
                 console.error("Type de données non pris en charge ou null:", record.data);
@@ -66,7 +77,6 @@ import { useSnackbar } from 'notistack';
   
               if (scannedData) {
                 console.log("Données scannées:", scannedData);
-                // Supposons que le Serial No soit contenu dans scannedData en hexadécimal
                 setFieldValue('RFID', scannedData);
                 setMessage(`RFID scanné avec succès: ${scannedData}`);
                 setOpen(true);
@@ -98,7 +108,6 @@ import { useSnackbar } from 'notistack';
       </>
     );
   };
-  
 
 
 
