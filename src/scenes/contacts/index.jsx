@@ -43,6 +43,7 @@ const RfidScanner = ({ setFieldValue }) => {
           event.message.records.forEach(record => {
             console.log("Type de données du record:", typeof record.data);
             console.log("Données du record:", record.data);
+            console.log("Données du record1:", record);
 
             let scannedData = '';
             if (record.data instanceof ArrayBuffer) {
