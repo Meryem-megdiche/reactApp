@@ -288,7 +288,7 @@ const checkoutSchema = yup.object().shape({
   RFID: yup.string().required("required"),
   Emplacement: yup.string().required("required"),
   Etat: yup.string().required("required"),
-  ConnecteA: yup.string().required("L'ID de l'équipement connecté est requis"),
+  ConnecteA: yup.string(),
 
 });
 
