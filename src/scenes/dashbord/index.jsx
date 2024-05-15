@@ -3,10 +3,6 @@ import { tokens } from "../../theme";
 import { Autocomplete,Checkbox } from '@mui/material';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
-
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import WifiTetheringIcon from '@mui/icons-material/WifiTethering';
 import Header from "../../components/Header";
 import LineChart from "../../components/LineChart";
 
@@ -15,15 +11,105 @@ import StatBox from "../../components/StatBox";
 import { useEffect, useState } from "react";
 import io from 'socket.io-client';
 import axios from "axios";
-import { NavLink } from 'react-router-dom';
+import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
+import WifiTetheringIcon from '@mui/icons-material/WifiTethering';
+import { NavLink,useNavigate } from 'react-router-dom';
 import {TextField}  from '@mui/material';
 import { Menu, MenuItem, FormGroup, FormControlLabel } from "@mui/material";
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'; // Importez l'icône appropriée
 import { Alert, AlertTitle } from '@mui/material'; // Importez les composants Alert de MUI
 import { useSnackbar } from 'notistack';
 import TTLStatsPieChart from "../../components/Pie";
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import html2canvas from 'html2canvas';
+import CollapsibleAlertBox from '../../components/CollapsibleAlertBox'; 
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
+
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const captureAndDownloadPDF = async () => {
+    try {
+        const canvas = await html2canvas(document.querySelector("#dashboard"));
+        const imageData = canvas.toDataURL('image/png');
+        
+        const docDefinition = {
+            content: [
+                { text: 'Rapport du Dashboard', style: 'header' },
+                { text: 'Résumé des indicateurs clés', style: 'subheader' },
+                {
+                    columns: [
+                        {
+                            width: '*',
+                            stack: [
+                                { text: `Nombre de pings: ${pingCount !== null ? pingCount : "-"}` },
+                                { text: `Nombre des interventions: ${InterventionCount !== null ? InterventionCount : "-"}` },
+                                { text: `Alertes résolues: ${resolvedAlertsCount !== null ? resolvedAlertsCount : "-"}` },
+                            ]
+                        }
+                    ]
+                },
+                { text: 'Équipement(s) sélectionné(s)', style: 'subheader' },
+                {
+                    ul: selectedEquipments.map(id => {
+                        const equip = equipments.find(e => e._id === id);
+                        return equip ? equip.Nom : "Équipement non spécifié";
+                    })
+                },
+                { text: 'Plage de dates', style: 'subheader' },
+                { text: `Début: ${startDate}`, margin: [0, 0, 0, 10] },
+                { text: `Fin: ${endDate}`, margin: [0, 0, 0, 10] },
+                { text: 'Graphiques et analyses', style: 'subheader' },
+                {
+                    image: imageData,
+                    width: 500
+                },
+                { text: 'Interprétation des résultats', style: 'subheader' },
+                {
+                    ul: [
+                        'Les pings sont réguliers et montrent une bonne stabilité de la connexion.',
+                        'Le nombre d\'interventions est cohérent avec les alertes reçues.',
+                        'Aucune alerte résolue pour cette période, nécessitant peut-être une analyse plus approfondie.'
+                    ]
+                },
+                { text: 'Détails des interventions récentes', style: 'subheader' },
+                {
+                    table: {
+                        body: [
+                            ['Type', 'Date', 'Détails'],
+                            ...interventions.slice(0, 5).map(intervention => [
+                                intervention.type,
+                                new Date(intervention.date).toLocaleDateString("fr-FR"),
+                                { text: 'Voir détails', link: `http://localhost:3000/listes/${intervention._id}`, style: 'link' }
+                            ])
+                        ]
+                    }
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 22,
+                    bold: true
+                },
+                subheader: {
+                    fontSize: 18,
+                    bold: true,
+                    margin: [0, 10, 0, 5]
+                },
+                link: {
+                    color: 'blue',
+                    decoration: 'underline'
+                }
+            }
+        };
+        
+        pdfMake.createPdf(docDefinition).download('dashboard-report.pdf');
+    } catch (error) {
+        console.error('Failed to capture and generate PDF:', error);
+    }
+};
   const { enqueueSnackbar } = useSnackbar();
   const [alerts, setAlerts] = useState([]);
   const [resolvedAlertsCount, setResolvedAlertsCount] = useState(null); 
@@ -44,7 +130,8 @@ const Dashboard = () => {
   const [reportSummary, setReportSummary] = useState('');
   const [exportFile, setExportFile] = useState(null);
   const socket = io('*'); // Assurez-vous que l'URL correspond à votre serveur
- 
+  const [isLoading, setIsLoading] = useState(false);
+
 
   // Écoute de l'événement 'newAlert' pour recevoir les nouvelles alertes
 socket.on('newAlert', (alert) => {
@@ -52,10 +139,10 @@ socket.on('newAlert', (alert) => {
   console.log('Nouvelle alerte reçue lors de l intervention:', alert);
   // Mettez à jour l'interface utilisateur avec l'alerte reçue
 });
- 
 
   // Vérifier si tous les équipements sont sélectionnés
   const isAllSelected = equipments.length > 0 && selectedEquipments.length === equipments.length;
+
 
   const fetchBarChartData = async () => {
     try {
@@ -65,7 +152,6 @@ socket.on('newAlert', (alert) => {
           endDate: endDate,
           equipmentIds: selectedEquipments
         });
-  
         setBarChartData(response.data);
       } else {
         setBarChartData(null);
@@ -74,7 +160,6 @@ socket.on('newAlert', (alert) => {
       console.error('Error fetching bar chart data:', error);
     }
   };
-
 
   useEffect(() => {
     if (selectedEquipments.length > 0 && startDate && endDate) {
@@ -85,7 +170,6 @@ socket.on('newAlert', (alert) => {
       setBarChartData(null);
     }
   }, [selectedEquipments, startDate, endDate]);
-  
 
   useEffect(() => {
     // Fonction pour charger la liste des équipements lorsque le composant est monté
@@ -107,6 +191,7 @@ socket.on('newAlert', (alert) => {
       }
     });
   };
+
   const handleSelectAll = (event) => {
     if (event.target.checked) {
       // Sélectionner tous les équipements
@@ -117,7 +202,7 @@ socket.on('newAlert', (alert) => {
       setSelectedEquipments([]);
     }
   };
-  
+
   const handleStartDateChange = (event) => {
     const formattedDate = event.target.value;
     setStartDate(formattedDate);
@@ -127,7 +212,7 @@ socket.on('newAlert', (alert) => {
     const formattedDate = event.target.value;
     setEndDate(formattedDate);
   };
-  
+
   const fetchEquipments = async () => {
     try {
       
@@ -140,9 +225,8 @@ socket.on('newAlert', (alert) => {
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
-   
   };
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -158,49 +242,65 @@ socket.on('newAlert', (alert) => {
 
 
   useEffect(() => {
-    // Connexion à socket.io
-    const socket = io('*'); // Assurez-vous que l'adresse correspond à votre serveur socket.io
+    const socket = io('https://nodeapp-0ome.onrender.com');
 
-    // Gestion de la nouvelle alerte
     socket.on('newAlert', (newAlert) => {
       console.log('Nouvelle alerte reçue:', newAlert);
-      let alertMessage = `Alerte: L'équipement ${newAlert.equipmentName || 'non spécifié'} est ${newAlert.status} après l'intervention.`;
-      let notificationColor; // Définir la couleur de la notification
-
-      switch (newAlert.status) {
-        case 'dysfonctionnel':
-          notificationColor = 'error';
-          break;
-        case 'Problème de réseau':
-          notificationColor = 'warning';
-          break;
-        case 'En bon état':
-          notificationColor = 'success';
-          break;
-        default:
-          notificationColor = 'info';
-          break;
+      let alertMessage = '';
+      let notificationColor;
+  
+      // Distinguez entre les types d'alerte
+      if (newAlert.alertType === 'Automatique') {
+        // Personnalisez le message pour une alerte automatique
+        alertMessage = `Surveillance Automatique: ${newAlert.equipmentName || 'Équipement non spécifié'} - ${newAlert.message}`;
+        switch (newAlert.status) {
+          case 'dysfonctionnel':
+            notificationColor = 'error';
+            break;
+          case 'Problème de réseau':
+            notificationColor = 'warning';
+            break;
+          case 'En bon état':
+            notificationColor = 'success';
+            break;
+          default:
+            notificationColor = 'info';
+            break;
+        }
+      } else if (newAlert.alertType === 'Intervention') {
+        // Personnalisez le message pour une alerte de post-intervention
+        alertMessage = `Post-Intervention: ${newAlert.equipmentName || 'Équipement non spécifié'} - ${newAlert.message}`;
+        switch (newAlert.status) {
+          case 'dysfonctionnel':
+            notificationColor = 'error';
+            break;
+          case 'Problème de réseau':
+            notificationColor = 'warning';
+            break;
+          case 'En bon état':
+            notificationColor = 'success';
+            break;
+          default:
+            notificationColor = 'info';
+            break;
+        }
       }
   
-      // Ajoutez le message personnalisé à l'état des alertes
+      // Mise à jour de l'état des alertes avec le nouveau message et la couleur
       setAlerts(currentAlerts => [
         ...currentAlerts,
-        { ...newAlert, message: alertMessage }
+        { ...newAlert, message: alertMessage, notificationColor }
       ]);
-
-      // Affichez une notification avec la couleur appropriée
+  
+      // Afficher la notification avec snackbar
       enqueueSnackbar(alertMessage, { variant: notificationColor });
     });
-
-    // Nettoyer l'écouteur d'événement lorsque le composant est démonté
     return () => {
       socket.off('newAlert');
       socket.close();
     };
-  }, []);
+  }, [enqueueSnackbar]);
 
-
-  
   useEffect(() => {
     if (selectedEquipments.length > 0 && startDate && endDate) {
       fetchPingCount();
@@ -227,6 +327,7 @@ socket.on('newAlert', (alert) => {
     console.error('Error fetching ping count:', error);
   }
 };
+
 useEffect(() => {
   if (selectedEquipments.length > 0 && startDate && endDate) {
     fetchInterventionCount();
@@ -251,8 +352,8 @@ const fetchInterventionCount = async () => {
     }
   } catch (error) {
     console.error('Error fetching intervention count:', error);
-  }
-};
+  }};
+
 useEffect(() => {
   if (selectedEquipments.length > 0 && startDate && endDate) {
     fetchData();
@@ -321,11 +422,11 @@ useEffect(() => {
   fetchResolvedAlertsCount();
 }, [selectedEquipments, startDate, endDate]); // Dépendances pour recharger le compte lors de leur changement
 
-
+// Fonction pour générer le rapport
 const generateAndDownloadReport = async (format) => {
   setIsGenerating(true);
   try {
-    const response = await axios.post('https://nodeapp-0ome.onrender.com/reports/generate', {
+    const response = await axios.post('https://nodeapp-0ome.onrender.com/api/reports/generate', {
       startDate, endDate, equipmentIds: selectedEquipments,
     });
     setIsGenerating(false);
@@ -341,58 +442,35 @@ const generateAndDownloadReport = async (format) => {
   }
 };
 
-
 // This function triggers the download of the report
 const downloadFile = (filePath) => {
   // The filePath should be the URL to access the generated report
   window.open(filePath, '_blank');
 };
 
-const generateSummary = async () => {
-  // Vous pouvez utiliser un appel API ici pour obtenir les données
-  const response = await axios.get("/api/some-endpoint");
-  const data = response.data;
+useEffect(() => {
+  // Fonction pour supprimer l'alerte après 45 secondes
+  const removeAlertAfterTimeout = (index) => {
+    setTimeout(() => {
+      setAlerts((prevAlerts) => prevAlerts.filter((_, i) => i !== index));
+    }, 200000); // 45 secondes
+  };
 
-  // Générez le résumé en fonction des données
-  let summary = "Lors de ces interventions, ";
-  data.forEach((item, index) => {
-    summary += `pour l'équipement ${item.equipmentName}, `;
-    if (item.pingCount === 0) {
-      summary += "aucune anomalie détectée ";
-    } else {
-      summary += `latence observée de ${item.latency} ms `;
-    }
-    if (index < data.length - 1) {
-      summary += "; ";
-    }
-  });
-  summary += ".";
-  setReportSummary(summary);
-};
+  // Ajoutez les alertes et configurez leur suppression après 45 secondes
+  alerts.forEach((_, index) => removeAlertAfterTimeout(index));
+}, [alerts]); // Exécutez cet effet chaque fois que les alertes changent
+
 
 return (
-   <Box m={2}>
-     <Box sx={{ position: 'fixed', bottom: 0, right: 0, m: 2 }}>
-  
+ <div id="dashboard">
+    <Box m="20px">
+     <Box sx={{ position: 'fixed', bottom: 0, right: 0, m: 2 }}> 
 </Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Header  subtitle="Welcome to your dashboard" />
+  <Box display="flex" justifyContent="space-between" alignItems="center">
+     <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
+        <CollapsibleAlertBox alerts={alerts} />
         <Box gridColumn="span 12" p="20px">
-        <Typography variant="h6" color="inherit">
-             Alertes récentes
-          </Typography>
-{alerts.map((alert, index) => (
-  <Alert
-    key={index}
-    severity={alert.notificationColor} // Utilisation de la couleur assignée dans l'écouteur socket
-    icon={<ErrorOutlineIcon fontSize="inherit" />}
-    sx={{ my: 2 }}
-  >
-    {alert.message} 
-  </Alert>
-))}
-</Box>
-       
+        </Box>
 <Box
       display="flex"
       alignItems="center"
@@ -434,7 +512,6 @@ return (
           },
         }}
       />
-    
    <Autocomplete
   multiple
   id="checkboxes-tags-demo"
@@ -446,7 +523,7 @@ return (
       <Checkbox
         icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
         checkedIcon={<CheckBoxIcon fontSize="small" />}
-        style={{ marginRight: 1 }}
+        style={{ marginRight: 5 }}
         checked={selected}
       />
       {option.Nom}
@@ -467,22 +544,44 @@ return (
           label=""
         />
       </FormGroup>
-
- 
-    </Box>
-
       </Box>
+<button 
+  onClick={captureAndDownloadPDF} 
+  style={{ 
+    backgroundColor: colors.blueAccent[700], 
+    color: colors.grey[300], 
+    fontSize: '14px', 
+    fontWeight: 'bold', 
+    padding: '10px 20px', 
+    borderRadius: '5px', 
+    cursor: 'pointer' 
+  }}
+>
+  Télécharger le rapport PDF
+</button>
+<Button
+          sx={{
+            backgroundColor: colors.blueAccent[700],
+            color: colors.grey[300],
+            fontSize: "14px",
+            fontWeight: "bold",
+            padding: "10px 20px",
+            marginLeft: "10px", // Ajouter une marge pour espacer les boutons
+          }}
+          onClick={() => navigate('/inventory')} // Navigation vers la page d'inventaire
+        >
+          Inventaire
+        </Button>
+<Box>
+    </Box>
+      </Box>
+     
       <Box
         display="grid"
         gridTemplateColumns="repeat(12, 1fr)"
         gridAutoRows="140px"
         gap="20px"
       >
-      
-       
-          
- 
-        
         <Box
   gridColumn="span 4"
   backgroundColor={colors.primary[400]}
@@ -517,7 +616,7 @@ return (
           alignItems="center"
           justifyContent="center"
         >
-  <StatBox
+ <StatBox
   title={InterventionCount !== null ? InterventionCount : "-"}
   subtitle="Nombre des interventions"
   
@@ -596,23 +695,14 @@ return (
     </FormGroup>
     <MenuItem onClick={handleClose}>Done</MenuItem>
   </Menu>
-</Box>
-<Box>
-             <Typography
+
+              <Typography
                 variant="h3"
                 fontWeight="bold"
                 color={colors.greenAccent[500]}
               >
-                TTL
+                Courbe  TTL
               </Typography>
-              
-            </Box>
-            <Box>
-              <IconButton>
-                <DownloadOutlinedIcon
-                  sx={{ fontSize: "26px", color: colors.greenAccent[500] }}
-                />
-              </IconButton>
             </Box>
           </Box>
           <Box height="250px" m="-20px 0 0 0">
@@ -630,21 +720,21 @@ return (
         <Box gridColumn="span 4" gridRow="span 2" backgroundColor={colors.primary[400]} overflow="auto">
         <div style={{ display: 'flex', gap: '10px' }}> 
   
-        <Button
-  sx={{
-    backgroundColor: colors.blueAccent[700],
-    color: colors.grey[100],
-    fontSize: "14px",
-    fontWeight: "bold",
-    padding: "10px 20px",
-    justifyContent:"center", // Centrez horizontalement
-  alignItems:"center",
-  }}
-  onClick={() => generateAndDownloadReport('pdf')}
-  disabled={isGenerating}
->
-  {isGenerating ? 'Génération rapport en cours...' : 'Télécharger rapport en  PDF'}
-</Button>
+  <Button
+    sx={{
+      backgroundColor: colors.blueAccent[700],
+      color: colors.grey[300],
+      fontSize: "14px",
+      fontWeight: "bold",
+      padding: "10px 20px",
+      justifyContent:"center", // Centrez horizontalement
+    alignItems:"center",
+    }}
+    onClick={() => generateAndDownloadReport('pdf')}
+    disabled={isGenerating}
+  >
+    {isGenerating ? 'Génération rapport en cours...' : 'Télécharger rapport en  PDF'}
+  </Button>
 </div>
           <Box
             display="flex"
@@ -654,8 +744,7 @@ return (
             colors={colors.grey[100]}
             p="15px"
           >
-              
-              <Typography color={colors.greenAccent[500]} variant="h5" fontWeight="600">
+              <Typography color={colors.grey[100]} variant="h5" fontWeight="600">
       Dernières interventions
     </Typography>
     <NavLink to="/listes">
@@ -680,8 +769,7 @@ return (
         >
           <Typography
             variant="h5"
-            fontWeight="bold"
-            color={colors.greenAccent[500]}
+            fontWeight="600"
             sx={{ padding: "30px 30px 0 30px" }}
           >
             PieChart
@@ -696,22 +784,16 @@ return (
 />
           </Box>
         </Box>
-      
-       
         <Box
           gridColumn="span 6"
           gridRow="span 2"
           backgroundColor={colors.primary[400]}
         >
-
-
-         <Typography
+          <Typography
             variant="h5"
-            fontWeight="bold"
-            color={colors.greenAccent[500]}
+            fontWeight="600"
             sx={{ padding: "30px 30px 0 30px" }}
           >
-            BarChart
           </Typography>
           <Box height="250px" mt="-20px">
           {selectedEquipments.length > 0 ? (
@@ -721,14 +803,16 @@ return (
         endDate={endDate}
         isDashboard={true}
       />
+      
     ) : (
-      <Typography variant="body2"></Typography>
+      <Typography variant="body2">Aucun équipement sélectionné pour afficher le graphique.</Typography>
     )}
-          </Box>
-        </Box>
-        
-      </Box>
     </Box>
-  );
+  </Box>
+</Box>
+</Box>
+</div>
+);
 };
+
 export default Dashboard;

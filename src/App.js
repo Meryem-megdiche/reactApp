@@ -32,7 +32,8 @@ import { useLocation } from "react-router-dom";
 import User from "./scenes/user";
 import ResetPasswordForm from "./scenes/forgot";
 import ForgotPasswordForm from "./scenes/password";
- import TTLStatsPieChart  from "./components/Pie"
+ import TTLStatsPieChart  from "./components/Pie";
+ import Inventory from "./scenes/inventory/Inventory";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -87,6 +88,7 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
                 <Route path="/user" element={<User/>} />
                 <Route path="/forgot" element={ <ResetPasswordForm/>} />
                 <Route path="/password" element={ <ForgotPasswordForm/>} />
+                <Route path="/inventory" element={ <Inventory/>} />
                 </Routes>
            
            
