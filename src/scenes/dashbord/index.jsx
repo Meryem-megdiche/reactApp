@@ -159,7 +159,7 @@ socket.on('newAlert', (alert) => {
 
   useEffect(() => {
     // Connexion à socket.io
-    const socket = io('https://nodeapp-0ome.onrender.com/'); // Assurez-vous que l'adresse correspond à votre serveur socket.io
+    const socket = io('*'); // Assurez-vous que l'adresse correspond à votre serveur socket.io
 
     // Gestion de la nouvelle alerte
     socket.on('newAlert', (newAlert) => {
