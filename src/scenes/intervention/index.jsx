@@ -67,9 +67,17 @@ const Intervention = () => {
   });
 
   const handleAddIntervention = async (values) => {
-    console.log("Soumission du formulaire avec les valeurs :", values); // Ajout du log pour les valeurs du formulaire
+    const equipmentId = equipments.find(equip => equip.Nom === values.equipmentName)?._id;
+    if (!equipmentId) {
+      setErrorMessage("Équipement non trouvé.");
+      return;
+    }
+    const dataToSubmit = { ...values, equipment: equipmentId };
+
+    console.log("Soumission du formulaire avec les valeurs :", dataToSubmit); // Ajout du log pour les valeurs du formulaire
+
     try {
-      const response = await axios.post('https://nodeapp-0ome.onrender.com/api/interventions', values);
+      const response = await axios.post('https://nodeapp-0ome.onrender.com/api/interventions', dataToSubmit);
       console.log("Réponse du serveur :", response.data); // Ajout du log pour la réponse du serveur
       if (response.data.success) {
         setSuccessMessage("Intervention ajoutée avec succès");
