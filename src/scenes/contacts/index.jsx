@@ -29,62 +29,38 @@ const RfidScanner = ({ setFieldValue }) => {
     setOpen(false);
   };
 
-  const setFieldValue = (field, value) => {
-    console.log(`${field}: ${value}`);
-    // Implémentez la logique pour mettre à jour le champ de formulaire ici
-  };
-
   const readNfcTag = async () => {
-    if ('NDEFReader' in window) { // Vérifiez si l'API NFC est supportée
+    if (nfcSupported) {
       try {
         const reader = new NDEFReader();
         await reader.scan();
         console.log("En attente de la lecture du tag NFC...");
-        
         reader.onreading = event => {
           console.log("Tag NFC détecté !");
-          const decoder = new TextDecoder();
-          console.log("Décoder initialisé");
-
           event.message.records.forEach(record => {
-            console.log("Type de données du record:", typeof record.data);
-            console.log("Données du record:", record.data);
-            console.log("Données du record1:", record);
-
-            let scannedData = '';
-            if (record.data instanceof ArrayBuffer) {
-              console.log("Type de données: ArrayBuffer");
-              scannedData = decoder.decode(record.data);
-            } else if (record.data && record.data.buffer instanceof ArrayBuffer) {
-              console.log("Type de données: ArrayBufferView");
-              scannedData = decoder.decode(record.data.buffer);
-            } else {
-              console.error("Type de données non pris en charge ou null:", record.data);
-              enqueueSnackbar("Le tag NFC ne contient pas de données valides.", { variant: 'warning' });
-              return;
-            }
-
-            if (scannedData) {
+            console.log("Record:", record);
+            if (record.recordType === "text") {
+              const decoder = new TextDecoder();
+              const scannedData = decoder.decode(record.data);
               console.log("Données scannées:", scannedData);
-              // Extraction de l'ID hexadécimal à partir des données scannées
-              const hexMatch = scannedData.match(/[0-9A-Fa-f]{8,}/); // Extrait les séquences hexadécimales de 8 caractères ou plus
-              if (hexMatch && hexMatch[0]) {
-                const hexID = hexMatch[0];
-                console.log("ID Hexadécimal extrait:", hexID);
-                setFieldValue('RFID', hexID);
-                setMessage(`RFID scanné avec succès: ${hexID}`);
+              const serialMatch = scannedData.match(/Serial No:\s*([A-Za-z0-9:]+)/);
+              if (serialMatch && serialMatch[1]) {
+                const serialNo = serialMatch[1];
+                console.log("Serial No extrait:", serialNo);
+                setFieldValue('RFID', serialNo);
+                setMessage(`RFID scanné avec succès: ${serialNo}`);
                 setOpen(true);
-                enqueueSnackbar(`RFID scanné avec succès: ${hexID}`, { variant: 'success' });
+                enqueueSnackbar(`RFID scanné avec succès: ${serialNo}`, { variant: 'success' });
                 if (navigator.vibrate) {
                   navigator.vibrate(200); // Vibration de 200 ms
                 }
               } else {
-                console.error("Le tag NFC ne contient pas d'ID hexadécimal valide.");
-                enqueueSnackbar("Le tag NFC ne contient pas d'ID hexadécimal valide.", { variant: 'warning' });
+                console.error("Le tag NFC ne contient pas de Serial No valide.");
+                enqueueSnackbar("Le tag NFC ne contient pas de Serial No valide.", { variant: 'warning' });
               }
             } else {
-              console.error("Aucune donnée scannée.");
-              enqueueSnackbar("Aucune donnée scannée.", { variant: 'warning' });
+              console.error("Type de données non pris en charge ou null:", record.data);
+              enqueueSnackbar("Le tag NFC ne contient pas de données valides.", { variant: 'warning' });
             }
           });
         };
@@ -94,9 +70,6 @@ const RfidScanner = ({ setFieldValue }) => {
         setOpen(true);
         enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, { variant: 'error' });
       }
-    } else {
-      console.error("NFC n'est pas supporté sur ce navigateur.");
-      enqueueSnackbar("NFC n'est pas supporté sur ce navigateur.", { variant: 'error' });
     }
   };
 
@@ -109,6 +82,7 @@ const RfidScanner = ({ setFieldValue }) => {
     </>
   );
 };
+
 
 
 const Contacts = () => {
