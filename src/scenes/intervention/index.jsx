@@ -82,10 +82,12 @@ const Intervention = () => {
       if (response.data.success) {
         setSuccessMessage("Intervention ajoutée avec succès");
         setErrorMessage(null);
-        setTimeout(() => navigate('/liste'), 800);
+     
       } else {
-        setErrorMessage(response.data.message || "Ajout réussi");
+        setSuccessMessage(response.data.message || "Ajout réussi");
+        setTimeout(() => navigate('/liste'), 800);
         setSuccessMessage(null);
+        
       }
     } catch (error) {
       console.error('Erreur lors de l\'ajout de l\'intervention :', error);
