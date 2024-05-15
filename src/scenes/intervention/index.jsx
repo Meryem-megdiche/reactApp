@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, MenuItem, TextField, FormControl, InputLabel,  useTheme  } from '@mui/material';
+import { Box, Button, MenuItem, TextField, useTheme } from '@mui/material';
 import { Formik } from 'formik';
-import { Autocomplete } from '@mui/material';
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
-import { useNavigate,useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from "axios";
 
 const Intervention = () => {
@@ -52,33 +51,30 @@ const Intervention = () => {
     date: "",
     description: "",
     parentIntervention: "",
-  
   };
 
   const validationSchema = yup.object().shape({
-    equipment: yup.string().required("Le champ équipement est requis"),
+    equipmentName: yup.string().required("Le champ équipement est requis"),
     type: yup.string().required("Le champ type est requis"),
     date: yup.date().required("Le champ date est requis"),
     description: yup.string().required("Le champ description est requis"),
     parentIntervention: yup.string().nullable(),
-    
   });
 
   const handleAddIntervention = async (values) => {
+    console.log("Soumission du formulaire avec les valeurs :", values); // Ajout du log pour les valeurs du formulaire
     try {
       const response = await axios.post('https://nodeapp-0ome.onrender.com/api/interventions', values);
+      console.log("Réponse du serveur :", response.data); // Ajout du log pour la réponse du serveur
       if (response.data.success) {
         setSuccessMessage("Intervention ajoutée avec succès");
-      } else {
-        
-        setSuccessMessage(response.data.message || "Ajout réussi");
         setTimeout(() => navigate('/liste'), 800);
+      } else {
+        setErrorMessage(response.data.message || "Ajout réussi");
       }
-      setErrorMessage(null);
     } catch (error) {
       console.error('Erreur lors de l\'ajout de l\'intervention :', error);
       setErrorMessage("Erreur côté client : " + error.message);
-      setSuccessMessage(null);
     }
   };
 
@@ -95,7 +91,7 @@ const Intervention = () => {
         {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
           <form onSubmit={handleSubmit}>
             <Box display="flex" flexDirection="column" gap={2}>
-            <TextField
+              <TextField
                 fullWidth
                 variant="filled"
                 type="text"
@@ -111,47 +107,68 @@ const Intervention = () => {
                   readOnly: true,
                 }}
               />
-              <TextField fullWidth variant="filled" type="text" 
-              label="Type" name="type" value={values.type} onChange={handleChange} 
-              onBlur={handleBlur} error={touched.type && Boolean(errors.type)} 
-              helperText={touched.type && errors.type} sx={{ gridColumn: "span 4" }} />
-              <TextField fullWidth variant="filled" 
-              type="date" label="Date" name="date" value={values.date} 
-              onChange={handleChange} onBlur={handleBlur}
-               error={touched.date && Boolean(errors.date)} helperText={touched.date && errors.date} sx={{ gridColumn: "span 4" }} />
-              <Autocomplete
-  freeSolo
-  disableClearable
-  options={interventions}
-  getOptionLabel={(option) => option.description || ''}
-  onChange={(event, newValue) => {
-    handleChange('parentIntervention')(newValue ? newValue._id : '');
-  }}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      label="Rechercher l'intervention précedente par description"
-      variant="outlined"
-      fullWidth
-      onChange={(event) => setSearch(event.target.value)}
-      onBlur={handleBlur}
-      error={touched.parentIntervention && Boolean(errors.parentIntervention)}
-      helperText={touched.parentIntervention && errors.parentIntervention}
-    />
-  )}
-/>
-
-            
-              <TextField fullWidth variant="filled" type="text" label="Description" name="description" value={values.description} onChange={handleChange} onBlur={handleBlur} error={touched.description && Boolean(errors.description)} helperText={touched.description && errors.description} sx={{ gridColumn: "span 4" }} />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Type"
+                name="type"
+                value={values.type}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.type && Boolean(errors.type)}
+                helperText={touched.type && errors.type}
+                sx={{ gridColumn: "span 4" }}
+              />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="date"
+                label="Date"
+                name="date"
+                value={values.date}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.date && Boolean(errors.date)}
+                helperText={touched.date && errors.date}
+                sx={{ gridColumn: "span 4" }}
+              />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Description"
+                name="description"
+                value={values.description}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.description && Boolean(errors.description)}
+                helperText={touched.description && errors.description}
+                sx={{ gridColumn: "span 4" }}
+              />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Parent Intervention"
+                name="parentIntervention"
+                value={values.parentIntervention}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.parentIntervention && Boolean(errors.parentIntervention)}
+                helperText={touched.parentIntervention && errors.parentIntervention}
+                sx={{ gridColumn: "span 4" }}
+              />
+             
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
-              <Button type="submit" color="secondary" variant="contained">Ajouter</Button>
+              <Button type="submit" color="secondary" variant="contained">
+                Ajouter
+              </Button>
             </Box>
           </form>
         )}
       </Formik>
-      {successMessage && <div style={{ color: 'green' }}>{successMessage}</div>}
-      {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
     </Box>
   );
 };
