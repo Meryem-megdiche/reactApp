@@ -20,10 +20,11 @@ const Intervention = () => {
   const location = useLocation();
   const scannedEquipmentName = location.state ? location.state.equipmentName : '';
 
+ 
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
-        const { data } = await axios.get('https://nodeapp-0ome.onrender.com/equip');
+        const { data } = await axios.get('http://localhost:3001/equip');
         setEquipments(data);
       } catch (error) {
         console.error('Erreur lors du chargement des équipements:', error);
@@ -35,7 +36,7 @@ const Intervention = () => {
   useEffect(() => {
     const fetchInterventions = async () => {
       try {
-        const { data } = await axios.get(`https://nodeapp-0ome.onrender.com/api/interventions/search?search=${search}`);
+        const { data } = await axios.get(`http://localhost:3001/api/interventions/search?search=${search}`);
         setInterventions(data);
       } catch (error) {
         console.error('Erreur lors du chargement des interventions:', error);
@@ -47,12 +48,12 @@ const Intervention = () => {
   }, [search]);
 
   const initialValues = {
-    equipmentName: scannedEquipmentName,
+    equipment:  scannedEquipmentName,
     type: "",
     date: "",
     description: "",
     parentIntervention: "",
-  
+ 
   };
 
   const validationSchema = yup.object().shape({
@@ -61,12 +62,11 @@ const Intervention = () => {
     date: yup.date().required("Le champ date est requis"),
     description: yup.string().required("Le champ description est requis"),
     parentIntervention: yup.string().nullable(),
-    
   });
 
   const handleAddIntervention = async (values) => {
     try {
-      const response = await axios.post('https://nodeapp-0ome.onrender.com/api/interventions', values);
+      const response = await axios.post('http://localhost:3001/api/interventions', values);
       if (response.data.success) {
         setSuccessMessage("Intervention ajoutée avec succès");
       } else {
@@ -111,6 +111,7 @@ const Intervention = () => {
                   readOnly: true,
                 }}
               />
+
               <TextField fullWidth variant="filled" type="text" label="Type" name="type" value={values.type} onChange={handleChange} onBlur={handleBlur} error={touched.type && Boolean(errors.type)} helperText={touched.type && errors.type} sx={{ gridColumn: "span 4" }} />
               <TextField fullWidth variant="filled" type="date" label="Date" name="date" value={values.date} onChange={handleChange} onBlur={handleBlur} error={touched.date && Boolean(errors.date)} helperText={touched.date && errors.date} sx={{ gridColumn: "span 4" }} />
               <Autocomplete
@@ -134,8 +135,6 @@ const Intervention = () => {
     />
   )}
 />
-
-            
               <TextField fullWidth variant="filled" type="text" label="Description" name="description" value={values.description} onChange={handleChange} onBlur={handleBlur} error={touched.description && Boolean(errors.description)} helperText={touched.description && errors.description} sx={{ gridColumn: "span 4" }} />
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
