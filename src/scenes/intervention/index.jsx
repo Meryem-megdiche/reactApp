@@ -18,7 +18,6 @@ const Intervention = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const scannedEquipmentName = location.state ? location.state.equipmentName : '';
-
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
@@ -44,34 +43,31 @@ const Intervention = () => {
       fetchInterventions();
     }
   }, [search]);
-
-  // Find the equipment ID based on the scanned equipment name
-  const scannedEquipment = equipments.find(equip => equip.Nom === scannedEquipmentName);
-  const scannedEquipmentId = scannedEquipment ? scannedEquipment._id : '';
+// Find the equipment ID based on the scanned equipment name
+const scannedEquipment = equipments.find(equip => equip.Nom === scannedEquipmentName);
+const scannedEquipmentId = scannedEquipment ? scannedEquipment._id : '';
 
   const initialValues = {
-    equipment: scannedEquipmentId,
+    equipmentName: scannedEquipmentName,
     type: "",
     date: "",
     description: "",
-    parentIntervention: ""
-   
+    parentIntervention: "",
   };
 
   const validationSchema = yup.object().shape({
-    equipment: yup.string().required("Le champ équipement est requis"),
+    equipmentName: yup.string().required("Le champ équipement est requis"),
     type: yup.string().required("Le champ type est requis"),
     date: yup.date().required("Le champ date est requis"),
     description: yup.string().required("Le champ description est requis"),
     parentIntervention: yup.string().nullable(),
-
   });
 
   const handleAddIntervention = async (values) => {
-    console.log("Soumission du formulaire avec les valeurs :", values);
+    console.log("Soumission du formulaire avec les valeurs :", values); // Ajout du log pour les valeurs du formulaire
     try {
       const response = await axios.post('https://nodeapp-0ome.onrender.com/api/interventions', values);
-      console.log("Réponse du serveur :", response.data);
+      console.log("Réponse du serveur :", response.data); // Ajout du log pour la réponse du serveur
       if (response.data.success) {
         setSuccessMessage("Intervention ajoutée avec succès");
         setTimeout(() => navigate('/liste'), 800);
@@ -102,8 +98,8 @@ const Intervention = () => {
                 variant="filled"
                 type="text"
                 label="Nom de l'équipement"
-                name="equipmentName"
-                value={scannedEquipmentName}
+                name="scannedEquipmentName"
+                value={values.equipmentName}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touched.equipmentName && Boolean(errors.equipmentName)}
@@ -112,18 +108,6 @@ const Intervention = () => {
                 InputProps={{
                   readOnly: true,
                 }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="hidden"
-                name="equipment"
-                value={values.equipment}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.equipment && Boolean(errors.equipment)}
-                helperText={touched.equipment && errors.equipment}
-                sx={{ display: 'none' }} // Caché mais nécessaire pour envoyer l'ID
               />
               <TextField
                 fullWidth
@@ -178,6 +162,7 @@ const Intervention = () => {
                 sx={{ gridColumn: "span 4" }}
               />
              
+           
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button type="submit" color="secondary" variant="contained">
