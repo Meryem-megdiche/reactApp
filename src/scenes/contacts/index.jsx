@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Button, TextField, Snackbar } from "@mui/material";
+import React, { useState, useEffect } from 'react'; 
+import { Box, Button, TextField, Snackbar, Autocomplete } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -7,9 +7,8 @@ import Header from "../../components/Header";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-import { Autocomplete } from '@mui/material'
 
-
+// Define the RfidScanner component outside of the Contacts component
 const RfidScanner = ({ setFieldValue }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [open, setOpen] = useState(false);
@@ -40,7 +39,6 @@ const RfidScanner = ({ setFieldValue }) => {
 
         reader.onreading = event => {
           console.log("Tag NFC détecté !");
-          // Directly accessing the tag's serial number
           const serialNumber = event.serialNumber;
           if (serialNumber) {
             console.log("Numéro de série du tag NFC:", serialNumber);
@@ -75,20 +73,15 @@ const RfidScanner = ({ setFieldValue }) => {
   );
 };
 
-
-
 const Contacts = () => {
-  const [rfid, setRfid] = useState('');
   const [equipments, setEquipments] = useState([]);
   const [successMessage, setSuccessMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
 
   const handleAddEquipment = async (values) => {
     try {
-      const connecteAIds = values.ConnecteA.split(',').map(id => id.trim());
       const newEquipment = {
         Nom: values.Nom,
         Type: values.Type,
@@ -96,12 +89,15 @@ const Contacts = () => {
         AdresseIp: values.AdresseIp,
         Emplacement: values.Emplacement,
         Etat: values.Etat,
-        ConnecteA: connecteAIds,
-      
+        ConnecteA: values.ConnecteA, // Utilisation de la valeur d'ID ici
       };
+
       console.log("Nouvel équipement :", newEquipment);
-      const response = await axios.post('https://nodeapp-0ome.onrender.com/equip/add', newEquipment);
+
+      const response = await axios.post('http://localhost:3001/equip/add', newEquipment);
+
       console.log("Réponse du serveur :", response.data);
+
       if (response.data.success) {
         setSuccessMessage("Équipement ajouté avec succès");
         setErrorMessage(null);
@@ -122,10 +118,11 @@ const Contacts = () => {
       setSuccessMessage(null);
     }
   };
+ 
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
-        const { data } = await axios.get('http://localhost:3001/equip');
+        const { data } = await axios.get('https://nodeapp-0ome.onrender.com/equip');
         setEquipments(data);
       } catch (error) {
         console.error('Erreur lors du chargement des équipements:', error);
@@ -133,6 +130,7 @@ const Contacts = () => {
     };
     fetchEquipments();
   }, []);
+
   return (
     <Box m="20px">
       <Header title="Ajouter un équipement" subtitle="Voir la liste des équipements" />
@@ -163,12 +161,12 @@ const Contacts = () => {
         }) => (
           <form onSubmit={handleSubmit} method="POST">
             <Box
-             display="grid"
-             gap="30px"
-             gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-             sx={{
-               "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
-             }}
+              display="grid"
+              gap="30px"
+              gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+              sx={{
+                "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
+              }}
             >
               <TextField
                 fullWidth
@@ -247,25 +245,24 @@ const Contacts = () => {
                 helperText={touched.Etat && errors.Etat}
                 sx={{ gridColumn: "span 4" }}
               />
-                      <Autocomplete
-  fullWidth
-  freeSolo
-  disableClearable
-  options={equipments.map(equipment => equipment.Nom)}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      label="Sélectionner équipement ConnectA"
-      variant="outlined"
-      fullWidth
-      onChange={(event) => setSearch(event.target.value)}
-      onBlur={handleBlur}
-      error={!!touched.ConnecteA && !!errors.ConnecteA}
-      helperText={touched.ConnecteA && errors.ConnecteA}
-    />
-  )}
-/>
-             
+              <Autocomplete
+                fullWidth
+                options={equipments}
+                getOptionLabel={(option) => option.Nom}
+                onChange={(event, value) => setFieldValue('ConnecteA', value ? value._id : '')}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Sélectionner équipement ConnecteA"
+                    variant="filled"
+                    name="ConnecteA"
+                    error={!!touched.ConnecteA && !!errors.ConnecteA}
+                    helperText={touched.ConnecteA && errors.ConnecteA}
+                    onBlur={handleBlur}
+                  />
+                )}
+              />
+              
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button type="submit" color="secondary" variant="contained">
@@ -275,6 +272,7 @@ const Contacts = () => {
           </form>
         )}
       </Formik>
+
       {successMessage && <div style={{ color: 'green' }}>{successMessage}</div>}
       {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
     </Box>
@@ -288,8 +286,8 @@ const checkoutSchema = yup.object().shape({
   RFID: yup.string().required("required"),
   Emplacement: yup.string().required("required"),
   Etat: yup.string().required("required"),
-  ConnecteA: yup.string(),
-
+  ConnecteA: yup.string().required("L'ID de l'équipement connecté est requis"),
+ 
 });
 
 const initialValues = {
@@ -300,7 +298,7 @@ const initialValues = {
   Emplacement: "",
   Etat: "",
   ConnecteA: "",
-
+ 
 };
 
 export default Contacts;
