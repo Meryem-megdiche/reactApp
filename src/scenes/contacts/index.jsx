@@ -53,7 +53,8 @@ import { useSnackbar } from 'notistack';
                 scannedData = decoder.decode(record.data);
               } else if (record.data instanceof DataView) {
                 console.log("Type de données: DataView");
-                scannedData = decoder.decode(record.data.buffer);
+                const buffer = new Uint8Array(record.data.buffer);
+                scannedData = Array.from(buffer).map(byte => byte.toString(16).padStart(2, '0')).join('');
               } else if (record.data && record.data.buffer instanceof ArrayBuffer) {
                 console.log("Type de données: ArrayBufferView");
                 scannedData = decoder.decode(record.data.buffer);
@@ -65,20 +66,13 @@ import { useSnackbar } from 'notistack';
   
               if (scannedData) {
                 console.log("Données scannées:", scannedData);
-                const serialMatch = scannedData.match(/Serial No:\s*([A-Za-z0-9:]+)/);
-                if (serialMatch && serialMatch[1]) {
-                  const serialNo = serialMatch[1];
-                  console.log("Serial No extrait:", serialNo);
-                  setFieldValue('RFID', serialNo);
-                  setMessage(`RFID scanné avec succès: ${serialNo}`);
-                  setOpen(true);
-                  enqueueSnackbar(`RFID scanné avec succès: ${serialNo}`, { variant: 'success' });
-                  if (navigator.vibrate) {
-                    navigator.vibrate(200); // Vibration de 200 ms
-                  }
-                } else {
-                  console.error("Le tag NFC ne contient pas de Serial No valide.");
-                  enqueueSnackbar("Le tag NFC ne contient pas de Serial No valide.", { variant: 'warning' });
+                // Supposons que le Serial No soit contenu dans scannedData en hexadécimal
+                setFieldValue('RFID', scannedData);
+                setMessage(`RFID scanné avec succès: ${scannedData}`);
+                setOpen(true);
+                enqueueSnackbar(`RFID scanné avec succès: ${scannedData}`, { variant: 'success' });
+                if (navigator.vibrate) {
+                  navigator.vibrate(200); // Vibration de 200 ms
                 }
               } else {
                 console.error("Aucune donnée scannée.");
@@ -104,6 +98,7 @@ import { useSnackbar } from 'notistack';
       </>
     );
   };
+  
 
 
 
