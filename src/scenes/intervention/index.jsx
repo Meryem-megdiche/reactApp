@@ -102,11 +102,11 @@ const Intervention = () => {
                 type="text"
                 label="Nom de l'équipement"
                 name="equipmentName"
-                value={values.equipmentName}
+                value={values.equipment}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                error={touched.equipmentName && Boolean(errors.equipmentName)}
-                helperText={touched.equipmentName && errors.equipmentName}
+                error={touched.equipment && Boolean(errors.equipment)}
+                helperText={touched.equipment && errors.equipment}
                 sx={{ gridColumn: "span 4" }}
                 InputProps={{
                   readOnly: true,
