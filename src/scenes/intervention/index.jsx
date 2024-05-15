@@ -5,7 +5,7 @@ import { Autocomplete } from '@mui/material';
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 import axios from "axios";
 
 const Intervention = () => {
@@ -17,7 +17,9 @@ const Intervention = () => {
   const [search, setSearch] = useState('');
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const navigate = useNavigate();
- 
+  const location = useLocation();
+  const scannedEquipmentName = location.state ? location.state.equipmentName : '';
+
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
@@ -33,9 +35,7 @@ const Intervention = () => {
   useEffect(() => {
     const fetchInterventions = async () => {
       try {
-        const { data } = await axios.get(`https://nodeapp-0ome.onrender.com
-
-/api/interventions/search?search=${search}`);
+        const { data } = await axios.get(`https://nodeapp-0ome.onrender.com/api/interventions/search?search=${search}`);
         setInterventions(data);
       } catch (error) {
         console.error('Erreur lors du chargement des interventions:', error);
@@ -47,7 +47,7 @@ const Intervention = () => {
   }, [search]);
 
   const initialValues = {
-    equipment: "",
+    equipmentName: scannedEquipmentName,
     type: "",
     date: "",
     description: "",
@@ -95,24 +95,21 @@ const Intervention = () => {
         {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
           <form onSubmit={handleSubmit}>
             <Box display="flex" flexDirection="column" gap={2}>
-            <Autocomplete
-                freeSolo
-                disableClearable
-                options={equipments}
-                getOptionLabel={(option) => option.Nom || ''}
-                onChange={(event, newValue) => {
-                  handleChange('equipment')(newValue ? newValue._id : '');
+            <TextField
+                fullWidth
+                variant="filled"
+                type="text"
+                label="Nom de l'équipement"
+                name="equipmentName"
+                value={values.equipmentName}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.equipmentName && Boolean(errors.equipmentName)}
+                helperText={touched.equipmentName && errors.equipmentName}
+                sx={{ gridColumn: "span 4" }}
+                InputProps={{
+                  readOnly: true,
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Sélectionner équipement"
-                    variant="outlined"
-                    fullWidth
-                    onChange={(event) => setSearch(event.target.value)}
-                    onBlur={handleBlur}
-                  />
-                )}
               />
               <TextField fullWidth variant="filled" type="text" label="Type" name="type" value={values.type} onChange={handleChange} onBlur={handleBlur} error={touched.type && Boolean(errors.type)} helperText={touched.type && errors.type} sx={{ gridColumn: "span 4" }} />
               <TextField fullWidth variant="filled" type="date" label="Date" name="date" value={values.date} onChange={handleChange} onBlur={handleBlur} error={touched.date && Boolean(errors.date)} helperText={touched.date && errors.date} sx={{ gridColumn: "span 4" }} />
