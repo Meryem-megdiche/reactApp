@@ -8,80 +8,102 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 
-const RfidScanner = ({ setFieldValue }) => {
-  const { enqueueSnackbar } = useSnackbar();
-  const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  const [nfcSupported, setNfcSupported] = useState(false);
 
-  useEffect(() => {
-    if ("NDEFReader" in window) {
-      setNfcSupported(true);
-      console.log("NFC supporté");
-    } else {
-      setNfcSupported(false);
-      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
-      console.log("NFC non supporté");
-    }
-  }, [enqueueSnackbar]);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const readNfcTag = async () => {
-    if (nfcSupported) {
-      try {
-        const reader = new NDEFReader();
-        await reader.scan();
-        console.log("En attente de la lecture du tag NFC...");
-        reader.onreading = event => {
-          console.log("Tag NFC détecté !");
-          event.message.records.forEach(record => {
-            console.log("Record:", record);
-            if (record.recordType === "text") {
-              const decoder = new TextDecoder();
-              const scannedData = decoder.decode(record.data);
-              console.log("Données scannées:", scannedData);
-              const serialMatch = scannedData.match(/Serial No:\s*([A-Za-z0-9:]+)/);
-              if (serialMatch && serialMatch[1]) {
-                const serialNo = serialMatch[1];
-                console.log("Serial No extrait:", serialNo);
-                setFieldValue('RFID', serialNo);
-                setMessage(`RFID scanné avec succès: ${serialNo}`);
-                setOpen(true);
-                enqueueSnackbar(`RFID scanné avec succès: ${serialNo}`, { variant: 'success' });
-                if (navigator.vibrate) {
-                  navigator.vibrate(200); // Vibration de 200 ms
+  const RfidScanner = ({ setFieldValue }) => {
+    const { enqueueSnackbar } = useSnackbar();
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState("");
+    const [nfcSupported, setNfcSupported] = useState(false);
+  
+    useEffect(() => {
+      if ("NDEFReader" in window) {
+        setNfcSupported(true);
+        console.log("NFC supporté");
+      } else {
+        setNfcSupported(false);
+        enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
+        console.log("NFC non supporté");
+      }
+    }, [enqueueSnackbar]);
+  
+    const handleClose = () => {
+      setOpen(false);
+    };
+  
+    const readNfcTag = async () => {
+      if (nfcSupported) {
+        try {
+          const reader = new NDEFReader();
+          await reader.scan();
+          console.log("En attente de la lecture du tag NFC...");
+          reader.onreading = event => {
+            console.log("Tag NFC détecté !");
+            const decoder = new TextDecoder();
+            console.log("Décoder initialisé");
+  
+            event.message.records.forEach(record => {
+              console.log("Type de données du record:", typeof record.data);
+              console.log("Données du record:", record.data);
+              console.log("Données du record1:", record);
+  
+              let scannedData = '';
+              if (record.data instanceof ArrayBuffer) {
+                console.log("Type de données: ArrayBuffer");
+                scannedData = decoder.decode(record.data);
+              } else if (record.data instanceof DataView) {
+                console.log("Type de données: DataView");
+                scannedData = decoder.decode(record.data.buffer);
+              } else if (record.data && record.data.buffer instanceof ArrayBuffer) {
+                console.log("Type de données: ArrayBufferView");
+                scannedData = decoder.decode(record.data.buffer);
+              } else {
+                console.error("Type de données non pris en charge ou null:", record.data);
+                enqueueSnackbar("Le tag NFC ne contient pas de données valides.", { variant: 'warning' });
+                return;
+              }
+  
+              if (scannedData) {
+                console.log("Données scannées:", scannedData);
+                const serialMatch = scannedData.match(/Serial No:\s*([A-Za-z0-9:]+)/);
+                if (serialMatch && serialMatch[1]) {
+                  const serialNo = serialMatch[1];
+                  console.log("Serial No extrait:", serialNo);
+                  setFieldValue('RFID', serialNo);
+                  setMessage(`RFID scanné avec succès: ${serialNo}`);
+                  setOpen(true);
+                  enqueueSnackbar(`RFID scanné avec succès: ${serialNo}`, { variant: 'success' });
+                  if (navigator.vibrate) {
+                    navigator.vibrate(200); // Vibration de 200 ms
+                  }
+                } else {
+                  console.error("Le tag NFC ne contient pas de Serial No valide.");
+                  enqueueSnackbar("Le tag NFC ne contient pas de Serial No valide.", { variant: 'warning' });
                 }
               } else {
-                console.error("Le tag NFC ne contient pas de Serial No valide.");
-                enqueueSnackbar("Le tag NFC ne contient pas de Serial No valide.", { variant: 'warning' });
+                console.error("Aucune donnée scannée.");
+                enqueueSnackbar("Aucune donnée scannée.", { variant: 'warning' });
               }
-            } else {
-              console.error("Type de données non pris en charge ou null:", record.data);
-              enqueueSnackbar("Le tag NFC ne contient pas de données valides.", { variant: 'warning' });
-            }
-          });
-        };
-      } catch (error) {
-        console.error(`Erreur de lecture du tag NFC: ${error.message}`);
-        setMessage(`Erreur de lecture du tag NFC: ${error.message}`);
-        setOpen(true);
-        enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, { variant: 'error' });
+            });
+          };
+        } catch (error) {
+          console.error(`Erreur de lecture du tag NFC: ${error.message}`);
+          setMessage(`Erreur de lecture du tag NFC: ${error.message}`);
+          setOpen(true);
+          enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, { variant: 'error' });
+        }
       }
-    }
+    };
+  
+    return (
+      <>
+        <Button onClick={readNfcTag} variant="contained" color="primary">
+          Scanner RFID
+        </Button>
+        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} message={message} />
+      </>
+    );
   };
-
-  return (
-    <>
-      <Button onClick={readNfcTag} variant="contained" color="primary">
-        Scanner RFID
-      </Button>
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} message={message} />
-    </>
-  );
-};
 
 
 
