@@ -45,27 +45,33 @@ const Intervention = () => {
     }
   }, [search]);
 
+  // Find the equipment ID based on the scanned equipment name
+  const scannedEquipment = equipments.find(equip => equip.Nom === scannedEquipmentName);
+  const scannedEquipmentId = scannedEquipment ? scannedEquipment._id : '';
+
   const initialValues = {
-    equipmentName: scannedEquipmentName,
+    equipment: scannedEquipmentId,
     type: "",
     date: "",
     description: "",
-    parentIntervention: "",
+    parentIntervention: ""
+   
   };
 
   const validationSchema = yup.object().shape({
-    equipmentName: yup.string().required("Le champ équipement est requis"),
+    equipment: yup.string().required("Le champ équipement est requis"),
     type: yup.string().required("Le champ type est requis"),
     date: yup.date().required("Le champ date est requis"),
     description: yup.string().required("Le champ description est requis"),
     parentIntervention: yup.string().nullable(),
+
   });
 
   const handleAddIntervention = async (values) => {
-    console.log("Soumission du formulaire avec les valeurs :", values); // Ajout du log pour les valeurs du formulaire
+    console.log("Soumission du formulaire avec les valeurs :", values);
     try {
       const response = await axios.post('https://nodeapp-0ome.onrender.com/api/interventions', values);
-      console.log("Réponse du serveur :", response.data); // Ajout du log pour la réponse du serveur
+      console.log("Réponse du serveur :", response.data);
       if (response.data.success) {
         setSuccessMessage("Intervention ajoutée avec succès");
         setTimeout(() => navigate('/liste'), 800);
@@ -97,7 +103,7 @@ const Intervention = () => {
                 type="text"
                 label="Nom de l'équipement"
                 name="equipmentName"
-                value={values.equipmentName}
+                value={scannedEquipmentName}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touched.equipmentName && Boolean(errors.equipmentName)}
@@ -106,6 +112,18 @@ const Intervention = () => {
                 InputProps={{
                   readOnly: true,
                 }}
+              />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="hidden"
+                name="equipment"
+                value={values.equipment}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.equipment && Boolean(errors.equipment)}
+                helperText={touched.equipment && errors.equipment}
+                sx={{ display: 'none' }} // Caché mais nécessaire pour envoyer l'ID
               />
               <TextField
                 fullWidth
