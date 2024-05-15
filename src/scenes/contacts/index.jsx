@@ -7,7 +7,7 @@ import Header from "../../components/Header";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-
+import { Autocomplete } from '@mui/material'
 
 
 const RfidScanner = ({ setFieldValue }) => {
@@ -78,8 +78,13 @@ const RfidScanner = ({ setFieldValue }) => {
 
 
 const Contacts = () => {
+  const [rfid, setRfid] = useState('');
+  const [equipments, setEquipments] = useState([]);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const navigate = useNavigate();
+  const [search, setSearch] = useState('');
 
   const handleAddEquipment = async (values) => {
     try {
@@ -92,24 +97,56 @@ const Contacts = () => {
         Emplacement: values.Emplacement,
         Etat: values.Etat,
         ConnecteA: connecteAIds,
-        Pays: values.Pays,
+      
       };
-
+      console.log("Nouvel équipement :", newEquipment);
       const response = await axios.post('https://nodeapp-0ome.onrender.com/equip/add', newEquipment);
-
+      console.log("Réponse du serveur :", response.data);
       if (response.data.success) {
-        navigate('/team'); 
+        setSuccessMessage("Équipement ajouté avec succès");
+        setErrorMessage(null);
+        setTimeout(() => {
+          navigate('/team'); // Remplacez ceci par le chemin réel de votre liste d'équipements
+        }, 800); 
       } else {
-        console.error(response.data.message || "Erreur inattendue lors de l'ajout de l'équipement");
+        if (response.data.message === "Equipement déjà existant") {
+          setErrorMessage("L'adresse IP ou le RFID existe déjà dans la base de données. L'équipement ne peut pas être ajouté.");
+        } else {
+          setErrorMessage(response.data.message || "Erreur inattendue lors de l'ajout de l'équipement");
+        }
+        setSuccessMessage(null);
       }
     } catch (error) {
       console.error('Erreur lors de l\'ajout de l\'équipement :', error);
+      setErrorMessage("Erreur lors de l'ajout de l'équipement. Veuillez réessayer plus tard.");
+      setSuccessMessage(null);
     }
   };
-
+  useEffect(() => {
+    const fetchEquipments = async () => {
+      try {
+        const { data } = await axios.get('http://localhost:3001/equip');
+        setEquipments(data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des équipements:', error);
+      }
+    };
+    fetchEquipments();
+  }, []);
   return (
     <Box m="20px">
       <Header title="Ajouter un équipement" subtitle="Voir la liste des équipements" />
+      {successMessage && (
+        <Box bgcolor="success.main" color="success.contrastText" p={2} mb={2} borderRadius={4}>
+          {successMessage}
+        </Box>
+      )}
+
+      {errorMessage && (
+        <Box bgcolor="error.main" color="error.contrastText" p={2} mb={2} borderRadius={4}>
+          {errorMessage}
+        </Box>
+      )}
       <Formik
         onSubmit={handleAddEquipment}
         initialValues={initialValues}
@@ -126,12 +163,12 @@ const Contacts = () => {
         }) => (
           <form onSubmit={handleSubmit} method="POST">
             <Box
-              display="grid"
-              gap="30px"
-              gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-              sx={{
-                "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
-              }}
+             display="grid"
+             gap="30px"
+             gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+             sx={{
+               "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
+             }}
             >
               <TextField
                 fullWidth
@@ -210,32 +247,25 @@ const Contacts = () => {
                 helperText={touched.Etat && errors.Etat}
                 sx={{ gridColumn: "span 4" }}
               />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="ConnecteA"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.ConnecteA}
-                name="ConnecteA"
-                error={!!touched.ConnecteA && !!errors.ConnecteA}
-                helperText={touched.ConnecteA && errors.ConnecteA}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Pays"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.Pays}
-                name="Pays"
-                error={!!touched.Pays && !!errors.Pays}
-                helperText={touched.Pays && errors.Pays}
-                sx={{ gridColumn: "span 4" }}
-              />
+                      <Autocomplete
+  fullWidth
+  freeSolo
+  disableClearable
+  options={equipments.map(equipment => equipment.Nom)}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Sélectionner équipement ConnectA"
+      variant="outlined"
+      fullWidth
+      onChange={(event) => setSearch(event.target.value)}
+      onBlur={handleBlur}
+      error={!!touched.ConnecteA && !!errors.ConnecteA}
+      helperText={touched.ConnecteA && errors.ConnecteA}
+    />
+  )}
+/>
+             
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button type="submit" color="secondary" variant="contained">
@@ -245,6 +275,8 @@ const Contacts = () => {
           </form>
         )}
       </Formik>
+      {successMessage && <div style={{ color: 'green' }}>{successMessage}</div>}
+      {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
     </Box>
   );
 };
@@ -257,7 +289,7 @@ const checkoutSchema = yup.object().shape({
   Emplacement: yup.string().required("required"),
   Etat: yup.string().required("required"),
   ConnecteA: yup.string().required("L'ID de l'équipement connecté est requis"),
-  Pays: yup.string().required("required")
+
 });
 
 const initialValues = {
@@ -268,7 +300,7 @@ const initialValues = {
   Emplacement: "",
   Etat: "",
   ConnecteA: "",
-  Pays: "",
+
 };
 
 export default Contacts;
