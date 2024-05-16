@@ -129,7 +129,7 @@ const Dashboard = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportSummary, setReportSummary] = useState('');
   const [exportFile, setExportFile] = useState(null);
-  const socket = io('*'); // Assurez-vous que l'URL correspond à votre serveur
+  const socket = io('https://nodeapp-0ome.onrender.com'); // Assurez-vous que l'URL correspond à votre serveur
   const [isLoading, setIsLoading] = useState(false);
 
 

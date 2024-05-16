@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import Graph from 'react-graph-vis';
 import 'vis-network/styles/vis-network.css';
 
-const socket = io('*'); // Replace with your backend URL
+const socket = io('https://nodeapp-0ome.onrender.com'); // Replace with your backend URL
 
 const Inventory = ({ role }) => {
   const navigate = useNavigate();
