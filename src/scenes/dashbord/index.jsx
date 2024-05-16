@@ -355,7 +355,7 @@ const fetchInterventionCount = async () => {
   }};
 
 useEffect(() => {
-  if (selectedEquipments.length > 0 && startDate && endDate) {
+  if (selectedEquipments.length > 0 && startDate && endDate) {s
     fetchData();
   }
 }, [selectedEquipments, startDate, endDate]);

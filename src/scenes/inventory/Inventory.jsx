@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import io from 'socket.io-client';
 import Graph from 'react-graph-vis';
 import 'vis-network/styles/vis-network.css';
 
-const socket = io('https://nodeapp-0ome.onrender.com'); // Replace with your backend URL
-
-const Inventory = ({ role }) => {
+const Inventory = () => {
   const navigate = useNavigate();
   const [scannedEquipments, setScannedEquipments] = useState([]);
   const [equipmentList, setEquipmentList] = useState([]);
@@ -26,17 +23,6 @@ const Inventory = ({ role }) => {
     fetchEquipments();
   }, []);
 
-  useEffect(() => {
-    socket.on('inventoryUpdate', (data) => {
-      setGraph(data);
-      setScannedEquipments(data.nodes.map(node => node.equipment));
-    });
-
-    return () => {
-      socket.off('inventoryUpdate');
-    };
-  }, []);
-
   const handleRFIDScan = async () => {
     try {
       const ndef = new NDEFReader();
@@ -47,6 +33,7 @@ const Inventory = ({ role }) => {
         if (scannedEquipment) {
           if (scannedEquipments.length > 0) {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
+            // Ajouter l'ID du nouvel équipement scanné à la liste des équipements connectés du dernier équipement scanné
             lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
             try {
               await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
@@ -54,9 +41,8 @@ const Inventory = ({ role }) => {
               console.error('Error updating equipment:', updateError);
             }
           }
-          const newScannedEquipments = [...scannedEquipments, scannedEquipment];
-          setScannedEquipments(newScannedEquipments);
-          updateGraph(newScannedEquipments);
+          setScannedEquipments([...scannedEquipments, scannedEquipment]);
+          updateGraph([...scannedEquipments, scannedEquipment]);
         } else {
           console.error('Équipement non trouvé');
         }
@@ -73,7 +59,7 @@ const Inventory = ({ role }) => {
       shape: 'image',
       image: selectIconBasedOnType(equip.Type),
       title: `Type: ${equip.Type}\nAdresse IP: ${equip.AdresseIp}\nRFID: ${equip.RFID}\nEtat: ${equip.Etat}`,
-      color: getColorByState(equip.Etat)
+      color: getColorByState(equip.Etat) // Ajouter la couleur basée sur l'état
     }));
 
     const edges = equipments.slice(1).map((equip, index) => ({
@@ -82,9 +68,7 @@ const Inventory = ({ role }) => {
       arrows: 'to'
     }));
 
-    const graphData = { nodes, edges };
-    setGraph(graphData);
-    socket.emit('inventoryUpdate', graphData); // Emit the updated graph to other clients
+    setGraph({ nodes, edges });
   };
 
   const selectIconBasedOnType = (type) => {
@@ -103,13 +87,13 @@ const Inventory = ({ role }) => {
   const getColorByState = (state) => {
     switch (state) {
       case 'dysfonctionnel':
-        return 'red';
+        return '#FF0000'; // Rouge
       case 'Problème de réseau':
-        return 'orange';
+        return '#FFA500'; // Orange
       case 'En bon état':
-        return 'green';
+        return '#008000'; // Vert
       default:
-        return 'blue';
+        return '#000000'; // Noir par défaut
     }
   };
 
