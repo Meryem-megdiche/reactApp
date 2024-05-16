@@ -40,18 +40,22 @@ const Inventory = () => {
 
   const handleRFIDScan = async () => {
     try {
-      const ndef = new window.NDEFReader();
+      const ndef = new NDEFReader();
       await ndef.scan();
       ndef.addEventListener('reading', async event => {
         const rfid = event.serialNumber;
         const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
-          let newScannedEquipments = [...scannedEquipments];
-
-          if (!newScannedEquipments.find(equip => equip._id === scannedEquipment._id)) {
-            newScannedEquipments.push(scannedEquipment);
+          if (scannedEquipments.length > 0) {
+            const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
+            lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
+            try {
+              await axios.put(`https://nodeapp-0ome.onrender.com/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
+            } catch (updateError) {
+              console.error('Error updating equipment:', updateError);
+            }
           }
-
+          const newScannedEquipments = [...scannedEquipments, scannedEquipment];
           setScannedEquipments(newScannedEquipments);
           updateGraph(newScannedEquipments);
           await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
@@ -64,12 +68,6 @@ const Inventory = () => {
     }
   };
 
-  const resetScannedEquipments = async () => {
-    setScannedEquipments([]);
-    await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', []);
-    updateGraph([]);
-  };
-
   const updateGraph = (equipments) => {
     const nodes = equipments.map(equip => ({
       id: equip._id,
@@ -80,13 +78,11 @@ const Inventory = () => {
       color: getColorByState(equip.Etat)
     }));
 
-    const edges = equipments.flatMap(equip =>
-      equip.ConnecteA.map(connectedId => ({
-        from: equip._id,
-        to: connectedId,
-        arrows: 'to'
-      }))
-    );
+    const edges = equipments.slice(1).map((equip, index) => ({
+      from: equipments[index]._id,
+      to: equip._id,
+      arrows: 'to'
+    }));
 
     setGraph({ nodes, edges });
   };
@@ -144,9 +140,6 @@ const Inventory = () => {
       <Typography variant="h3" mb="20px">Inventaire</Typography>
       <Button variant="contained" color="primary" onClick={handleRFIDScan}>
         Scanner RFID
-      </Button>
-      <Button variant="contained" color="secondary" onClick={resetScannedEquipments} style={{ marginLeft: '10px' }}>
-        Réinitialiser les équipements scannés
       </Button>
       {scannedEquipments.length > 0 && (
         <Box mt="20px">
