@@ -33,7 +33,9 @@ import User from "./scenes/user";
 import ResetPasswordForm from "./scenes/forgot";
 import ForgotPasswordForm from "./scenes/password";
  import TTLStatsPieChart  from "./components/Pie";
- import Topologi from "./scenes/topologi/Topologi";
+
+import { Inventory } from "@mui/icons-material";
+import Topologi from "./scenes/topologi/Inventory";
 
 function App() {
   const [theme, colorMode] = useMode();
