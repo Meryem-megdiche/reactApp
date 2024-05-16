@@ -58,7 +58,8 @@ const Inventory = () => {
       label: equip.Nom,
       shape: 'image',
       image: selectIconBasedOnType(equip.Type),
-      title: `Type: ${equip.Type}\nAdresse IP: ${equip.AdresseIp}\nRFID: ${equip.RFID}\nEtat: ${equip.Etat}`
+      title: `Type: ${equip.Type}\nAdresse IP: ${equip.AdresseIp}\nRFID: ${equip.RFID}\nEtat: ${equip.Etat}`,
+      color: getColorByState(equip.Etat) // Ajouter la couleur basée sur l'état
     }));
 
     const edges = equipments.slice(1).map((equip, index) => ({
@@ -80,6 +81,19 @@ const Inventory = () => {
         return `${process.env.PUBLIC_URL}/icons/computer.png`;
       default:
         return `${process.env.PUBLIC_URL}/icons/default.png`;
+    }
+  };
+
+  const getColorByState = (state) => {
+    switch (state) {
+      case 'dysfonctionnel':
+        return '#FF0000'; // Rouge
+      case 'Problème de réseau':
+        return '#FFA500'; // Orange
+      case 'En bon état':
+        return '#008000'; // Vert
+      default:
+        return '#000000'; // Noir par défaut
     }
   };
 
