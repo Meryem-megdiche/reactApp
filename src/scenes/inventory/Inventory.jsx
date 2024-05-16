@@ -25,21 +25,6 @@ const Inventory = () => {
     fetchEquipments();
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(fetchScannedEquipments, 5000); // Fetch every 5 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchScannedEquipments = async () => {
-    try {
-      const response = await axios.get('https://nodeapp-0ome.onrender.com/scannedEquipments');
-      setScannedEquipments(response.data);
-      updateGraph(response.data);
-    } catch (error) {
-      console.error('Error fetching scanned equipments:', error);
-    }
-  };
-
   const handleRFIDScan = async () => {
     try {
       const ndef = new NDEFReader();
@@ -55,7 +40,7 @@ const Inventory = () => {
             if (selectedEquipment) {
               selectedEquipment.ConnecteA.push(scannedEquipment._id);
               try {
-                await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${selectedEquipment._id}`, selectedEquipment);
+                await axios.put(`https://nodeapp-0ome.onrender.com/equip/${selectedEquipment._id}`, selectedEquipment);
                 setAlertMessage(`Connexion créée entre ${selectedEquipment.Nom} et ${scannedEquipment.Nom}`);
               } catch (updateError) {
                 console.error('Error updating equipment:', updateError);
@@ -175,18 +160,16 @@ const Inventory = () => {
       <Button variant="contained" color="primary" onClick={handleRFIDScan}>
         Scanner RFID
       </Button>
-      {scannedEquipments.length > 0 && (
-        <Box mt="20px">
-          <Typography variant="h5">Équipements scannés :</Typography>
-          <Graph
-            key={Date.now()}
-            graph={graph}
-            options={options}
-            events={events}
-            style={{ height: "500px" }}
-          />
-        </Box>
-      )}
+      <Box mt="20px">
+        <Typography variant="h5">Équipements scannés :</Typography>
+        <Graph
+          key={Date.now()}
+          graph={graph}
+          options={options}
+          events={events}
+          style={{ height: "500px" }}
+        />
+      </Box>
       <Snackbar
         open={!!alertMessage}
         autoHideDuration={6000}
