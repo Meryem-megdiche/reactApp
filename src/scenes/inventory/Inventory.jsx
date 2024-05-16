@@ -23,6 +23,21 @@ const Inventory = () => {
     fetchEquipments();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(fetchScannedEquipments, 5000); // Fetch every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchScannedEquipments = async () => {
+    try {
+      const response = await axios.get('https://nodeapp-0ome.onrender.com/scannedEquipments');
+      setScannedEquipments(response.data);
+      updateGraph(response.data);
+    } catch (error) {
+      console.error('Error fetching scanned equipments:', error);
+    }
+  };
+
   const handleRFIDScan = async () => {
     try {
       const ndef = new NDEFReader();
@@ -33,7 +48,6 @@ const Inventory = () => {
         if (scannedEquipment) {
           if (scannedEquipments.length > 0) {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
-            // Ajouter l'ID du nouvel équipement scanné à la liste des équipements connectés du dernier équipement scanné
             lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
             try {
               await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
@@ -41,8 +55,10 @@ const Inventory = () => {
               console.error('Error updating equipment:', updateError);
             }
           }
-          setScannedEquipments([...scannedEquipments, scannedEquipment]);
-          updateGraph([...scannedEquipments, scannedEquipment]);
+          const newScannedEquipments = [...scannedEquipments, scannedEquipment];
+          setScannedEquipments(newScannedEquipments);
+          updateGraph(newScannedEquipments);
+          await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
         } else {
           console.error('Équipement non trouvé');
         }
@@ -59,7 +75,7 @@ const Inventory = () => {
       shape: 'image',
       image: selectIconBasedOnType(equip.Type),
       title: `Type: ${equip.Type}\nAdresse IP: ${equip.AdresseIp}\nRFID: ${equip.RFID}\nEtat: ${equip.Etat}`,
-      color: getColorByState(equip.Etat) // Ajouter la couleur basée sur l'état
+      color: getColorByState(equip.Etat)
     }));
 
     const edges = equipments.slice(1).map((equip, index) => ({
@@ -87,13 +103,13 @@ const Inventory = () => {
   const getColorByState = (state) => {
     switch (state) {
       case 'dysfonctionnel':
-        return '#FF0000'; // Rouge
+        return 'red';
       case 'Problème de réseau':
-        return '#FFA500'; // Orange
+        return 'orange';
       case 'En bon état':
-        return '#008000'; // Vert
+        return 'green';
       default:
-        return '#000000'; // Noir par défaut
+        return 'blue';
     }
   };
 
