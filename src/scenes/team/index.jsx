@@ -302,7 +302,7 @@ const Team = () => {
     {
       field: "Actions",
       headerName: "Actions",
-      flex: 5,
+      flex: 4,
       headerAlign: "center",
       align: "center",
       renderCell: renderActionCell,

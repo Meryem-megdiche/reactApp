@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const Inventory = () => {
   const navigate = useNavigate();
-  const [equipment, setEquipment] = useState(null);
+  const [scannedEquipments, setScannedEquipments] = useState([]);
   const [equipmentList, setEquipmentList] = useState([]);
 
   useEffect(() => {
@@ -24,11 +24,16 @@ const Inventory = () => {
     try {
       const ndef = new NDEFReader();
       await ndef.scan();
-      ndef.addEventListener('reading', event => {
+      ndef.addEventListener('reading', async event => {
         const rfid = event.serialNumber;
         const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
-          setEquipment(scannedEquipment);
+          if (scannedEquipments.length > 0) {
+            const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
+            lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
+            await axios.put(`https://nodeapp-0ome.onrender.com/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
+          }
+          setScannedEquipments([...scannedEquipments, scannedEquipment]);
         } else {
           console.error('Équipement non trouvé');
         }
@@ -44,13 +49,20 @@ const Inventory = () => {
       <Button variant="contained" color="primary" onClick={handleRFIDScan}>
         Scanner RFID
       </Button>
-      {equipment && (
+      {scannedEquipments.length > 0 && (
         <Box mt="20px">
-          <Typography variant="h5">Équipement scanné :</Typography>
-          <Typography>Nom : {equipment.Nom}</Typography>
-          <Typography>Type : {equipment.Type}</Typography>
-          <Typography>Adresse IP : {equipment.AdresseIp}</Typography>
-          <Typography>RFID : {equipment.RFID}</Typography>
+          <Typography variant="h5">Équipements scannés :</Typography>
+          {scannedEquipments.map((equip, index) => (
+            <Box key={equip._id} mt="10px">
+              <Typography>Nom : {equip.Nom}</Typography>
+              <Typography>Type : {equip.Type}</Typography>
+              <Typography>Adresse IP : {equip.AdresseIp}</Typography>
+              <Typography>RFID : {equip.RFID}</Typography>
+              {index > 0 && (
+                <Typography>Connecté à : {scannedEquipments[index - 1].Nom}</Typography>
+              )}
+            </Box>
+          ))}
         </Box>
       )}
       <Button variant="contained" color="secondary" onClick={() => navigate('/dashboard')} mt="20px">
