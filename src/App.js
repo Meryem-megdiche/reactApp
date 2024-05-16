@@ -35,7 +35,7 @@ import ForgotPasswordForm from "./scenes/password";
  import TTLStatsPieChart  from "./components/Pie";
 
 import { Inventory } from "@mui/icons-material";
-import Topologi from "./scenes/topologi/Inventory";
+import Inventory from "./scenes/topologi/Inventory";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -90,7 +90,7 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
                 <Route path="/user" element={<User/>} />
                 <Route path="/forgot" element={ <ResetPasswordForm/>} />
                 <Route path="/password" element={ <ForgotPasswordForm/>} />
-                <Route path="/topologi" element={ <Topologi/>} />
+                <Route path="/topologi" element={ <Inventory/>} />
                 </Routes>
            
            
