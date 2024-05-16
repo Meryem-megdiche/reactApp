@@ -30,8 +30,13 @@ const Inventory = () => {
         if (scannedEquipment) {
           if (scannedEquipments.length > 0) {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
+            // Ajouter l'ID du nouvel équipement scanné à la liste des équipements connectés du dernier équipement scanné
             lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
-            await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
+            try {
+              await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
+            } catch (updateError) {
+              console.error('Error updating equipment:', updateError);
+            }
           }
           setScannedEquipments([...scannedEquipments, scannedEquipment]);
         } else {
