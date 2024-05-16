@@ -5,14 +5,13 @@ import axios from 'axios';
 import Graph from 'react-graph-vis';
 import 'vis-network/styles/vis-network.css';
 
-const Topologi = () => {
+const Inventory = () => {
   const navigate = useNavigate();
   const [scannedEquipments, setScannedEquipments] = useState([]);
   const [equipmentList, setEquipmentList] = useState([]);
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [selectedEquipmentId, setSelectedEquipmentId] = useState(null);
   const [alertMessage, setAlertMessage] = useState('');
-  const [targetEquipmentId, setTargetEquipmentId] = useState(null);
 
   useEffect(() => {
     const fetchEquipments = async () => {
@@ -25,21 +24,6 @@ const Topologi = () => {
     };
     fetchEquipments();
   }, []);
-
-  useEffect(() => {
-    const interval = setInterval(fetchScannedEquipments, 5000); // Fetch every 5 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchScannedEquipments = async () => {
-    try {
-      const response = await axios.get('https://nodeapp-0ome.onrender.com/scannedEquipments');
-      setScannedEquipments(response.data);
-      updateGraph(response.data);
-    } catch (error) {
-      console.error('Error fetching scanned equipments:', error);
-    }
-  };
 
   const handleRFIDScan = async () => {
     try {
@@ -165,33 +149,14 @@ const Topologi = () => {
   const events = {
     selectNode: (event) => {
       const { nodes } = event;
-      if (selectedEquipmentId) {
-        setTargetEquipmentId(nodes[0]);
-        linkEquipments(selectedEquipmentId, nodes[0]);
-      } else {
-        setSelectedEquipmentId(nodes[0]);
-        setAlertMessage(`Équipement sélectionné: ${nodes[0]}`);
-      }
-    }
-  };
-
-  const linkEquipments = async (sourceId, targetId) => {
-    try {
-      const sourceEquipment = scannedEquipments.find(equip => equip._id === sourceId);
-      if (sourceEquipment) {
-        sourceEquipment.ConnecteA.push(targetId);
-        await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${sourceEquipment._id}`, sourceEquipment);
-        setAlertMessage(`Connexion créée entre ${sourceEquipment.Nom} et l'équipement cible.`);
-        fetchScannedEquipments(); // Refresh the scanned equipments to reflect the new connection
-      }
-    } catch (error) {
-      console.error('Error linking equipments:', error);
+      setSelectedEquipmentId(nodes[0]);
+      setAlertMessage(`Équipement sélectionné: ${nodes[0]}`);
     }
   };
 
   return (
     <Box m="20px">
-      <Typography variant="h3" mb="20px">Topologie Réseau</Typography>
+      <Typography variant="h3" mb="20px">Inventaire</Typography>
       <Button variant="contained" color="primary" onClick={handleRFIDScan}>
         Scanner RFID
       </Button>
@@ -218,4 +183,4 @@ const Topologi = () => {
   );
 };
 
-export default Topologi;
+export default Inventory;
