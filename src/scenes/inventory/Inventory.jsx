@@ -31,7 +31,7 @@ const Inventory = () => {
           if (scannedEquipments.length > 0) {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
             lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
-            await axios.put(`https://nodeapp-0ome.onrender.com/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
+            await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
           }
           setScannedEquipments([...scannedEquipments, scannedEquipment]);
         } else {
