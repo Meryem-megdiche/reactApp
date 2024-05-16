@@ -13,6 +13,7 @@ const Topologi = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState(null);
   const [alertMessage, setAlertMessage] = useState('');
 
+  // Fetch all equipments initially and periodically
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
@@ -25,20 +26,22 @@ const Topologi = () => {
     fetchEquipments();
   }, []);
 
+  // Fetch scanned equipments periodically
   useEffect(() => {
-    const interval = setInterval(fetchScannedEquipments, 5000); // Fetch every 5 seconds
+    const fetchScannedEquipments = async () => {
+      try {
+        const response = await axios.get('https://nodeapp-0ome.onrender.com/api/topologie');
+        setScannedEquipments(response.data);
+        updateGraph(response.data);
+      } catch (error) {
+        console.error('Error fetching scanned equipments:', error);
+      }
+    };
+
+    fetchScannedEquipments();
+    const interval = setInterval(fetchScannedEquipments, 5000);
     return () => clearInterval(interval);
   }, []);
-
-  const fetchScannedEquipments = async () => {
-    try {
-      const response = await axios.get('https://nodeapp-0ome.onrender.com/scannedEquipments');
-      setScannedEquipments(response.data);
-      updateGraph(response.data);
-    } catch (error) {
-      console.error('Error fetching scanned equipments:', error);
-    }
-  };
 
   const handleRFIDScan = async () => {
     try {
@@ -49,7 +52,7 @@ const Topologi = () => {
         const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
           let newScannedEquipments = [...scannedEquipments];
-          
+
           if (selectedEquipmentId) {
             const selectedEquipment = newScannedEquipments.find(equip => equip._id === selectedEquipmentId);
             if (selectedEquipment) {
@@ -62,7 +65,7 @@ const Topologi = () => {
               }
             }
           }
-          
+
           if (!newScannedEquipments.find(equip => equip._id === scannedEquipment._id)) {
             newScannedEquipments = [...newScannedEquipments, scannedEquipment];
           }
