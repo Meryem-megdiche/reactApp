@@ -1,186 +1,164 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button } from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { tokens } from "../../theme";
-import Header from "../../components/Header";
-import { useTheme } from "@mui/material";
-import axios from "axios";
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
+import { Box, Button, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import io from 'socket.io-client';
+import Graph from 'react-graph-vis';
+import 'vis-network/styles/vis-network.css';
 
-const Listes = () => {
-  const { id } = useParams();
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-  const [interventions, setInterventions] = useState([]);
-  const [nfcSupported, setNfcSupported] = useState(false);
-  const { enqueueSnackbar } = useSnackbar();
+const socket = io('*'); // Replace with your backend URL
+
+const Inventory = ({ role }) => {
   const navigate = useNavigate();
+  const [scannedEquipments, setScannedEquipments] = useState([]);
+  const [equipmentList, setEquipmentList] = useState([]);
+  const [graph, setGraph] = useState({ nodes: [], edges: [] });
 
   useEffect(() => {
-    if ("NDEFReader" in window) {
-      setNfcSupported(true);
-      console.log("NFC supporté");
-    } else {
-      setNfcSupported(false);
-      enqueueSnackbar("NFC n'est pas supporté sur cet appareil ou navigateur.", { variant: 'warning' });
-      console.log("NFC non supporté");
-    }
-  }, [enqueueSnackbar]);
-
-  const readNfcTagForIntervention = async () => {
-    if (nfcSupported) {
+    const fetchEquipments = async () => {
       try {
-        const reader = new NDEFReader();
-        await reader.scan();
-        console.log("En attente de la lecture du tag NFC...");
-
-        reader.onreading = async event => {
-          console.log("Tag NFC détecté !");
-          const serialNumber = event.serialNumber;
-          if (serialNumber) {
-            console.log("Numéro de série du tag NFC:", serialNumber);
-
-            // Rechercher l'équipement dans la base de données en utilisant le RFID scanné
-            try {
-              const response = await axios.get(`https://nodeapp-0ome.onrender.com/equip/find/${serialNumber}`);
-              if (response.data.success) {
-                const equipment = response.data.equipment;
-                navigate('/intervention', { state: { equipmentName: equipment.Nom } });
-              } else {
-                enqueueSnackbar("Équipement non trouvé.", { variant: 'error' });
-              }
-            } catch (error) {
-              console.error('Erreur lors de la recherche de l\'équipement :', error);
-              enqueueSnackbar("Erreur lors de la recherche de l'équipement.", { variant: 'error' });
-            }
-          } else {
-            console.error("Aucune donnée scannée.");
-            enqueueSnackbar("Aucune donnée scannée.", { variant: 'warning' });
-          }
-        };
+        const response = await axios.get('https://nodeapp-0ome.onrender.com/equip');
+        setEquipmentList(response.data);
       } catch (error) {
-        console.error(`Erreur de lecture du tag NFC: ${error.message}`);
-        enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, { variant: 'error' });
+        console.error('Error fetching equipments:', error);
       }
+    };
+    fetchEquipments();
+  }, []);
+
+  useEffect(() => {
+    socket.on('inventoryUpdate', (data) => {
+      setGraph(data);
+      setScannedEquipments(data.nodes.map(node => node.equipment));
+    });
+
+    return () => {
+      socket.off('inventoryUpdate');
+    };
+  }, []);
+
+  const handleRFIDScan = async () => {
+    try {
+      const ndef = new NDEFReader();
+      await ndef.scan();
+      ndef.addEventListener('reading', async event => {
+        const rfid = event.serialNumber;
+        const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
+        if (scannedEquipment) {
+          if (scannedEquipments.length > 0) {
+            const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
+            lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
+            try {
+              await axios.put(`https://nodeapp-0ome.onrender.com/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
+            } catch (updateError) {
+              console.error('Error updating equipment:', updateError);
+            }
+          }
+          const newScannedEquipments = [...scannedEquipments, scannedEquipment];
+          setScannedEquipments(newScannedEquipments);
+          updateGraph(newScannedEquipments);
+        } else {
+          console.error('Équipement non trouvé');
+        }
+      });
+    } catch (error) {
+      console.error('Erreur lors de la lecture du tag RFID:', error);
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("https://nodeapp-0ome.onrender.com/api/interventions");
-        console.log(response.data);
-        setInterventions(response.data);
+  const updateGraph = (equipments) => {
+    const nodes = equipments.map(equip => ({
+      id: equip._id,
+      label: equip.Nom,
+      shape: 'image',
+      image: selectIconBasedOnType(equip.Type),
+      title: `Type: ${equip.Type}\nAdresse IP: ${equip.AdresseIp}\nRFID: ${equip.RFID}\nEtat: ${equip.Etat}`,
+      color: getColorByState(equip.Etat)
+    }));
 
-        const equippedInterventions = await Promise.all(response.data.map(async (intervention) => {
-          try {
-            const equipResponse = await axios.get(`https://nodeapp-0ome.onrender.com/api/interventions/equip/${intervention.equipment}`);
-            if (equipResponse.data && equipResponse.data.Nom) {
-              intervention.equipmentName = equipResponse.data.Nom;
-            } else {
-              intervention.equipmentName = 'Unavailable';
-            }
-            return intervention;
-          } catch (error) {
-            console.error('Failed to fetch equipment details:', error);
-            intervention.equipmentName = 'Unavailable';
-            return intervention;
-          }
-        }));
-        setInterventions(equippedInterventions);
-      } catch (error) {
-        console.error("Error fetching interventions:", error);
+    const edges = equipments.slice(1).map((equip, index) => ({
+      from: equipments[index]._id,
+      to: equip._id,
+      arrows: 'to'
+    }));
+
+    const graphData = { nodes, edges };
+    setGraph(graphData);
+    socket.emit('inventoryUpdate', graphData); // Emit the updated graph to other clients
+  };
+
+  const selectIconBasedOnType = (type) => {
+    switch (type) {
+      case 'router':
+        return `${process.env.PUBLIC_URL}/icons/router.png`;
+      case 'switch':
+        return `${process.env.PUBLIC_URL}/icons/switch.png`;
+      case 'computer':
+        return `${process.env.PUBLIC_URL}/icons/computer.png`;
+      default:
+        return `${process.env.PUBLIC_URL}/icons/default.png`;
+    }
+  };
+
+  const getColorByState = (state) => {
+    switch (state) {
+      case 'dysfonctionnel':
+        return 'red';
+      case 'Problème de réseau':
+        return 'orange';
+      case 'En bon état':
+        return 'green';
+      default:
+        return 'blue';
+    }
+  };
+
+  const options = {
+    layout: {
+      hierarchical: false
+    },
+    nodes: {
+      shape: 'image',
+      size: 30,
+      borderWidth: 2,
+      shapeProperties: {
+        useImageSize: false,
+        useBorderWithImage: true
       }
-    };
-
-    fetchData();
-  }, []);
-
-  const columns = [
-    { field: "equipmentName", headerName: "Equipment", flex: 1 },
-    { field: "type", headerName: "Type", flex: 1 },
-    { field: "date", headerName: "Date", flex: 1 },
-   
-    { field: 'description', headerName: "Description", flex: 1 },
-    { field: "parentIntervention", headerName: 'Parent Intervention', flex: 1 },
-  ];
+    },
+    edges: {
+      color: "#000000",
+      arrows: {
+        to: { enabled: true, scaleFactor: 1 }
+      }
+    },
+    height: "500px"
+  };
 
   return (
     <Box m="20px">
-      <Header title="Liste des interventions" />
-      <Box display="flex" gap="20px" mb="20px">
-        <Link to="/intervention">
-          <Button
-            sx={{
-              backgroundColor: colors.blueAccent[700],
-              color: colors.grey[100],
-              fontSize: "14px",
-              fontWeight: "bold",
-              padding: "10px 20px",
-            }}
-            variant="contained"
-          >
-            Ajouter intervention
-          </Button>
-        </Link>
-        <Button
-          onClick={readNfcTagForIntervention}
-          sx={{
-            backgroundColor: colors.blueAccent[700],
-            color: colors.grey[100],
-            fontSize: "14px",
-            fontWeight: "bold",
-            padding: "10px 20px",
-          }}
-          variant="contained"
-        >
-          Scanner RFID pour Intervention
+      <Typography variant="h3" mb="20px">Inventaire</Typography>
+      {role === 'technician' && (
+        <Button variant="contained" color="primary" onClick={handleRFIDScan}>
+          Scanner RFID
         </Button>
-      </Box>
-      <Box
-        m="40px 0 0 0"
-        height="75vh"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${colors.grey[100]} !important`,
-          },
-        }}
-      >
-        <div style={{ height: 450, width: '100%' }}>
-          <DataGrid
-            rows={interventions}
-            columns={columns}
-            components={{ Toolbar: GridToolbar }}
-            getRowId={(row) => row._id}
+      )}
+      {scannedEquipments.length > 0 && (
+        <Box mt="20px">
+          <Typography variant="h5">Équipements scannés :</Typography>
+          <Graph
+            key={Date.now()}
+            graph={graph}
+            options={options}
+            style={{ height: "500px" }}
           />
-        </div>
-      </Box>
+        </Box>
+      )}
+      <Button variant="contained" color="secondary" onClick={() => navigate('/dashboard')} mt="20px">
+        Retour au Dashboard
+      </Button>
     </Box>
   );
 };
 
-export default Listes;
+export default Inventory;
