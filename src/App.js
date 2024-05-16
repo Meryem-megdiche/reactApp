@@ -90,12 +90,12 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
                 <Route path="/user" element={<User/>} />
                 <Route path="/forgot" element={ <ResetPasswordForm/>} />
                 <Route path="/password" element={ <ForgotPasswordForm/>} />
-                <Route path="/topologi" element={ <Inventory/>} />
+                <Route path="/inventory" element={ <Inventory/>} />
                 </Routes>
            
            
           </main>
-          
+
         </div>
         </SnackbarProvider>
 

@@ -568,7 +568,7 @@ return (
             padding: "10px 20px",
             marginLeft: "10px", // Ajouter une marge pour espacer les boutons
           }}
-          onClick={() => navigate('/topologi')} // Navigation vers la page d'inventaire
+          onClick={() => navigate('/inventory')} // Navigation vers la page d'inventaire
         >
           Inventaire
         </Button>
