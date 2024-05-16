@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Graph from 'react-graph-vis';
+import 'vis-network/styles/vis-network.css';
 
 const Inventory = () => {
   const navigate = useNavigate();
   const [scannedEquipments, setScannedEquipments] = useState([]);
   const [equipmentList, setEquipmentList] = useState([]);
+  const [graph, setGraph] = useState({ nodes: [], edges: [] });
 
   useEffect(() => {
     const fetchEquipments = async () => {
@@ -39,6 +42,7 @@ const Inventory = () => {
             }
           }
           setScannedEquipments([...scannedEquipments, scannedEquipment]);
+          updateGraph([...scannedEquipments, scannedEquipment]);
         } else {
           console.error('Équipement non trouvé');
         }
@@ -46,6 +50,59 @@ const Inventory = () => {
     } catch (error) {
       console.error('Erreur lors de la lecture du tag RFID:', error);
     }
+  };
+
+  const updateGraph = (equipments) => {
+    const nodes = equipments.map(equip => ({
+      id: equip._id,
+      label: equip.Nom,
+      shape: 'image',
+      image: selectIconBasedOnType(equip.Type),
+      title: `Type: ${equip.Type}\nAdresse IP: ${equip.AdresseIp}\nRFID: ${equip.RFID}\nEtat: ${equip.Etat}`
+    }));
+
+    const edges = equipments.slice(1).map((equip, index) => ({
+      from: equipments[index]._id,
+      to: equip._id,
+      arrows: 'to'
+    }));
+
+    setGraph({ nodes, edges });
+  };
+
+  const selectIconBasedOnType = (type) => {
+    switch (type) {
+      case 'router':
+        return `${process.env.PUBLIC_URL}/icons/router.png`;
+      case 'switch':
+        return `${process.env.PUBLIC_URL}/icons/switch.png`;
+      case 'computer':
+        return `${process.env.PUBLIC_URL}/icons/computer.png`;
+      default:
+        return `${process.env.PUBLIC_URL}/icons/default.png`;
+    }
+  };
+
+  const options = {
+    layout: {
+      hierarchical: false
+    },
+    nodes: {
+      shape: 'image',
+      size: 30,
+      borderWidth: 2,
+      shapeProperties: {
+        useImageSize: false,
+        useBorderWithImage: true
+      }
+    },
+    edges: {
+      color: "#000000",
+      arrows: {
+        to: { enabled: true, scaleFactor: 1 }
+      }
+    },
+    height: "500px"
   };
 
   return (
@@ -57,17 +114,12 @@ const Inventory = () => {
       {scannedEquipments.length > 0 && (
         <Box mt="20px">
           <Typography variant="h5">Équipements scannés :</Typography>
-          {scannedEquipments.map((equip, index) => (
-            <Box key={equip._id} mt="10px">
-              <Typography>Nom : {equip.Nom}</Typography>
-              <Typography>Type : {equip.Type}</Typography>
-              <Typography>Adresse IP : {equip.AdresseIp}</Typography>
-              <Typography>RFID : {equip.RFID}</Typography>
-              {index > 0 && (
-                <Typography>Connecté à : {scannedEquipments[index - 1].Nom}</Typography>
-              )}
-            </Box>
-          ))}
+          <Graph
+            key={Date.now()}
+            graph={graph}
+            options={options}
+            style={{ height: "500px" }}
+          />
         </Box>
       )}
       <Button variant="contained" color="secondary" onClick={() => navigate('/dashboard')} mt="20px">
