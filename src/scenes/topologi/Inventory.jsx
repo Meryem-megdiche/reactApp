@@ -12,6 +12,7 @@ const Topologi = () => {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [selectedEquipmentId, setSelectedEquipmentId] = useState(null);
   const [alertMessage, setAlertMessage] = useState('');
+  const [targetEquipmentId, setTargetEquipmentId] = useState(null);
 
   useEffect(() => {
     const fetchEquipments = async () => {
@@ -55,7 +56,7 @@ const Topologi = () => {
             if (selectedEquipment) {
               selectedEquipment.ConnecteA.push(scannedEquipment._id);
               try {
-                await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${selectedEquipment._id}`, selectedEquipment);
+                await axios.put(`https://nodeapp-0ome.onrender.com/equip/${selectedEquipment._id}`, selectedEquipment);
                 setAlertMessage(`Connexion créée entre ${selectedEquipment.Nom} et ${scannedEquipment.Nom}`);
               } catch (updateError) {
                 console.error('Error updating equipment:', updateError);
@@ -164,14 +165,33 @@ const Topologi = () => {
   const events = {
     selectNode: (event) => {
       const { nodes } = event;
-      setSelectedEquipmentId(nodes[0]);
-      setAlertMessage(`Équipement sélectionné: ${nodes[0]}`);
+      if (selectedEquipmentId) {
+        setTargetEquipmentId(nodes[0]);
+        linkEquipments(selectedEquipmentId, nodes[0]);
+      } else {
+        setSelectedEquipmentId(nodes[0]);
+        setAlertMessage(`Équipement sélectionné: ${nodes[0]}`);
+      }
+    }
+  };
+
+  const linkEquipments = async (sourceId, targetId) => {
+    try {
+      const sourceEquipment = scannedEquipments.find(equip => equip._id === sourceId);
+      if (sourceEquipment) {
+        sourceEquipment.ConnecteA.push(targetId);
+        await axios.put(`https://nodeapp-0ome.onrender.com/equip/${sourceEquipment._id}`, sourceEquipment);
+        setAlertMessage(`Connexion créée entre ${sourceEquipment.Nom} et l'équipement cible.`);
+        fetchScannedEquipments(); // Refresh the scanned equipments to reflect the new connection
+      }
+    } catch (error) {
+      console.error('Error linking equipments:', error);
     }
   };
 
   return (
     <Box m="20px">
-      <Typography variant="h3" mb="20px">Inventaire</Typography>
+      <Typography variant="h3" mb="20px">Topologie Réseau</Typography>
       <Button variant="contained" color="primary" onClick={handleRFIDScan}>
         Scanner RFID
       </Button>
