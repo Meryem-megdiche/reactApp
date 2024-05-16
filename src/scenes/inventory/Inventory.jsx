@@ -13,6 +13,18 @@ const Inventory = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState(null);
   const [alertMessage, setAlertMessage] = useState('');
 
+  // Use socket.io to receive real-time updates
+  useEffect(() => {
+    const socket = io('https://nodeapp-0ome.onrender.com');
+    socket.on('topologyUpdated', (data) => {
+      console.log('Topology updated:', data);
+      setScannedEquipments(data);
+      updateGraph(data);
+    });
+
+    return () => socket.disconnect();
+  }, []);
+
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
