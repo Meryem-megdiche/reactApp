@@ -161,7 +161,7 @@ const Inventory = () => {
         Scanner RFID
       </Button>
       <Box mt="20px">
-        <Typography variant="h5">Équipements scannés :</Typography>
+        <Typography variant="h5">Équipements sssscannés :</Typography>
         <Graph
           key={Date.now()}
           graph={graph}
