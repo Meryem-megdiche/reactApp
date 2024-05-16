@@ -1,160 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+/*import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Box, Typography } from '@mui/material';
 import Graph from 'react-graph-vis';
 import 'vis-network/styles/vis-network.css';
 
 const Topologie = () => {
-  const navigate = useNavigate();
-  const [scannedEquipments, setScannedEquipments] = useState([]);
-  const [equipmentList, setEquipmentList] = useState([]);
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
 
   useEffect(() => {
-    const fetchEquipments = async () => {
+    const fetchTopologie = async () => {
       try {
-        const response = await axios.get('https://nodeapp-0ome.onrender.com/equip');
-        setEquipmentList(response.data);
+        const response = await axios.get('https://nodeapp-0ome.onrender.com/api/topologie');
+        const visData = transformDataToVisNetwork(response.data);
+        setGraph(visData);
       } catch (error) {
-        console.error('Error fetching equipments:', error);
+        console.error('Erreur lors du chargement de la topologie réseau:', error);
       }
     };
-    fetchEquipments();
+    
+    fetchTopologie();
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(fetchScannedEquipments, 5000); // Fetch every 5 seconds
-    return () => clearInterval(interval);
-  }, []);
+  const transformDataToVisNetwork = (data) => {
+    const nodes = [];
+    const edges = [];
+  
+    data.forEach((equip) => {
+        nodes.push({
+            id: equip.id,
+            label: `${equip.nom} (${equip.ip})`,
+            title: `Type: ${equip.Type}  \nEmplacement: ${equip.emplacement} \n Etat: ${equip.etat}`,
+          });
+          
 
-  const fetchScannedEquipments = async () => {
-    try {
-      const response = await axios.get('https://nodeapp-0ome.onrender.com/scannedEquipments');
-      setScannedEquipments(response.data);
-      updateGraph(response.data);
-    } catch (error) {
-      console.error('Error fetching scanned equipments:', error);
-    }
-  };
-
-  const handleRFIDScan = async () => {
-    try {
-      const ndef = new NDEFReader();
-      await ndef.scan();
-      ndef.addEventListener('reading', async event => {
-        const rfid = event.serialNumber;
-        const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
-        if (scannedEquipment) {
-          if (scannedEquipments.length > 0) {
-            const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
-            lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
-            try {
-              await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
-            } catch (updateError) {
-              console.error('Error updating equipment:', updateError);
-            }
-          }
-          const newScannedEquipments = [...scannedEquipments, scannedEquipment];
-          setScannedEquipments(newScannedEquipments);
-          updateGraph(newScannedEquipments);
-          await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
-        } else {
-          console.error('Équipement non trouvé');
-        }
+      // ConnecteA est un tableau des équipements auxquels cet équipement est connecté.
+      equip.connecteA.forEach((connectedEquip) => {
+        edges.push({
+          from: equip.id,
+          to: connectedEquip.id,
+          label: equip.port, // Vous pouvez choisir de montrer ou non le port sur l'arête
+        });
       });
-    } catch (error) {
-      console.error('Erreur lors de la lecture du tag RFID:', error);
-    }
-  };
-
-  const updateGraph = (equipments) => {
-    const nodes = equipments.map(equip => ({
-      id: equip._id,
-      label: equip.Nom,
-      shape: 'image',
-      image: selectIconBasedOnType(equip.Type),
-      title: `Type: ${equip.Type}\nAdresse IP: ${equip.AdresseIp}\nRFID: ${equip.RFID}\nEtat: ${equip.Etat}`,
-      color: getColorByState(equip.Etat)
-    }));
-
-    const edges = equipments.slice(1).map((equip, index) => ({
-      from: equipments[index]._id,
-      to: equip._id,
-      arrows: 'to'
-    }));
-
-    setGraph({ nodes, edges });
-  };
-
-  const selectIconBasedOnType = (type) => {
-    switch (type) {
-      case 'router':
-        return `${process.env.PUBLIC_URL}/icons/router.png`;
-      case 'switch':
-        return `${process.env.PUBLIC_URL}/icons/switch.png`;
-      case 'computer':
-        return `${process.env.PUBLIC_URL}/icons/computer.png`;
-      default:
-        return `${process.env.PUBLIC_URL}/icons/default.png`;
-    }
-  };
-
-  const getColorByState = (state) => {
-    switch (state) {
-      case 'dysfonctionnel':
-        return 'red';
-      case 'Problème de réseau':
-        return 'orange';
-      case 'En bon état':
-        return 'green';
-      default:
-        return 'blue';
-    }
-  };
-
+    });
+    return { nodes, edges };
+};
   const options = {
     layout: {
       hierarchical: false
     },
-    nodes: {
-      shape: 'image',
-      size: 30,
-      borderWidth: 2,
-      shapeProperties: {
-        useImageSize: false,
-        useBorderWithImage: true
-      }
-    },
     edges: {
-      color: "#000000",
-      arrows: {
-        to: { enabled: true, scaleFactor: 1 }
-      }
+      color: "#000000"
     },
     height: "500px"
   };
 
+  const events = {
+    hoverNode: function(event) {
+      var { nodes, edges } = event;
+    }
+  };
+
   return (
     <Box m="20px">
-      <Typography variant="h3" mb="20px">Topologie</Typography>
-      <Button variant="contained" color="primary" onClick={handleRFIDScan}>
-        Commencer l'installation par Scannner les équipements
-      </Button>
-      {scannedEquipments.length > 0 && (
-        <Box mt="20px">
-          <Typography variant="h5">Équipements scannés :</Typography>
-          <Graph
-            key={Date.now()}
-            graph={graph}
-            options={options}
-            style={{ height: "500px" }}
-          />
-        </Box>
-      )}
-      
+      <Typography variant="h4" mb={3}>
+        Topologie Réseau
+      </Typography>
+      <Graph
+  key={Date.now()} // force re-render
+  graph={graph}
+  options={options}
+  events={events}
+  style={{ height: "calc(100vh - 100px)" }}
+/>
     </Box>
   );
 };
 
-export default Topologie;
+export default Topologie;*/

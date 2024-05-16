@@ -559,7 +559,19 @@ return (
 >
   Télécharger le rapport PDF
 </button>
-
+<Button
+          sx={{
+            backgroundColor: colors.blueAccent[700],
+            color: colors.grey[300],
+            fontSize: "14px",
+            fontWeight: "bold",
+            padding: "10px 20px",
+            marginLeft: "10px", // Ajouter une marge pour espacer les boutons
+          }}
+          onClick={() => navigate('/inventory')} // Navigation vers la page d'inventaire
+        >
+          Inventaire
+        </Button>
 <Box>
     </Box>
       </Box>
