@@ -34,7 +34,7 @@ import ResetPasswordForm from "./scenes/forgot";
 import ForgotPasswordForm from "./scenes/password";
  import TTLStatsPieChart  from "./components/Pie";
 
-import { Inventory } from "@mui/icons-material";
+
 import Inventory from "./scenes/topologi/Inventory";
 
 function App() {
