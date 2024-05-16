@@ -95,6 +95,7 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
            
            
           </main>
+          
         </div>
         </SnackbarProvider>
 
