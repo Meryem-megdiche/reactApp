@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('https://nodeapp-0ome.onrender.com'); // Connectez-vous à votre backend
+const socket = io('https://nodeapp-0ome.onrender.com'); // Assurez-vous que l'URL est correcte
 
 const ScanRFID = () => {
   const [rfid, setRfid] = useState('');
@@ -9,14 +9,13 @@ const ScanRFID = () => {
   const [equipments, setEquipments] = useState([]);
 
   useEffect(() => {
-    // Recevoir les mises à jour en temps réel
     socket.on('equipmentUpdated', (updatedEquipments) => {
       setEquipments(updatedEquipments);
     });
   }, []);
 
   const handleScan = async () => {
-    const response = await fetch('/equip/scanRFID', {
+    const response = await fetch('https://nodeapp-0ome.onrender.com/equip/scanRFID', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +50,7 @@ const ScanRFID = () => {
       <h2>Équipements</h2>
       <ul>
         {equipments.map((equip) => (
-          <li key={equip._id}>{equip.Nom} - Connecté à: {equip.ConnecteA.join(', ')}</li>
+          <li key={equip._id}>{equip.Nom} - Connecté à: {equip.ConnecteA.map(e => e.Nom).join(', ')}</li>
         ))}
       </ul>
     </div>
