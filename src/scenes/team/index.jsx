@@ -310,7 +310,7 @@ const Team = () => {
   ];
   return (
     <Box m="20px">
-      <Header title="Liste d'équipement "  />
+      <Header title="Liste des équipements "  />
       <Link to="/contacts">
       <Button 
         sx={{

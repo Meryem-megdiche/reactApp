@@ -23,7 +23,8 @@ import ModifyUser from "./scenes/ModifyUser";
 import Intervention from "./scenes/intervention";
 import Listes from "./scenes/liste";
 import Config from "./scenes/config";
-import Topologie from "./scenes/Topologie";
+
+
 import InterventionDetails from "./scenes/InterventionDetails"; // Importez le nouveau composant
 import { SnackbarProvider } from 'notistack';
 import Alert from "./scenes/alert"
@@ -34,8 +35,7 @@ import ResetPasswordForm from "./scenes/forgot";
 import ForgotPasswordForm from "./scenes/password";
  import TTLStatsPieChart  from "./components/Pie";
 
-
-import Inventory from "./scenes/topologi/Inventory";
+ import ScanRFID from "./scenes/Topologie";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -80,7 +80,7 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
                 <Route path="/pie" element={<TTLStatsPieChart />} />
 
                 <Route path="/listes/:id" element={<InterventionDetails />} />
-                <Route path="/Topologie" element={<Topologie/>} />
+               
                 <Route path="/equip/:id" element={<Listes />} />
                 <Route path="/alert/:equipmentId" element={<Alert />} />
                 <Route path="/invoices/:equipmentId" element={<Invoices/>} />
@@ -90,7 +90,7 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
                 <Route path="/user" element={<User/>} />
                 <Route path="/forgot" element={ <ResetPasswordForm/>} />
                 <Route path="/password" element={ <ForgotPasswordForm/>} />
-                <Route path="/inventory" element={ <Inventory/>} />
+                <Route path="/Topologie" element={ <ScanRFID/>} />
                 </Routes>
            
            

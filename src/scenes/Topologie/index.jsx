@@ -1,79 +1,61 @@
-/*import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Box, Typography } from '@mui/material';
-import Graph from 'react-graph-vis';
-import 'vis-network/styles/vis-network.css';
+import React, { useState, useEffect } from 'react';
+import io from 'socket.io-client';
 
-const Topologie = () => {
-  const [graph, setGraph] = useState({ nodes: [], edges: [] });
+const socket = io('https://nodeapp-0ome.onrender.com'); // Connectez-vous à votre backend
+
+const ScanRFID = () => {
+  const [rfid, setRfid] = useState('');
+  const [connectToRfid, setConnectToRfid] = useState('');
+  const [equipments, setEquipments] = useState([]);
 
   useEffect(() => {
-    const fetchTopologie = async () => {
-      try {
-        const response = await axios.get('https://nodeapp-0ome.onrender.com/api/topologie');
-        const visData = transformDataToVisNetwork(response.data);
-        setGraph(visData);
-      } catch (error) {
-        console.error('Erreur lors du chargement de la topologie réseau:', error);
-      }
-    };
-    
-    fetchTopologie();
+    // Recevoir les mises à jour en temps réel
+    socket.on('equipmentUpdated', (updatedEquipments) => {
+      setEquipments(updatedEquipments);
+    });
   }, []);
 
-  const transformDataToVisNetwork = (data) => {
-    const nodes = [];
-    const edges = [];
-  
-    data.forEach((equip) => {
-        nodes.push({
-            id: equip.id,
-            label: `${equip.nom} (${equip.ip})`,
-            title: `Type: ${equip.Type}  \nEmplacement: ${equip.emplacement} \n Etat: ${equip.etat}`,
-          });
-          
-
-      // ConnecteA est un tableau des équipements auxquels cet équipement est connecté.
-      equip.connecteA.forEach((connectedEquip) => {
-        edges.push({
-          from: equip.id,
-          to: connectedEquip.id,
-          label: equip.port, // Vous pouvez choisir de montrer ou non le port sur l'arête
-        });
-      });
+  const handleScan = async () => {
+    const response = await fetch('/equip/scanRFID', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ rfid, connectToRfid }),
     });
-    return { nodes, edges };
-};
-  const options = {
-    layout: {
-      hierarchical: false
-    },
-    edges: {
-      color: "#000000"
-    },
-    height: "500px"
-  };
-
-  const events = {
-    hoverNode: function(event) {
-      var { nodes, edges } = event;
+    const data = await response.json();
+    if (data.success) {
+      setRfid('');
+      setConnectToRfid('');
+    } else {
+      console.error(data.message);
     }
   };
 
   return (
-    <Box m="20px">
-      <Typography variant="h4" mb={3}>
-        Topologie Réseau
-      </Typography>
-      <Graph
-  key={Date.now()} // force re-render
-  graph={graph}
-  options={options}
-  events={events}
-  style={{ height: "calc(100vh - 100px)" }}
-/>
-    </Box>
+    <div>
+      <h1>Scanner RFID</h1>
+      <input
+        type="text"
+        value={rfid}
+        onChange={(e) => setRfid(e.target.value)}
+        placeholder="Scanner le tag RFID"
+      />
+      <input
+        type="text"
+        value={connectToRfid}
+        onChange={(e) => setConnectToRfid(e.target.value)}
+        placeholder="RFID à connecter (optionnel)"
+      />
+      <button onClick={handleScan}>Scan</button>
+      <h2>Équipements</h2>
+      <ul>
+        {equipments.map((equip) => (
+          <li key={equip._id}>{equip.Nom} - Connecté à: {equip.ConnecteA.join(', ')}</li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
-export default Topologie;*/
+export default ScanRFID;
