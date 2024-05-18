@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, Snackbar } from '@mui/material';
+
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Graph from 'react-graph-vis';
 import 'vis-network/styles/vis-network.css';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Topologie = () => {
   const navigate = useNavigate();
@@ -12,7 +14,7 @@ const Topologie = () => {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-
+  
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
@@ -48,11 +50,12 @@ const Topologie = () => {
         const rfid = event.serialNumber;
         const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
-          if (scannedEquipments.some(equip => equip._id === scannedEquipment._id)) {
-            setAlertMessage(`L'équipement ${scannedEquipment.Nom} est déjà scanné.`);
-            setAlertOpen(true);
-            return;
-          }
+            if (scannedEquipments.some(equip => equip._id === scannedEquipment._id)) {
+              setAlertMessage(`L'équipement ${scannedEquipment.Nom} est déjà scanné.`);
+              setAlertOpen(true);
+              return;
+            }
+        
           if (scannedEquipments.length > 0) {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
             lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
@@ -67,12 +70,22 @@ const Topologie = () => {
           updateGraph(newScannedEquipments);
           await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
         } else {
-          setAlertMessage('Équipement non trouvé');
-          setAlertOpen(true);
+          console.error('Équipement non trouvé');
         }
       });
     } catch (error) {
       console.error('Erreur lors de la lecture du tag RFID:', error);
+    }
+  };
+
+  const handleRemoveEquipment = async (id) => {
+    try {
+      const newScannedEquipments = scannedEquipments.filter(equip => equip._id !== id);
+      setScannedEquipments(newScannedEquipments);
+      updateGraph(newScannedEquipments);
+      await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'équipement:', error);
     }
   };
 
@@ -152,6 +165,16 @@ const Topologie = () => {
       {scannedEquipments.length > 0 && (
         <Box mt="20px">
           <Typography variant="h5">Équipements scannés :</Typography>
+          {scannedEquipments.map((equip) => (
+            <Box key={equip._id} display="flex" alignItems="center" mt="10px">
+              <Typography>
+                Nom: {equip.Nom} 
+              </Typography>
+              <IconButton onClick={() => handleRemoveEquipment(equip._id)} color="secondary">
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          ))}
           <Graph
             key={Date.now()}
             graph={graph}
