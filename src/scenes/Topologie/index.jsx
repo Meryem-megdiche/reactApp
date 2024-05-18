@@ -12,71 +12,42 @@ const Topologie = () => {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [selectedEquipmentId, setSelectedEquipmentId] = useState(null);
   const [alertMessage, setAlertMessage] = useState('');
-  
-  let eventSource;
 
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
-        console.log('Fetching equipments from server...');
         const response = await axios.get('https://nodeapp-0ome.onrender.com/equip');
         setEquipmentList(response.data);
-        console.log('Fetched equipments:', response.data);
-        updateGraph(response.data);
       } catch (error) {
         console.error('Error fetching equipments:', error);
       }
     };
     fetchEquipments();
-    listenForUpdates();
-
-    return () => {
-      if (eventSource) eventSource.close();
-    };
   }, []);
-
-  const listenForUpdates = async () => {
-    try {
-      console.log('Listening for updates...');
-      eventSource = new EventSource('https://nodeapp-0ome.onrender.com/events');
-      eventSource.onmessage = (event) => {
-        const newEquipment = JSON.parse(event.data);
-        console.log('Received new equipment update:', newEquipment);
-        setScannedEquipments((prev) => [...prev, newEquipment]);
-        updateGraph([...scannedEquipments, newEquipment]);
-      };
-    } catch (error) {
-      console.error('Error listening for updates:', error);
-    }
-  };
 
   const handleRFIDScan = async () => {
     try {
-      console.log('Starting RFID scan...');
       const ndef = new NDEFReader();
       await ndef.scan();
       ndef.addEventListener('reading', async event => {
-        const rfid = event.serialNumber.trim();  // Trim spaces
-        console.log('RFID scanned:', rfid);
-        const scannedEquipment = equipmentList.find(equip => equip.RFID.trim() === rfid);
+        const rfid = event.serialNumber;
+        const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
-          console.log('Equipment found:', scannedEquipment);
           let newScannedEquipments = [...scannedEquipments];
-
+          
           if (selectedEquipmentId) {
             const selectedEquipment = newScannedEquipments.find(equip => equip._id === selectedEquipmentId);
             if (selectedEquipment) {
               selectedEquipment.ConnecteA.push(scannedEquipment._id);
               try {
-                console.log(`Updating equipment ${selectedEquipment._id} with connection to ${scannedEquipment._id}`);
-                await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${selectedEquipment._id}`, selectedEquipment);
+                await axios.put(`https://nodeapp-0ome.onrender.com/equip/${selectedEquipment._id}`, selectedEquipment);
                 setAlertMessage(`Connexion créée entre ${selectedEquipment.Nom} et ${scannedEquipment.Nom}`);
               } catch (updateError) {
                 console.error('Error updating equipment:', updateError);
               }
             }
           }
-
+          
           if (!newScannedEquipments.find(equip => equip._id === scannedEquipment._id)) {
             newScannedEquipments = [...newScannedEquipments, scannedEquipment];
           }
@@ -84,8 +55,7 @@ const Topologie = () => {
           setScannedEquipments(newScannedEquipments);
           setSelectedEquipmentId(null);
           updateGraph(newScannedEquipments);
-          console.log('Posting new scanned equipment to server...');
-          await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', { equipment: scannedEquipment });
+          await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
         } else {
           setAlertMessage('Équipement non trouvé');
           console.error('Équipement non trouvé');
@@ -97,7 +67,6 @@ const Topologie = () => {
   };
 
   const updateGraph = (equipments) => {
-    console.log('Updating graph with equipments:', equipments);
     const nodes = equipments.map(equip => ({
       id: equip._id,
       label: equip.Nom,
@@ -180,7 +149,6 @@ const Topologie = () => {
   const events = {
     selectNode: (event) => {
       const { nodes } = event;
-      console.log(`Selected equipment ID: ${nodes[0]}`);
       setSelectedEquipmentId(nodes[0]);
       setAlertMessage(`Équipement sélectionné: ${nodes[0]}`);
     }
