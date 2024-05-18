@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography, Snackbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Graph from 'react-graph-vis';
@@ -10,6 +10,8 @@ const Topologie = () => {
   const [scannedEquipments, setScannedEquipments] = useState([]);
   const [equipmentList, setEquipmentList] = useState([]);
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   useEffect(() => {
     const fetchEquipments = async () => {
@@ -46,6 +48,11 @@ const Topologie = () => {
         const rfid = event.serialNumber;
         const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
+          if (scannedEquipments.some(equip => equip._id === scannedEquipment._id)) {
+            setAlertMessage(`L'équipement ${scannedEquipment.Nom} est déjà scanné.`);
+            setAlertOpen(true);
+            return;
+          }
           if (scannedEquipments.length > 0) {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
             lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
@@ -60,7 +67,8 @@ const Topologie = () => {
           updateGraph(newScannedEquipments);
           await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
         } else {
-          console.error('Équipement non trouvé');
+          setAlertMessage('Équipement non trouvé');
+          setAlertOpen(true);
         }
       });
     } catch (error) {
@@ -155,6 +163,12 @@ const Topologie = () => {
       <Button variant="contained" color="secondary" onClick={() => navigate('/dashboard')} mt="20px">
         Retour au Dashboard
       </Button>
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={6000}
+        onClose={() => setAlertOpen(false)}
+        message={alertMessage}
+      />
     </Box>
   );
 };
