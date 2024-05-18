@@ -13,7 +13,6 @@ const Topologie = () => {
   const [selectedEquipmentId, setSelectedEquipmentId] = useState(null);
   const [alertMessage, setAlertMessage] = useState('');
   
-  // Declare eventSource at the component level
   let eventSource;
 
   useEffect(() => {
@@ -209,7 +208,7 @@ const Topologie = () => {
         message={alertMessage}
       />
       <Button variant="contained" color="secondary" onClick={() => navigate('/dashboard')} mt="20px">
-        Retour 
+        Retour au Dashboard
       </Button>
     </Box>
   );
