@@ -19,9 +19,10 @@ const Topologie = () => {
     const fetchEquipments = async () => {
       try {
         console.log('Fetching equipments from server...');
-        const response = await axios.get('https://nodeapp-0ome.onrender.com/equip');
+        const response = await axios.get('https://nodeapp-0ome.onrender.com/equip/equips');
         setEquipmentList(response.data);
         console.log('Fetched equipments:', response.data);
+        updateGraph(response.data);
       } catch (error) {
         console.error('Error fetching equipments:', error);
       }
@@ -55,9 +56,9 @@ const Topologie = () => {
       const ndef = new NDEFReader();
       await ndef.scan();
       ndef.addEventListener('reading', async event => {
-        const rfid = event.serialNumber;
+        const rfid = event.serialNumber.trim();  // Trim spaces
         console.log('RFID scanned:', rfid);
-        const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
+        const scannedEquipment = equipmentList.find(equip => equip.RFID.trim() === rfid);
         if (scannedEquipment) {
           console.log('Equipment found:', scannedEquipment);
           let newScannedEquipments = [...scannedEquipments];
@@ -68,7 +69,7 @@ const Topologie = () => {
               selectedEquipment.ConnecteA.push(scannedEquipment._id);
               try {
                 console.log(`Updating equipment ${selectedEquipment._id} with connection to ${scannedEquipment._id}`);
-                await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${selectedEquipment._id}`, selectedEquipment);
+                await axios.put(`https://nodeapp-0ome.onrender.com/equip/equips/${selectedEquipment._id}`, selectedEquipment);
                 setAlertMessage(`Connexion créée entre ${selectedEquipment.Nom} et ${scannedEquipment.Nom}`);
               } catch (updateError) {
                 console.error('Error updating equipment:', updateError);
