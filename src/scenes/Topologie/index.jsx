@@ -19,7 +19,7 @@ const Topologie = () => {
     const fetchEquipments = async () => {
       try {
         console.log('Fetching equipments from server...');
-        const response = await axios.get('http://localhost:3001/equip');
+        const response = await axios.get('https://nodeapp-0ome.onrender.com/equip');
         setEquipmentList(response.data);
         console.log('Fetched equipments:', response.data);
       } catch (error) {
@@ -37,7 +37,7 @@ const Topologie = () => {
   const listenForUpdates = async () => {
     try {
       console.log('Listening for updates...');
-      eventSource = new EventSource('http://localhost:3001/events');
+      eventSource = new EventSource('https://nodeapp-0ome.onrender.com/events');
       eventSource.onmessage = (event) => {
         const newEquipment = JSON.parse(event.data);
         console.log('Received new equipment update:', newEquipment);
@@ -68,7 +68,7 @@ const Topologie = () => {
               selectedEquipment.ConnecteA.push(scannedEquipment._id);
               try {
                 console.log(`Updating equipment ${selectedEquipment._id} with connection to ${scannedEquipment._id}`);
-                await axios.put(`http://localhost:3001/equip/${selectedEquipment._id}`, selectedEquipment);
+                await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${selectedEquipment._id}`, selectedEquipment);
                 setAlertMessage(`Connexion créée entre ${selectedEquipment.Nom} et ${scannedEquipment.Nom}`);
               } catch (updateError) {
                 console.error('Error updating equipment:', updateError);
@@ -84,7 +84,7 @@ const Topologie = () => {
           setSelectedEquipmentId(null);
           updateGraph(newScannedEquipments);
           console.log('Posting new scanned equipment to server...');
-          await axios.post('http://localhost:3001/scannedEquipments', { equipment: scannedEquipment });
+          await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', { equipment: scannedEquipment });
         } else {
           setAlertMessage('Équipement non trouvé');
           console.error('Équipement non trouvé');
