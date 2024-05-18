@@ -32,7 +32,7 @@ import User from "./scenes/user";
 import ResetPasswordForm from "./scenes/forgot";
 import ForgotPasswordForm from "./scenes/password";
 import TTLStatsPieChart  from "./components/Pie";
-import Inventory from "./scenes/Topologie"
+import Topologie from "./scenes/Topologie"
 
 
 function App() {
@@ -82,7 +82,7 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
                 <Route path="/user" element={<User/>} />
                 <Route path="/forgot" element={ <ResetPasswordForm/>} />
                 <Route path="/password" element={ <ForgotPasswordForm/>} />
-                <Route path="/topologie" element={ <Inventory/>} />
+                <Route path="/topologie" element={ <Topologie/>} />
                
                 </Routes>
            

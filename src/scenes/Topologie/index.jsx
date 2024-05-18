@@ -5,7 +5,7 @@ import axios from 'axios';
 import Graph from 'react-graph-vis';
 import 'vis-network/styles/vis-network.css';
 
-const Inventory = () => {
+const Topologie = () => {
   const navigate = useNavigate();
   const [scannedEquipments, setScannedEquipments] = useState([]);
   const [equipmentList, setEquipmentList] = useState([]);
@@ -40,7 +40,7 @@ const Inventory = () => {
             if (selectedEquipment) {
               selectedEquipment.ConnecteA.push(scannedEquipment._id);
               try {
-                await axios.put(`https://nodeapp-0ome.onrender.com/equip/${selectedEquipment._id}`, selectedEquipment);
+                await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${selectedEquipment._id}`, selectedEquipment);
                 setAlertMessage(`Connexion créée entre ${selectedEquipment.Nom} et ${scannedEquipment.Nom}`);
               } catch (updateError) {
                 console.error('Error updating equipment:', updateError);
@@ -183,4 +183,4 @@ const Inventory = () => {
   );
 };
 
-export default Inventory;
+export default Topologie;
