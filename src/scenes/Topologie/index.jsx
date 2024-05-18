@@ -209,7 +209,7 @@ const Topologie = () => {
         message={alertMessage}
       />
       <Button variant="contained" color="secondary" onClick={() => navigate('/dashboard')} mt="20px">
-        Retour au Dashboard
+        Retour 
       </Button>
     </Box>
   );
