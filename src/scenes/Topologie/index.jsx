@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Snackbar } from '@mui/material';
-
+import { Box, Button, Typography, Snackbar, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Graph from 'react-graph-vis';
