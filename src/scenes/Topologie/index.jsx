@@ -50,7 +50,7 @@ const Topologie = () => {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
             lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
             try {
-              await axios.put(`https://nodeapp-0ome.onrender.com/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
+              await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
             } catch (updateError) {
               console.error('Error updating equipment:', updateError);
             }
