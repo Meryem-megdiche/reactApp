@@ -16,14 +16,33 @@ const Topologie = () => {
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
-        const response = await axios.get('https://nodeapp-0ome.onrender.com/equip');
+        const response = await axios.get('http://localhost:3001/equip');
         setEquipmentList(response.data);
       } catch (error) {
         console.error('Error fetching equipments:', error);
       }
     };
     fetchEquipments();
+    listenForUpdates();
+
+    return () => {
+      // Cleanup function to close event source
+      if (eventSource) eventSource.close();
+    };
   }, []);
+
+  const listenForUpdates = async () => {
+    try {
+      const eventSource = new EventSource('http://localhost:3001/events');
+      eventSource.onmessage = (event) => {
+        const newEquipment = JSON.parse(event.data);
+        setScannedEquipments((prev) => [...prev, newEquipment]);
+        updateGraph([...scannedEquipments, newEquipment]);
+      };
+    } catch (error) {
+      console.error('Error listening for updates:', error);
+    }
+  };
 
   const handleRFIDScan = async () => {
     try {
@@ -34,20 +53,20 @@ const Topologie = () => {
         const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
           let newScannedEquipments = [...scannedEquipments];
-          
+
           if (selectedEquipmentId) {
             const selectedEquipment = newScannedEquipments.find(equip => equip._id === selectedEquipmentId);
             if (selectedEquipment) {
               selectedEquipment.ConnecteA.push(scannedEquipment._id);
               try {
-                await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${selectedEquipment._id}`, selectedEquipment);
+                await axios.put(`http://localhost:3001/equip/${selectedEquipment._id}`, selectedEquipment);
                 setAlertMessage(`Connexion créée entre ${selectedEquipment.Nom} et ${scannedEquipment.Nom}`);
               } catch (updateError) {
                 console.error('Error updating equipment:', updateError);
               }
             }
           }
-          
+
           if (!newScannedEquipments.find(equip => equip._id === scannedEquipment._id)) {
             newScannedEquipments = [...newScannedEquipments, scannedEquipment];
           }
@@ -55,7 +74,7 @@ const Topologie = () => {
           setScannedEquipments(newScannedEquipments);
           setSelectedEquipmentId(null);
           updateGraph(newScannedEquipments);
-          await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
+          await axios.post('http://localhost:3001/scannedEquipments', { equipment: scannedEquipment });
         } else {
           setAlertMessage('Équipement non trouvé');
           console.error('Équipement non trouvé');
