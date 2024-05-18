@@ -23,8 +23,6 @@ import ModifyUser from "./scenes/ModifyUser";
 import Intervention from "./scenes/intervention";
 import Listes from "./scenes/liste";
 import Config from "./scenes/config";
-
-
 import InterventionDetails from "./scenes/InterventionDetails"; // Importez le nouveau composant
 import { SnackbarProvider } from 'notistack';
 import Alert from "./scenes/alert"
@@ -33,9 +31,9 @@ import { useLocation } from "react-router-dom";
 import User from "./scenes/user";
 import ResetPasswordForm from "./scenes/forgot";
 import ForgotPasswordForm from "./scenes/password";
- import TTLStatsPieChart  from "./components/Pie";
+import TTLStatsPieChart  from "./components/Pie";
+import Inventory from "./scenes/Topologie"
 
- import ScanRFID from "./scenes/Topologie";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -62,25 +60,19 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/form" element={<Form />} />
                 <Route path="/calendar" element={<Calendar />} />
-              
                 <Route path="/bar" element={<Bar />} />
                 <Route path="/pie" element={<Pie />} />
                 <Route path="/line" element={<Line />} />
-                
                 <Route path="/ping" element={<Ping />} />
                 <Route path="/ping/:equipmentId" element={<Ping />} />
                 <Route path="/modify/:id" element={<ModifyEquipment />} />
                 <Route path="/modify-config/:id" element={<ModifyConfig />} />
                 <Route path="//modify-user/:id" element={<ModifyUser />} />
-                
                 <Route path="/intervention" element={<Intervention />} />
                 <Route path="/liste" element={<Listes />} />
                 <Route path="/listes" element={<Listes />} />
-              
                 <Route path="/pie" element={<TTLStatsPieChart />} />
-
                 <Route path="/listes/:id" element={<InterventionDetails />} />
-               
                 <Route path="/equip/:id" element={<Listes />} />
                 <Route path="/alert/:equipmentId" element={<Alert />} />
                 <Route path="/invoices/:equipmentId" element={<Invoices/>} />
@@ -90,7 +82,8 @@ const isForgotPasswordPage = location.pathname === '/forgot' || location.pathnam
                 <Route path="/user" element={<User/>} />
                 <Route path="/forgot" element={ <ResetPasswordForm/>} />
                 <Route path="/password" element={ <ForgotPasswordForm/>} />
-                <Route path="/Topologie" element={ <ScanRFID/>} />
+                <Route path="/topologie" element={ <Inventory/>} />
+               
                 </Routes>
            
            
