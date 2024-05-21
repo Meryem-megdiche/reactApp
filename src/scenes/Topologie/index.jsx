@@ -18,32 +18,15 @@ const RealTimeEquip = () => {
     };
   }, []);
 
-  const handleScan = (rfid) => {
+  const handleScan = () => {
     const socket = socketIOClient(ENDPOINT);
-    socket.emit('scanEquip', rfid);
-  };
-
-  const handleConnectEquipments = async (equipId, connecteAId) => {
-    try {
-      const response = await fetch(`${ENDPOINT}/equip/updateConnection`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ equipId, connecteAId }),
-      });
-      const result = await response.json();
-      if (result.success) {
-        // Mettez à jour l'interface utilisateur ou affichez un message de succès
-      }
-    } catch (error) {
-      console.error('Erreur lors de la connexion des équipements :', error);
-    }
+    socket.emit('scanEquip');
   };
 
   return (
     <div>
       <h1>Équipements en temps réel</h1>
+      <button onClick={handleScan}>Scanner RFID</button>
       <ul>
         {equipments.map(equip => (
           <li key={equip._id}>
