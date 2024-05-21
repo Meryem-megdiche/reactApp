@@ -130,10 +130,13 @@ const Contacts = () => {
     };
     fetchEquipments();
   }, []);
-
+  const navigateToConfigList = () => {
+    navigate('/team'); // Remplacez par le chemin correct
+  };
   return (
     <Box m="20px">
-      <Header title="Ajouter un équipement" subtitle="Voir la liste des équipements" />
+      <Header title="Ajouter un équipement" subtitle="Voir la liste des équipements" 
+      onSubtitleClick={navigateToConfigList} />
       {successMessage && (
         <Box bgcolor="success.main" color="success.contrastText" p={2} mb={2} borderRadius={4}>
           {successMessage}
