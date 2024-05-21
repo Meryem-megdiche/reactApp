@@ -18,15 +18,18 @@ const RealTimeEquip = () => {
     };
   }, []);
 
-  const handleScan = () => {
+  const handleScanRFID = () => {
+    // Ici, vous pourriez appeler une fonction pour scanner le tag RFID.
+    // Une fois que le tag est scanné avec succès, envoyez-le au backend.
+    const scannedRFID = "RFID12345"; // Remplacez ceci par le vrai tag RFID scanné.
     const socket = socketIOClient(ENDPOINT);
-    socket.emit('scanEquip');
+    socket.emit('scanEquip', scannedRFID);
   };
 
   return (
     <div>
       <h1>Équipements en temps réel</h1>
-      <button onClick={handleScan}>Scanner RFID</button>
+      <button onClick={handleScanRFID}>Scanner RFID</button>
       <ul>
         {equipments.map(equip => (
           <li key={equip._id}>
