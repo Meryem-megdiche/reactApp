@@ -127,7 +127,7 @@ const User = () => {
     {
       field: "actions",
       headerName: "Actions",
-      flex: 0.98,
+      flex: 0.8,
       renderCell: ({ row }) => (
         <Box display="flex" justifyContent="center">
           <Button

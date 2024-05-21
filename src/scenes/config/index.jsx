@@ -110,7 +110,7 @@ const Config = () => {
       field: "activité",
       headerName: "activité",
       sortable: false,
-      flex: 1.3,
+      flex: 1.1,
       renderCell: (params) => {
         return (
           <Box display="flex" justifyContent="center">
