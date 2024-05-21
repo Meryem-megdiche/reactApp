@@ -13,7 +13,7 @@ const Topologie = () => {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-  
+
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
@@ -49,20 +49,10 @@ const Topologie = () => {
         const rfid = event.serialNumber;
         const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
-            if (scannedEquipments.some(equip => equip._id === scannedEquipment._id)) {
-              setAlertMessage(`L'équipement ${scannedEquipment.Nom} est déjà scanné.`);
-              setAlertOpen(true);
-              return;
-            }
-        
-          if (scannedEquipments.length > 0) {
-            const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
-            lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
-            try {
-              await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
-            } catch (updateError) {
-              console.error('Error updating equipment:', updateError);
-            }
+          if (scannedEquipments.some(equip => equip._id === scannedEquipment._id)) {
+            setAlertMessage(`L'équipement ${scannedEquipment.Nom} est déjà scanné.`);
+            setAlertOpen(true);
+            return;
           }
           const newScannedEquipments = [...scannedEquipments, scannedEquipment];
           setScannedEquipments(newScannedEquipments);
@@ -98,11 +88,14 @@ const Topologie = () => {
       color: getColorByState(equip.Etat)
     }));
 
-    const edges = equipments.slice(1).map((equip, index) => ({
-      from: equipments[index]._id,
-      to: equip._id,
-      arrows: 'to'
-    }));
+    const edges = [];
+    for (let i = 0; i < equipments.length - 1; i++) {
+      edges.push({
+        from: equipments[i]._id,
+        to: equipments[i + 1]._id,
+        arrows: 'to'
+      });
+    }
 
     setGraph({ nodes, edges });
   };
