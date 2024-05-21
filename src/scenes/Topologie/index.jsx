@@ -7,24 +7,31 @@ const RealTimeEquip = () => {
   const [equipments, setEquipments] = useState([]);
 
   useEffect(() => {
+    console.log("Effect hook executed");
     const socket = socketIOClient(ENDPOINT);
 
     socket.on('updateEquip', (equip) => {
+      console.log("Received updateEquip event:", equip);
       setEquipments((prevEquipments) => [...prevEquipments, equip]);
     });
 
     return () => {
+      console.log("Cleanup function executed");
       socket.disconnect();
     };
   }, []);
 
   const handleScanRFID = () => {
+    console.log("Scanning RFID...");
     // Ici, vous pourriez appeler une fonction pour scanner le tag RFID.
     // Une fois que le tag est scanné avec succès, envoyez-le au backend.
     const scannedRFID = "RFID12345"; // Remplacez ceci par le vrai tag RFID scanné.
+    console.log("Scanned RFID:", scannedRFID);
     const socket = socketIOClient(ENDPOINT);
     socket.emit('scanEquip', scannedRFID);
   };
+
+  console.log("Rendering component with equipments:", equipments);
 
   return (
     <div>
