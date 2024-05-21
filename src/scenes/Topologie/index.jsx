@@ -27,7 +27,7 @@ const Topologie = () => {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(fetchScannedEquipments, 5000); // Fetch every 5 seconds
+    const interval = setInterval(fetchScannedEquipments, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -54,6 +54,20 @@ const Topologie = () => {
             setAlertOpen(true);
             return;
           }
+
+          if (scannedEquipments.length > 0) {
+            const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
+            const updatedLastScannedEquipment = {
+              ...lastScannedEquipment,
+              ConnecteA: [...lastScannedEquipment.ConnecteA, scannedEquipment._id]
+            };
+            try {
+              await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, updatedLastScannedEquipment);
+            } catch (updateError) {
+              console.error('Error updating equipment:', updateError);
+            }
+          }
+
           const newScannedEquipments = [...scannedEquipments, scannedEquipment];
           setScannedEquipments(newScannedEquipments);
           updateGraph(newScannedEquipments);
@@ -88,14 +102,11 @@ const Topologie = () => {
       color: getColorByState(equip.Etat)
     }));
 
-    const edges = [];
-    for (let i = 0; i < equipments.length - 1; i++) {
-      edges.push({
-        from: equipments[i]._id,
-        to: equipments[i + 1]._id,
-        arrows: 'to'
-      });
-    }
+    const edges = equipments.slice(1).map((equip, index) => ({
+      from: equipments[index]._id,
+      to: equip._id,
+      arrows: 'to'
+    }));
 
     setGraph({ nodes, edges });
   };
@@ -160,7 +171,7 @@ const Topologie = () => {
           {scannedEquipments.map((equip) => (
             <Box key={equip._id} display="flex" alignItems="center" mt="10px">
               <Typography>
-                Nom: {equip.Nom} 
+                Nom: {equip.Nom}
               </Typography>
               <IconButton onClick={() => handleRemoveEquipment(equip._id)} color="secondary">
                 <DeleteIcon />
