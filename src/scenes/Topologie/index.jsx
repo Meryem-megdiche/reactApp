@@ -40,7 +40,6 @@ const Topologie = () => {
       console.error('Error fetching scanned equipments:', error);
     }
   };
-
   const handleRFIDScan = async () => {
     try {
       const ndef = new NDEFReader();
@@ -82,6 +81,7 @@ const Topologie = () => {
   };
   
   
+  
   const handleRemoveEquipment = async (id) => {
     try {
       const newScannedEquipments = scannedEquipments.filter(equip => equip._id !== id);
@@ -114,6 +114,7 @@ const Topologie = () => {
   
     setGraph({ nodes, edges });
   };
+  
   
   const selectIconBasedOnType = (type) => {
     switch (type) {
