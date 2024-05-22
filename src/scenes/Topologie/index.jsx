@@ -65,7 +65,7 @@ const Inventory = () => {
   const handleFinishInventory = async () => {
     try {
       const scannedEquipmentIds = scannedEquipments.map(equip => equip._id);
-      await axios.post('https://nodeapp-0ome.onrender.com/equip/inventory/finish', {
+      await axios.post('https://nodeapp-0ome.onrender.com/finish', {
         scannedEquipments: scannedEquipmentIds,
         technician: technicianId,
       });
