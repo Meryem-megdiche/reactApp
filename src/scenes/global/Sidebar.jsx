@@ -143,7 +143,13 @@ const Sidebar = () => {
               setSelected={setSelected}
             />
             
-            
+            <Item
+              title="count "
+              to="/scanned-count"
+              icon={< HubIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
             <Item
               title="Calendar"
               to="/calendar"

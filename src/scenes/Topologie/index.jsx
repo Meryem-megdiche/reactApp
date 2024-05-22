@@ -46,19 +46,12 @@ const Inventory = () => {
         const rfid = event.serialNumber;
         const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
-          if (scannedEquipments.length > 0) {
-            const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
-            lastScannedEquipment.ConnecteA.push(scannedEquipment._id);
-            try {
-              await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, lastScannedEquipment);
-            } catch (updateError) {
-              console.error('Error updating equipment:', updateError);
-            }
-          }
           const newScannedEquipments = [...scannedEquipments, scannedEquipment];
           setScannedEquipments(newScannedEquipments);
           updateGraph(newScannedEquipments);
-          await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
+
+          // Send the scanned equipment data to the backend
+          await axios.post('https://nodeapp-0ome.onrender.com/equip/inventory/scan', { rfid, userId: 'YOUR_USER_ID' });
         } else {
           console.error('Équipement non trouvé');
         }
