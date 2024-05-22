@@ -56,6 +56,7 @@ const Topologie = () => {
             return;
           }
 
+          // Update the last scanned equipment to include the new connection
           if (scannedEquipments.length > 0) {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
             const updatedLastScannedEquipment = {
