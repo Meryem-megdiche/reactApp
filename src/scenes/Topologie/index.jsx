@@ -55,10 +55,6 @@ const Topologie = () => {
             return;
           }
   
-          let newScannedEquipments = [...scannedEquipments, scannedEquipment];
-          setScannedEquipments(newScannedEquipments);
-          updateGraph(newScannedEquipments);
-  
           if (scannedEquipments.length > 0) {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
             const updatedLastScannedEquipment = {
@@ -71,7 +67,10 @@ const Topologie = () => {
               console.error('Error updating equipment:', updateError);
             }
           }
-
+  
+          const newScannedEquipments = [...scannedEquipments, scannedEquipment];
+          setScannedEquipments(newScannedEquipments);
+          updateGraph(newScannedEquipments);
           await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
         } else {
           console.error('Équipement non trouvé');
@@ -104,7 +103,7 @@ const Topologie = () => {
     }));
 
     const edges = [];
-    equipments.forEach((equip) => {
+    equipments.forEach((equip, index) => {
       if (equip.ConnecteA && equip.ConnecteA.length > 0) {
         equip.ConnecteA.forEach(connId => {
           edges.push({
@@ -112,6 +111,12 @@ const Topologie = () => {
             to: connId,
             arrows: 'to'
           });
+        });
+      } else if (index > 0) {
+        edges.push({
+          from: equipments[index - 1]._id,
+          to: equip._id,
+          arrows: 'to'
         });
       }
     });
