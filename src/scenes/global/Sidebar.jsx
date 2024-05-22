@@ -137,7 +137,7 @@ const Sidebar = () => {
            
            <Item
               title="Topologie "
-              to="/topologie"
+              to="/inventory"
               icon={< HubIcon />}
               selected={selected}
               setSelected={setSelected}
