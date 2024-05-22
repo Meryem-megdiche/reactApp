@@ -81,6 +81,7 @@ const Topologie = () => {
     }
   };
   
+  
   const handleRemoveEquipment = async (id) => {
     try {
       const newScannedEquipments = scannedEquipments.filter(equip => equip._id !== id);
@@ -102,16 +103,18 @@ const Topologie = () => {
       title: `Type: ${equip.Type}\nAdresse IP: ${equip.AdresseIp}\nRFID: ${equip.RFID}\nEtat: ${equip.Etat}`,
       color: getColorByState(equip.Etat)
     }));
-
-    const edges = equipments.slice(1).map((equip, index) => ({
-      from: equipments[index]._id,
-      to: equip._id,
-      arrows: 'to'
-    }));
-
+  
+    const edges = equipments.flatMap(equip => 
+      equip.ConnecteA.map(connId => ({
+        from: equip._id,
+        to: connId,
+        arrows: 'to'
+      }))
+    );
+  
     setGraph({ nodes, edges });
   };
-
+  
   const selectIconBasedOnType = (type) => {
     switch (type) {
       case 'router':
