@@ -793,7 +793,7 @@ return (
       />
       
     ) : (
-      <Typography variant="body2">Aucun équipement sélectionné pour afficher le graphique.</Typography>
+      <Typography variant="body2"></Typography>
     )}
     </Box>
   </Box>
