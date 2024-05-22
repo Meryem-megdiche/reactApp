@@ -40,6 +40,7 @@ const Topologie = () => {
       console.error('Error fetching scanned equipments:', error);
     }
   };
+
   const handleRFIDScan = async () => {
     try {
       const ndef = new NDEFReader();
@@ -53,7 +54,7 @@ const Topologie = () => {
             setAlertOpen(true);
             return;
           }
-  
+
           if (scannedEquipments.length > 0) {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
             const updatedLastScannedEquipment = {
@@ -66,7 +67,7 @@ const Topologie = () => {
               console.error('Error updating equipment:', updateError);
             }
           }
-  
+
           const newScannedEquipments = [...scannedEquipments, scannedEquipment];
           setScannedEquipments(newScannedEquipments);
           updateGraph(newScannedEquipments);
@@ -79,9 +80,7 @@ const Topologie = () => {
       console.error('Erreur lors de la lecture du tag RFID:', error);
     }
   };
-  
-  
-  
+
   const handleRemoveEquipment = async (id) => {
     try {
       const newScannedEquipments = scannedEquipments.filter(equip => equip._id !== id);
@@ -92,7 +91,6 @@ const Topologie = () => {
       console.error('Erreur lors de la suppression de l\'équipement:', error);
     }
   };
-  
 
   const updateGraph = (equipments) => {
     const nodes = equipments.map(equip => ({
@@ -103,19 +101,23 @@ const Topologie = () => {
       title: `Type: ${equip.Type}\nAdresse IP: ${equip.AdresseIp}\nRFID: ${equip.RFID}\nEtat: ${equip.Etat}`,
       color: getColorByState(equip.Etat)
     }));
-  
-    const edges = equipments.flatMap(equip => 
-      equip.ConnecteA.map(connId => ({
-        from: equip._id,
-        to: connId,
-        arrows: 'to'
-      }))
-    );
-  
+
+    const edges = [];
+    equipments.forEach(equip => {
+      if (equip.ConnecteA && equip.ConnecteA.length > 0) {
+        equip.ConnecteA.forEach(connId => {
+          edges.push({
+            from: equip._id,
+            to: connId,
+            arrows: 'to'
+          });
+        });
+      }
+    });
+
     setGraph({ nodes, edges });
   };
-  
-  
+
   const selectIconBasedOnType = (type) => {
     switch (type) {
       case 'router':
