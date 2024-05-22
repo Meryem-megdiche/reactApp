@@ -80,7 +80,7 @@ const Topologie = () => {
       console.error('Erreur lors de la lecture du tag RFID:', error);
     }
   };
-  
+
   const handleRemoveEquipment = async (id) => {
     try {
       const newScannedEquipments = scannedEquipments.filter(equip => equip._id !== id);
@@ -111,12 +111,6 @@ const Topologie = () => {
             to: connId,
             arrows: 'to'
           });
-        });
-      } else if (index > 0) {
-        edges.push({
-          from: equipments[index - 1]._id,
-          to: equip._id,
-          arrows: 'to'
         });
       }
     });
