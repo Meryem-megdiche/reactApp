@@ -51,7 +51,7 @@ const Inventory = () => {
           updateGraph(newScannedEquipments);
 
           // Send the scanned equipment data to the backend
-          await axios.post('https://nodeapp-0ome.onrender.com/equip/inventory/scan', { rfid, userId: 'YOUR_USER_ID' });
+          await axios.post('https://nodeapp-0ome.onrender.com/equip/inventory/scan', { rfid });
         } else {
           console.error('Équipement non trouvé');
         }
