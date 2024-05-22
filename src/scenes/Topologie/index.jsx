@@ -49,28 +49,25 @@ const Topologie = () => {
         const rfid = event.serialNumber;
         const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
-          console.log(`Scanned equipment: ${scannedEquipment.Nom} with RFID: ${rfid}`);
           if (scannedEquipments.some(equip => equip._id === scannedEquipment._id)) {
             setAlertMessage(`L'équipement ${scannedEquipment.Nom} est déjà scanné.`);
             setAlertOpen(true);
             return;
           }
-
-          // Update the last scanned equipment to include the new connection
+  
           if (scannedEquipments.length > 0) {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
             const updatedLastScannedEquipment = {
               ...lastScannedEquipment,
               ConnecteA: [...lastScannedEquipment.ConnecteA, scannedEquipment._id]
             };
-            console.log(`Updating last scanned equipment: ${lastScannedEquipment.Nom} with new connection to ${scannedEquipment.Nom}`);
             try {
               await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, updatedLastScannedEquipment);
             } catch (updateError) {
               console.error('Error updating equipment:', updateError);
             }
           }
-
+  
           const newScannedEquipments = [...scannedEquipments, scannedEquipment];
           setScannedEquipments(newScannedEquipments);
           updateGraph(newScannedEquipments);
@@ -83,7 +80,7 @@ const Topologie = () => {
       console.error('Erreur lors de la lecture du tag RFID:', error);
     }
   };
-
+  
   const handleRemoveEquipment = async (id) => {
     try {
       const newScannedEquipments = scannedEquipments.filter(equip => equip._id !== id);
@@ -106,7 +103,7 @@ const Topologie = () => {
     }));
 
     const edges = [];
-    equipments.forEach(equip => {
+    equipments.forEach((equip, index) => {
       if (equip.ConnecteA && equip.ConnecteA.length > 0) {
         equip.ConnecteA.forEach(connId => {
           edges.push({
@@ -115,11 +112,16 @@ const Topologie = () => {
             arrows: 'to'
           });
         });
+      } else if (index > 0) {
+        edges.push({
+          from: equipments[index - 1]._id,
+          to: equip._id,
+          arrows: 'to'
+        });
       }
     });
 
     setGraph({ nodes, edges });
-    console.log('Graph updated:', { nodes, edges });
   };
 
   const selectIconBasedOnType = (type) => {
