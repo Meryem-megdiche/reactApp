@@ -91,7 +91,6 @@ const Topologie = () => {
       console.error('Erreur lors de la suppression de l\'équipement:', error);
     }
   };
-  
 
   const updateGraph = (equipments) => {
     const nodes = equipments.map(equip => ({
@@ -103,11 +102,24 @@ const Topologie = () => {
       color: getColorByState(equip.Etat)
     }));
 
-    const edges = equipments.slice(1).map((equip, index) => ({
-      from: equipments[index]._id,
-      to: equip._id,
-      arrows: 'to'
-    }));
+    const edges = [];
+    equipments.forEach((equip, index) => {
+      if (equip.ConnecteA && equip.ConnecteA.length > 0) {
+        equip.ConnecteA.forEach(connId => {
+          edges.push({
+            from: equip._id,
+            to: connId,
+            arrows: 'to'
+          });
+        });
+      } else if (index > 0) {
+        edges.push({
+          from: equipments[index - 1]._id,
+          to: equip._id,
+          arrows: 'to'
+        });
+      }
+    });
 
     setGraph({ nodes, edges });
   };
