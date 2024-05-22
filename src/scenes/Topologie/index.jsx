@@ -10,6 +10,7 @@ const Inventory = () => {
   const [scannedEquipments, setScannedEquipments] = useState([]);
   const [equipmentList, setEquipmentList] = useState([]);
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
+  const technicianId = 'TECHNICIAN_ID'; // Remplacez par l'ID du technicien authentifié
 
   useEffect(() => {
     const fetchEquipments = async () => {
@@ -58,6 +59,21 @@ const Inventory = () => {
       });
     } catch (error) {
       console.error('Erreur lors de la lecture du tag RFID:', error);
+    }
+  };
+
+  const handleFinishInventory = async () => {
+    try {
+      const scannedEquipmentIds = scannedEquipments.map(equip => equip._id);
+      await axios.post('https://nodeapp-0ome.onrender.com/equip/inventory/finish', {
+        scannedEquipments: scannedEquipmentIds,
+        technician: technicianId,
+      });
+      alert('Inventaire terminé avec succès');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Erreur lors de la terminaison de l\'inventaire:', error);
+      alert('Erreur lors de la terminaison de l\'inventaire');
     }
   };
 
@@ -143,11 +159,12 @@ const Inventory = () => {
             options={options}
             style={{ height: "500px" }}
           />
+          <Button variant="contained" color="primary" onClick={handleFinishInventory} style={{ marginTop: '20px' }}>
+            Terminer l'inventaire
+          </Button>
         </Box>
       )}
-      <Button variant="contained" color="secondary" onClick={() => navigate('/dashboard')} mt="20px">
-        Retour au Dashboard
-      </Button>
+      
     </Box>
   );
 };
