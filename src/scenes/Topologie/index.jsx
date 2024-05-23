@@ -17,7 +17,7 @@ const Inventory = () => {
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
-        const response = await axios.get('https://nodeapp-ectt.onrender.com/equip');
+        const response = await axios.get('https://nodeapp-0ome.onrender.com/equip');
         setEquipmentList(response.data);
       } catch (error) {
         console.error('Error fetching equipments:', error);
@@ -33,7 +33,7 @@ const Inventory = () => {
 
   const fetchScannedEquipments = async () => {
     try {
-      const response = await axios.get('https://nodeapp-ectt.onrender.com/scannedEquipments');
+      const response = await axios.get('https://nodeapp-0ome.onrender.com/scannedEquipments');
       setScannedEquipments(response.data);
       updateGraph(response.data);
     } catch (error) {
@@ -59,7 +59,7 @@ const Inventory = () => {
             const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
             const updatedConnecteA = [...lastScannedEquipment.ConnecteA, scannedEquipment._id];
             try {
-              await axios.put(`https://nodeapp-ectt.onrender.com/equip/equip/${lastScannedEquipment._id}`, { ConnecteA: updatedConnecteA });
+              await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${lastScannedEquipment._id}`, { ConnecteA: updatedConnecteA });
             } catch (updateError) {
               console.error('Error updating equipment:', updateError);
             }
@@ -68,7 +68,7 @@ const Inventory = () => {
           const newScannedEquipments = [...scannedEquipments, scannedEquipment];
           setScannedEquipments(newScannedEquipments);
           updateGraph(newScannedEquipments);
-          await axios.post('https://nodeapp-ectt.onrender.com/scannedEquipments', newScannedEquipments);
+          await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
         } else {
           console.error('Équipement non trouvé');
         }
@@ -83,7 +83,7 @@ const Inventory = () => {
       const newScannedEquipments = scannedEquipments.filter(equip => equip._id !== id);
       setScannedEquipments(newScannedEquipments);
       updateGraph(newScannedEquipments);
-      await axios.post('https://nodeapp-ectt.onrender.com/scannedEquipments', newScannedEquipments);
+      await axios.post('https://nodeapp-0ome.onrender.com/scannedEquipments', newScannedEquipments);
     } catch (error) {
       console.error('Erreur lors de la suppression de l\'équipement:', error);
     }
@@ -91,10 +91,12 @@ const Inventory = () => {
 
   const handleFinishInventory = async () => {
     try {
+      console.log('Scanned Equipments:', scannedEquipments); // Ajout du log
       const scannedEquipmentIds = scannedEquipments.map(equip => equip._id);
-      const response = await axios.post('https://nodeapp-ectt.onrender.com/finish', {
+      const response = await axios.post('https://nodeapp-0ome.onrender.com/finish', {
         scannedEquipments: scannedEquipmentIds,
       });
+      console.log('Response:', response.data); // Ajout du log
       setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${response.data.count}`);
       setAlertOpen(true);
       navigate('/dashboard');
