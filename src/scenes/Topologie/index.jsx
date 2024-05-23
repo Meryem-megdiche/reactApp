@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography, Snackbar, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Graph from 'react-graph-vis';
 import 'vis-network/styles/vis-network.css';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Inventory = () => {
   const navigate = useNavigate();
   const [scannedEquipments, setScannedEquipments] = useState([]);
   const [equipmentList, setEquipmentList] = useState([]);
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
-  const technicianId = 'TECHNICIAN_ID'; // Remplacez par l'ID du technicien authentifié
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
-        const response = await axios.get('https://nodeapp-0ome.onrender.com/equip');
+        const response = await axios.get('https://nodeapp-ectt.onrender.com/equip');
         setEquipmentList(response.data);
       } catch (error) {
         console.error('Error fetching equipments:', error);
@@ -25,13 +27,13 @@ const Inventory = () => {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(fetchScannedEquipments, 5000); // Fetch every 5 seconds
+    const interval = setInterval(fetchScannedEquipments, 5000);
     return () => clearInterval(interval);
   }, []);
 
   const fetchScannedEquipments = async () => {
     try {
-      const response = await axios.get('https://nodeapp-0ome.onrender.com/scannedEquipments');
+      const response = await axios.get('https://nodeapp-ectt.onrender.com/scannedEquipments');
       setScannedEquipments(response.data);
       updateGraph(response.data);
     } catch (error) {
@@ -47,12 +49,26 @@ const Inventory = () => {
         const rfid = event.serialNumber;
         const scannedEquipment = equipmentList.find(equip => equip.RFID === rfid);
         if (scannedEquipment) {
+          if (scannedEquipments.some(equip => equip._id === scannedEquipment._id)) {
+            setAlertMessage(`L'équipement ${scannedEquipment.Nom} est déjà scanné.`);
+            setAlertOpen(true);
+            return;
+          }
+
+          if (scannedEquipments.length > 0) {
+            const lastScannedEquipment = scannedEquipments[scannedEquipments.length - 1];
+            const updatedConnecteA = [...lastScannedEquipment.ConnecteA, scannedEquipment._id];
+            try {
+              await axios.put(`https://nodeapp-ectt.onrender.com/equip/equip/${lastScannedEquipment._id}`, { ConnecteA: updatedConnecteA });
+            } catch (updateError) {
+              console.error('Error updating equipment:', updateError);
+            }
+          }
+
           const newScannedEquipments = [...scannedEquipments, scannedEquipment];
           setScannedEquipments(newScannedEquipments);
           updateGraph(newScannedEquipments);
-
-          // Send the scanned equipment data to the backend
-          await axios.post('https://nodeapp-0ome.onrender.com/equip/inventory/scan', { rfid });
+          await axios.post('https://nodeapp-ectt.onrender.com/scannedEquipments', newScannedEquipments);
         } else {
           console.error('Équipement non trouvé');
         }
@@ -62,18 +78,30 @@ const Inventory = () => {
     }
   };
 
+  const handleRemoveEquipment = async (id) => {
+    try {
+      const newScannedEquipments = scannedEquipments.filter(equip => equip._id !== id);
+      setScannedEquipments(newScannedEquipments);
+      updateGraph(newScannedEquipments);
+      await axios.post('https://nodeapp-ectt.onrender.com/scannedEquipments', newScannedEquipments);
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'équipement:', error);
+    }
+  };
+
   const handleFinishInventory = async () => {
     try {
       const scannedEquipmentIds = scannedEquipments.map(equip => equip._id);
-      await axios.post('https://nodeapp-0ome.onrender.com/finish', {
+      const response = await axios.post('https://nodeapp-ectt.onrender.com/finish', {
         scannedEquipments: scannedEquipmentIds,
-        technician: technicianId,
       });
-      alert('Inventaire terminé avec succès');
+      setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${response.data.count}`);
+      setAlertOpen(true);
       navigate('/dashboard');
     } catch (error) {
       console.error('Erreur lors de la terminaison de l\'inventaire:', error);
-      alert('Erreur lors de la terminaison de l\'inventaire');
+      setAlertMessage('Erreur lors de la terminaison de l\'inventaire');
+      setAlertOpen(true);
     }
   };
 
@@ -153,6 +181,16 @@ const Inventory = () => {
       {scannedEquipments.length > 0 && (
         <Box mt="20px">
           <Typography variant="h5">Équipements scannés :</Typography>
+          {scannedEquipments.map((equip) => (
+            <Box key={equip._id} display="flex" alignItems="center" mt="10px">
+              <Typography>
+                Nom: {equip.Nom}
+              </Typography>
+              <IconButton onClick={() => handleRemoveEquipment(equip._id)} color="secondary">
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          ))}
           <Graph
             key={Date.now()}
             graph={graph}
@@ -164,7 +202,15 @@ const Inventory = () => {
           </Button>
         </Box>
       )}
-      
+      <Button variant="contained" color="secondary" onClick={() => navigate('/dashboard')} mt="20px">
+        Retour au Dashboard
+      </Button>
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={6000}
+        onClose={() => setAlertOpen(false)}
+        message={alertMessage}
+      />
     </Box>
   );
 };
