@@ -88,15 +88,14 @@ const Inventory = () => {
       console.error('Erreur lors de la suppression de l\'équipement:', error);
     }
   };
-
   const handleFinishInventory = async () => {
     try {
-      console.log('Scanned Equipments:', scannedEquipments); // Ajout du log
+      console.log('Scanned Equipments:', scannedEquipments);
       const scannedEquipmentIds = scannedEquipments.map(equip => equip._id);
-      const response = await axios.post('https://nodeapp-0ome.onrender.com/finish', {
+      const response = await axios.post('https://nodeapp-0ome.onrender.com/inventory/finish', {
         scannedEquipments: scannedEquipmentIds,
       });
-      console.log('Response:', response.data); // Ajout du log
+      console.log('Response:', response.data);
       setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${response.data.count}`);
       setAlertOpen(true);
       navigate('/dashboard');
@@ -106,6 +105,7 @@ const Inventory = () => {
       setAlertOpen(true);
     }
   };
+  
 
   const updateGraph = (equipments) => {
     const nodes = equipments.map(equip => ({
