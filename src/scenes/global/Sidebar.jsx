@@ -12,7 +12,7 @@ import HubIcon from '@mui/icons-material/Hub';
 import SettingsApplicationsOutlinedIcon from '@mui/icons-material/SettingsApplicationsOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ComputerIcon from '@mui/icons-material/Computer';
-
+import CountIcon from '@mui/icons-material/Inventory'; 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -146,7 +146,7 @@ const Sidebar = () => {
             <Item
               title="count "
               to="/scanned-count"
-              icon={< HubIcon />}
+              icon={<CountIcon  />}
               selected={selected}
               setSelected={setSelected}
             />

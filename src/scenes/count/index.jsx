@@ -1,50 +1,38 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+import Header from "../../components/Header";
+const InventoryList = () => {
+  const [inventories, setInventories] = useState([]);
 
-const ScannedCount = () => {
-  const [date, setDate] = useState('');
-  const [count, setCount] = useState(null);
-  const [error, setError] = useState('');
+  useEffect(() => {
+    const fetchInventories = async () => {
+      try {
+        const response = await axios.get('https://nodeapp-0ome.onrender.com/inventory');
+        setInventories(response.data);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des inventaires:', error);
+      }
+    };
 
-  const handleDateChange = (event) => {
-    setDate(event.target.value);
-  };
-
-  const handleGetCount = async () => {
-    try {
-      const response = await axios.get(`/equip/scannedCount/${date}`);
-      setCount(response.data.count);
-      setError('');
-    } catch (error) {
-      console.error('Error fetching scanned count:', error);
-      setError('Erreur lors de la récupération du compte des équipements scannés.');
-    }
-  };
+    fetchInventories();
+  }, []);
 
   return (
     <Box m="20px">
-      <Typography variant="h3" mb="20px">Nombre d'interventions scannées</Typography>
-      <TextField
-        type="date"
-        value={date}
-        onChange={handleDateChange}
-        label="Date"
-        InputLabelProps={{
-          shrink: true,
-        }}
-      />
-      <Button variant="contained" color="primary" onClick={handleGetCount} style={{ marginLeft: '10px' }}>
-        Obtenir le nombre
-      </Button>
-      {count !== null && (
-        <Typography variant="h5" mt="20px">Nombre d'équipements scannés : {count}</Typography>
-      )}
-      {error && (
-        <Typography variant="h6" color="error" mt="20px">{error}</Typography>
-      )}
+      <Header title= 'Liste des Inventaires'/>
+      <List>
+        {inventories.map(inventory => (
+          <ListItem key={inventory._id}>
+            <ListItemText
+              primary={`Date: ${new Date(inventory.date).toLocaleDateString()}`}
+              secondary={`Nombre d'équipements scannés: ${inventory.scannedEquipmentsCount}`}
+            />
+          </ListItem>
+        ))}
+      </List>
     </Box>
   );
 };
 
-export default ScannedCount;
+export default InventoryList;
