@@ -13,7 +13,7 @@ const Inventory = () => {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-  const technicianId = 'TECHNICIAN_ID';
+
   useEffect(() => {
     const fetchEquipments = async () => {
       try {
@@ -94,7 +94,7 @@ const Inventory = () => {
       const scannedEquipmentIds = scannedEquipments.map(equip => equip._id);
       const response = await axios.post('https://nodeapp-0ome.onrender.com/inventory/finish', {
         scannedEquipments: scannedEquipmentIds,
-        emailTechnician: technicianId,
+       
       });
       console.log('Response:', response.data);
       setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${response.data.count}`);
