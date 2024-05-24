@@ -11,7 +11,7 @@ const LoginForm = () =>
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch('https://nodeapp-0ome.onrender.com/auth/login', {
+      const response = await fetch('https://noderole-1.onrender.com/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -23,8 +23,14 @@ const LoginForm = () =>
       if (response.status === 200) {
         // Stockez le token dans localStorage ou un contexte de gestion d'état global si vous utilisez Redux ou Context API
         localStorage.setItem('token', data.accessToken);
-       
-        navigate('/dashboard');
+        localStorage.setItem('user', JSON.stringify(data.user));
+         // Redirect based on user role
+         const userRole = data.user.role;
+         if (userRole === 'adminReseau' || userRole === 'technicienReseau') {
+           navigate('/dashboard');
+         } else if (userRole === 'adminSystem') {
+           navigate('/user');
+         }
       } else if (response.status === 401) {
         // Code d'état HTTP 401 indique une authentification non réussie (mauvais identifiant ou mot de passe)
         alert('Login failed: Incorrect email or password.');

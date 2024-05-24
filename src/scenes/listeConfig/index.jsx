@@ -13,8 +13,11 @@ const Config = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [configs, setConfigs] = useState([]);
+  const [currentUser, setCurrentUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || null
+  );
+  const navigate = useNavigate(); 
 
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,12 +121,14 @@ const Config = () => {
   <Button
    startIcon={<EditIcon />}
   
-  variant="contained" color="secondary">Modifier</Button>
+  variant="contained" color="secondary"
+  disabled={currentUser?.role === 'technicienReseau'}>Modifier</Button>
 </Link>
             <Button 
             startIcon={<DeleteIcon />}
             
-            variant="contained" onClick={() => handleDeleteClick(params.row.id)} color="error">Supprimer</Button>
+            variant="contained" onClick={() => handleDeleteClick(params.row.id)} color="error"
+            disabled={currentUser?.role === 'technicienReseau'}>Supprimer</Button>
             <Button 
             startIcon={<VisibilityIcon /> }variant="contained" onClick={() => handleWatchClick(params.row.id)} color="secondary"  
               component={Link}

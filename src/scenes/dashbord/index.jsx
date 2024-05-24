@@ -770,14 +770,15 @@ return (
           gridRow="span 2"
           backgroundColor={colors.primary[400]}
         >
-          <Typography
-            variant="h5"
-            fontWeight="600"
-            sx={{ padding: "30px 30px 0 30px" }}
-          >
-            PieChart
-          </Typography>
-          <Box height="250px" mt="-20px">
+           <Typography
+                variant="h3"
+                fontWeight="bold"
+                color={colors.greenAccent[300]}
+                align="centre"
+              >
+                PieChart
+              </Typography>
+          <Box height="250px" mt="-22px">
           <TTLStatsPieChart
   isDashboard={false}
   equipmentIds={selectedEquipments}
@@ -792,12 +793,14 @@ return (
           gridRow="span 2"
           backgroundColor={colors.primary[400]}
         >
-          <Typography
-            variant="h5"
-            fontWeight="600"
-            sx={{ padding: "30px 30px 0 30px" }}
-          >
-          </Typography>
+        <Typography
+                variant="h3"
+                fontWeight="bold"
+                color={colors.greenAccent[300]}
+                align="centre"
+              >
+                BarChart
+              </Typography>
           <Box height="250px" mt="-20px">
           {selectedEquipments.length > 0 ? (
       <BarChart
