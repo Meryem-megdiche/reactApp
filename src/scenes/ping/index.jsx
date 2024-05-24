@@ -69,6 +69,9 @@ const Ping = () => {
       align: "left",
       width: 50,
       flex: 2,
+      renderCell: (params) => (
+        params.row.success ? params.value.join(", ") : "[]"
+      )
     },
  
     {
@@ -79,6 +82,9 @@ const Ping = () => {
       align: "left",
       width: 50,
       flex: 2,
+      renderCell: (params) => (
+        params.row.success ? params.value.join(", ") : "[]"
+      )
     },
     {
       field: "packetsSent",
