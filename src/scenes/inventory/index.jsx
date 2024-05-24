@@ -94,7 +94,7 @@ const Inventory = () => {
       const scannedEquipmentIds = scannedEquipments.map(equip => equip._id);
       const response = await axios.post('https://nodeapp-0ome.onrender.com/inventory/finish', {
         scannedEquipments: scannedEquipmentIds,
-        technician: technicianId,
+        emailTechnician: technicianId,
       });
       console.log('Response:', response.data);
       setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${response.data.count}`);
