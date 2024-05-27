@@ -6,7 +6,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from "axios";
-
+import { Autocomplete } from '@mui/material';
 const Intervention = () => {
   const theme = useTheme();
   const [equipments, setEquipments] = useState([]);
@@ -161,19 +161,27 @@ const Intervention = () => {
                 helperText={touched.description && errors.description}
                 sx={{ gridColumn: "span 4" }}
               />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Parent Intervention"
-                name="parentIntervention"
-                value={values.parentIntervention}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.parentIntervention && Boolean(errors.parentIntervention)}
-                helperText={touched.parentIntervention && errors.parentIntervention}
-                sx={{ gridColumn: "span 4" }}
-              />
+               <Autocomplete
+  freeSolo
+  disableClearable
+  options={interventions}
+  getOptionLabel={(option) => option.description || ''}
+  onChange={(event, newValue) => {
+    handleChange('parentIntervention')(newValue ? newValue._id : '');
+  }}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Rechercher l'intervention précedente par description"
+      variant="outlined"
+      fullWidth
+      onChange={(event) => setSearch(event.target.value)}
+      onBlur={handleBlur}
+      error={touched.parentIntervention && Boolean(errors.parentIntervention)}
+      helperText={touched.parentIntervention && errors.parentIntervention}
+    />
+  )}
+/>
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button type="submit" color="secondary" variant="contained">
