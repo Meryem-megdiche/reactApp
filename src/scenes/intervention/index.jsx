@@ -81,12 +81,14 @@ const Intervention = () => {
       console.log("Réponse du serveur :", response.data);
       if (response.data.success) {
         setSuccessMessage("Intervention ajoutée avec succès");
+        setErrorMessage(null);
+        setTimeout(() => navigate('/liste'), 800);
       } else {
         setSuccessMessage(response.data.message || "Ajout réussi");
-    
+        setErrorMessage(null);
         setTimeout(() => navigate('/liste'), 800);
       }
-      setErrorMessage(null);
+    
     } catch (error) {
       console.error('Erreur lors de l\'ajout de l\'intervention :', error);
       setErrorMessage("Erreur côté client : " + error.message);
