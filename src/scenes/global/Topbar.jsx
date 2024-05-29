@@ -2,12 +2,11 @@ import { Box, IconButton, useTheme } from "@mui/material";
 import { useContext } from "react";
 import { useNavigate } from 'react-router-dom';
 import { ColorModeContext, tokens } from "../../theme";
-import InputBase from "@mui/material/InputBase";
+
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import SearchIcon from "@mui/icons-material/Search";
+
+
 import LogoutIcon from "@mui/icons-material/Logout";
 
 const Topbar = () => {
@@ -44,13 +43,13 @@ const Topbar = () => {
           )}
         </IconButton>
         <IconButton>
-          <NotificationsOutlinedIcon />
+         
         </IconButton>
         <IconButton onClick={handleLogout}>
           <LogoutIcon />  {/* Attach the logout handler here */}
         </IconButton>
         <IconButton>
-          <PersonOutlinedIcon />
+          
         </IconButton>
       </Box>
     </Box>

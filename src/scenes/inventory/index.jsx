@@ -96,7 +96,8 @@ const Inventory = () => {
         scannedEquipments: scannedEquipmentIds,
       });
       console.log('Response:', response.data);
-      setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${response.data.count}`);
+      const count = scannedEquipments.length;
+      setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${count}`);
       setAlertOpen(true);
       navigate('/dashboard');
     } catch (error) {

@@ -26,7 +26,7 @@ const LoginForm = () =>
         localStorage.setItem('user', JSON.stringify(data.user));
          // Redirect based on user role
          const userRole = data.user.role;
-         if (userRole === 'adminReseau' || userRole === 'technicienReseau') {
+         if (userRole === 'admin' || userRole === 'technicienReseau') {
            navigate('/dashboard');
          } else if (userRole === 'adminSystem') {
            navigate('/user');

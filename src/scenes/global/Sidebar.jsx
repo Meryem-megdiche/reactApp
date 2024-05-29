@@ -84,7 +84,7 @@ const Sidebar = () => {
                 ml="15px"
               >
                 <Typography variant="h3" color={colors.grey[100]}>
-                  ADMINIS
+                  
                 </Typography>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                   <MenuOutlinedIcon />
@@ -93,6 +93,32 @@ const Sidebar = () => {
             )}
           </MenuItem>
 
+          {!isCollapsed && (
+            <Box mb="25px">
+              <Box display="flex" justifyContent="center" alignItems="center">
+                <img
+                 
+                  width="100px"
+                  height="100px"
+                  src={`${process.env.PUBLIC_URL}/icons\reseau.jpg(1).png`}
+                  style={{ cursor: "pointer", borderRadius: "50%" }}
+                />
+              </Box>
+              <Box textAlign="center">
+                <Typography
+                  variant="h2"
+                  color={colors.grey[100]}
+                  fontWeight="bold"
+                  sx={{ m: "10px 0 0 0" }}
+                >
+                  
+                </Typography>
+                <Typography variant="h5" color={colors.greenAccent[500]}>
+                  VP Fancy Admin
+                </Typography>
+              </Box>
+            </Box>
+          )}
           <Box paddingLeft={isCollapsed ? undefined : "3%"}>
           <Item
               title="Dashboard"
