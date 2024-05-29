@@ -27,7 +27,7 @@ const Inventory = () => {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(fetchScannedEquipments, 500000000000000);
+    const interval = setInterval(fetchScannedEquipments, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -96,10 +96,9 @@ const Inventory = () => {
         scannedEquipments: scannedEquipmentIds,
       });
       console.log('Response:', response.data);
-      const count = scannedEquipments.length;
-      setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${count}`);
+      setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${response.data.count}`);
       setAlertOpen(true);
-      
+      navigate('/dashboard');
     } catch (error) {
       console.error('Erreur lors de la terminaison de l\'inventaire:', error);
       setAlertMessage('Erreur lors de la terminaison de l\'inventaire');
@@ -213,12 +212,6 @@ const Inventory = () => {
         autoHideDuration={6000}
         onClose={() => setAlertOpen(false)}
         message={alertMessage}
-        ContentProps={{
-          style: {
-            backgroundColor: 'green',
-            fontSize: '20px'
-          }
-        }}
       />
     </Box>
   );
