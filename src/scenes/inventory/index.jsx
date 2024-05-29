@@ -212,12 +212,7 @@ const Inventory = () => {
         autoHideDuration={6000}
         onClose={() => setAlertOpen(false)}
         message={alertMessage}
-        ContentProps={{
-          style: {
-            backgroundColor: 'green',
-            fontSize: '20px'
-          }
-        }}
+        
       />
     </Box>
   );
