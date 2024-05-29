@@ -96,16 +96,16 @@ const Inventory = () => {
         scannedEquipments: scannedEquipmentIds,
       });
       console.log('Response:', response.data);
-      setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${response.data.count}`);
+      const count = scannedEquipments.length;
+      setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${count}`);
       setAlertOpen(true);
-      navigate('/dashboard');
+    
     } catch (error) {
       console.error('Erreur lors de la terminaison de l\'inventaire:', error);
       setAlertMessage('Erreur lors de la terminaison de l\'inventaire');
       setAlertOpen(true);
     }
   };
-  
 
   const updateGraph = (equipments) => {
     const nodes = equipments.map(equip => ({
@@ -212,6 +212,12 @@ const Inventory = () => {
         autoHideDuration={6000}
         onClose={() => setAlertOpen(false)}
         message={alertMessage}
+        ContentProps={{
+          style: {
+            backgroundColor: 'green',
+            fontSize: '20px'
+          }
+        }}
       />
     </Box>
   );
