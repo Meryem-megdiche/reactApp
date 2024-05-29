@@ -27,7 +27,7 @@ const Inventory = () => {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(fetchScannedEquipments, 50000000000000);
+    const interval = setInterval(fetchScannedEquipments, 500000000000000);
     return () => clearInterval(interval);
   }, []);
 
@@ -88,7 +88,6 @@ const Inventory = () => {
       console.error('Erreur lors de la suppression de l\'équipement:', error);
     }
   };
-
   const handleFinishInventory = async () => {
     try {
       console.log('Scanned Equipments:', scannedEquipments);
@@ -100,13 +99,14 @@ const Inventory = () => {
       const count = scannedEquipments.length;
       setAlertMessage(`Inventaire terminé avec succès. Nombre d'équipements scannés: ${count}`);
       setAlertOpen(true);
-    
+      
     } catch (error) {
       console.error('Erreur lors de la terminaison de l\'inventaire:', error);
       setAlertMessage('Erreur lors de la terminaison de l\'inventaire');
       setAlertOpen(true);
     }
   };
+  
 
   const updateGraph = (equipments) => {
     const nodes = equipments.map(equip => ({
@@ -213,6 +213,12 @@ const Inventory = () => {
         autoHideDuration={6000}
         onClose={() => setAlertOpen(false)}
         message={alertMessage}
+        ContentProps={{
+          style: {
+            backgroundColor: 'green',
+            fontSize: '20px'
+          }
+        }}
       />
     </Box>
   );
