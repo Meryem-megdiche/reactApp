@@ -116,9 +116,7 @@ const Alert = () => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await axios.get(`https://nodeapp-0ome.onrender.com
-
-/api/config/equip/${equipmentId}`);
+        const response = await axios.get(`https://nodeapp-0ome.onrender.com/api/config/equip/${equipmentId}`);
         setConfig(response.data);
       } catch (error) {
         console.error('Error fetching configuration:', error);
@@ -181,6 +179,9 @@ const Alert = () => {
       field: "status",
       headerName: "Statut",
       flex: 2,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell",
       renderCell: (params) => (
         <div style={{ color: params.row.success ? "green" : "red" }}>
           {params.row.success ? "Success" : "Failed"}
@@ -192,6 +193,8 @@ const Alert = () => {
       field: "size",
       headerName: "Size",
       flex: 1.5,
+      headerAlign: "center",
+      align: "center",
       cellClassName: "name-column--cell",
     },
  

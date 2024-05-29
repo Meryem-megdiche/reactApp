@@ -58,7 +58,7 @@ const ModifyEquipment = () => {
 
   const handleModifyEquipment = async (values) => {
     try {
-      const response = await axios.put(`https://nodeapp-0ome.onrender.com/equip/equip/${id}`, values);
+      const response = await axios.put(`https://nodeapp-0ome.onrender.com/equip/equipe/${id}`, values);
   
       if (response.data.success) {
         setSuccessMessage("Équipement modifié avec succès");

@@ -89,6 +89,9 @@ const Config = () => {
       field: "equipmentName",
       headerName: "equipment",
       flex: 1,
+    
+      headerAlign: "center",
+      align: "center",
       cellClassName: "name-column--cell",
     },
     {
@@ -97,23 +100,35 @@ const Config = () => {
       flex: 0.5,
       headerAlign: "left",
       align: "left",
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell",
     },
     {
       field: "seuil",
       headerName: "seuil",
       flex: 0.5,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell",
     },
    
     {
       field: "adresseMail",
       headerName: "addresseMail",
       flex: 1,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell",
     },
     {
       field: "activité",
       headerName: "activité",
       sortable: false,
       flex: 1.1,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell",
       renderCell: (params) => {
         return (
           <Box display="flex" justifyContent="center">

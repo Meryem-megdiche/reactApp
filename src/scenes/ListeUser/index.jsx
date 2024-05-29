@@ -89,22 +89,34 @@ const User = () => {
       field: "username",
       headerName: "Nom",
       flex: 0.75,
+      headerAlign: "center",
+      align: "center",
       cellClassName: "name-column--cell",
+     
     },
     {
       field: "email",
       headerName: "Email",
       flex: 1,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell",
     },
     {
       field: "number",
       headerName: "Numéro",
       flex: 0.5,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell",
     },
     {
       field: "role",
       headerName: "Rôle",
       flex: 1,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell",
       renderCell: ({ row: { role } }) => (
         <Box
           width="60%"
@@ -128,6 +140,9 @@ const User = () => {
       field: "actions",
       headerName: "Actions",
       flex: 0.8,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell",
       renderCell: ({ row }) => (
         <Box display="flex" justifyContent="center">
           <Button

@@ -98,12 +98,38 @@ const Listes = () => {
   }, []);
 
   const columns = [
-    { field: "equipmentName", headerName: "Equipment", flex: 1 },
-    { field: "type", headerName: "Type", flex: 1 },
-    { field: "date", headerName: "Date", flex: 1 },
+    { field: "equipmentName", 
+    headerName: "Equipment", 
+    flex: 1,
+    headerAlign: "center",
+    align: "center",
+    cellClassName: "name-column--cell", },
+    { field: "type", 
+    headerName: "Type", 
+    flex: 1,
+    headerAlign: "center",
+    align: "center",
+    cellClassName: "name-column--cell", },
+    { field: "date", 
+    headerName: "Date", 
+    flex: 1,
+    headerAlign: "center",
+    align: "center",
+    cellClassName: "name-column--cell", },
    
-    { field: 'description', headerName: "Description", flex: 1 },
-    { field: "parentIntervention", headerName: 'Parent Intervention', flex: 1 },
+    { field: 'description',
+     headerName: "Description", 
+     flex: 1 ,
+     headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell",
+    },
+    { field: "parentIntervention", 
+    headerName: 'Parent Intervention', 
+    flex: 1 ,
+    headerAlign: "center",
+    align: "center",
+    cellClassName: "name-column--cell",},
   ];
 
   return (
