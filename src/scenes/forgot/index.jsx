@@ -1,5 +1,5 @@
 // ResetPasswordForm.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaLock, FaKey } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import '../LoginForm/LoginForm.css'; // Réutilisez le même CSS que pour LoginForm
@@ -8,7 +8,12 @@ const ResetPasswordForm = () => {
   const [token, setToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const navigate = useNavigate();
-
+  useEffect(() => {
+    document.body.classList.add('login-page');
+    return () => {
+      document.body.classList.remove('login-page');
+    };
+  }, [])
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {

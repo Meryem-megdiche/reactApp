@@ -195,13 +195,15 @@ const Config = () => {
           },
         }}
       >
+          <div style={{ height: 455, width: '100%' }}>
         <DataGrid
           rows={configs}
-      
+          pageSize={9}
           columns={columns}
           getRowId={(row) => row._id}
           components={{ Toolbar: GridToolbar }}
         />
+        </div>
       </Box>
     </Box>
   );

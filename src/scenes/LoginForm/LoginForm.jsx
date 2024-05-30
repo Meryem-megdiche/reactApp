@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './LoginForm.css';
 import { useNavigate } from 'react-router-dom';
 
 const LoginForm = () =>
-{
+{  useEffect(() => {
+  document.body.classList.add('login-page');
+  return () => {
+    document.body.classList.remove('login-page');
+  };
+}, []);
     const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();

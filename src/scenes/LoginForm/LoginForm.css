@@ -98,6 +98,9 @@ color: #fff;
 .register-link p a:hover {
     text-decoration: underline;
 }
-
+body.login-page {
+    background: url('/public/assets/login3.png') no-repeat center center fixed;
+    background-size: cover;
+}
   /* Ajoutez ceci à votre fichier CSS */
 

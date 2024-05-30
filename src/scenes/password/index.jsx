@@ -1,13 +1,20 @@
 // ForgotPasswordForm.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaEnvelope } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import '../LoginForm/LoginForm.css'
 
 const ForgotPasswordForm = () => {
+  
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
-
+  
+  useEffect(() => {
+    document.body.classList.add('login-page');
+    return () => {
+      document.body.classList.remove('login-page');
+    };
+  }, [])
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {

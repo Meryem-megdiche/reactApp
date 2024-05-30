@@ -139,7 +139,7 @@ const Contacts = () => {
         setErrorMessage(null);
         setTimeout(() => {
           navigate('/team');
-        }, 800); 
+        }, 1600); 
       } else {
         if (response.data.message === "Equipement déjà existant") {
           setErrorMessage("L'adresse IP ou le RFID existe déjà dans la base de données. L'équipement ne peut pas être ajouté.");
