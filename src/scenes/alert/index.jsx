@@ -193,9 +193,8 @@ const Alert = () => {
       field: "size",
       headerName: "Size",
       flex: 1.5,
-      headerAlign: "center",
-      align: "center",
-      cellClassName: "name-column--cell",
+      headerAlign: "left",
+      align: "left",
     },
  
     {
@@ -248,23 +247,23 @@ const Alert = () => {
       field: "packetsReceived",
       headerName: "Packets Received",
       type: 'number',
-      align: 'left',
-      headerAlign: 'left',
+      headerAlign: "left",
+      align: "left",
       renderCell: (params) => (
         <div style={{ backgroundColor: getCellColor(params.value, 'packetsReceived') }}>
           {params.value}
         </div>
       ),
       flex: 1.7,
-      cellClassName: "name-column--cell",
+      
     },
   
     {
       field: "packetsLost",
       headerName: "Packets Lost",
       type: 'number',
-      align: 'left',
-      headerAlign: 'left',
+      headerAlign: "left",
+      align: "left",
       renderCell: (params) => (
         <div style={{ backgroundColor: getCellColor(params.value, 'packetsLost') }}>
           {params.value}
@@ -275,8 +274,8 @@ const Alert = () => {
     {
       field: "minimumTime",
       headerName: "Minimum Time",
-      type: 'number',
-      align: 'left',
+      headerAlign: "left",
+      align: "left",
       renderCell: (params) => (
         <div style={{ backgroundColor: getCellColor(params.value, 'minimumTime') }}>
           {params.value}
@@ -289,6 +288,7 @@ const Alert = () => {
       field: "maximumTime",
       headerName: "Maximum Time",
       type: 'number',
+      
       renderCell: (params) => (
         <div style={{ backgroundColor: getCellColor(params.value, 'maximumTime') }}>
           {params.value}
