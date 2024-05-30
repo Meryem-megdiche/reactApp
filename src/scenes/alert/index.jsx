@@ -571,12 +571,12 @@ const Alert = () => {
           },
         }}
       >
-        <div style={{ height: 450, width: '100%' }}>
+        <div style={{ height: 550, width: '100%' }}>
       <DataGrid
        rows={pingResults}
        columns={columns}
        getRowId={(row) => row._id}
-        pageSize={5}
+        pageSize={6}
        
         
       />
