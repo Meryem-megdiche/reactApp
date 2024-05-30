@@ -101,7 +101,7 @@ const Form = () => {
                 fullWidth
                 variant="filled"
                 type="text"
-                label="Nom"
+                label="Prénom & Nom"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.username}

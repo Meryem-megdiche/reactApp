@@ -87,7 +87,7 @@ const User = () => {
    
     {
       field: "username",
-      headerName: "Nom",
+      headerName: "Prénom & Nom",
       flex: 0.75,
       headerAlign: "center",
       align: "center",
@@ -96,7 +96,7 @@ const User = () => {
     },
     {
       field: "email",
-      headerName: "Email",
+      headerName: "Mail",
       flex: 1,
       headerAlign: "center",
       align: "center",

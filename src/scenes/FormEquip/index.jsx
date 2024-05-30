@@ -87,7 +87,7 @@ const Contacts = () => {
         Type: values.Type,
         RFID: values.RFID,
         AdresseIp: values.AdresseIp,
-        Emplacement: values.Emplacement,
+        Département: values.Département,
         Etat: values.Etat,
        // Utilisation de la valeur d'ID ici
       };
@@ -226,13 +226,13 @@ const Contacts = () => {
                 fullWidth
                 variant="filled"
                 type="text"
-                label="Emplacement"
+                label="Département"
                 onBlur={handleBlur}
                 onChange={handleChange}
-                value={values.Emplacement}
-                name="Emplacement"
-                error={!!touched.Emplacement && !!errors.Emplacement}
-                helperText={touched.Emplacement && errors.Emplacement}
+                value={values.Département}
+                name="Département"
+                error={!!touched.Département && !!errors.Département}
+                helperText={touched.Département && errors.Département}
                 sx={{ gridColumn: "span 4" }}
               />
               <TextField
@@ -271,7 +271,7 @@ const checkoutSchema = yup.object().shape({
   Type: yup.string().required("required"),
   AdresseIp: yup.string().required("required"),
   RFID: yup.string().required("required"),
-  Emplacement: yup.string().required("required"),
+  Département: yup.string().required("required"),
   Etat: yup.string().required("required"),
  
  
@@ -282,7 +282,7 @@ const initialValues = {
   Type: "",
   AdresseIp: "",
   RFID: "",
-  Emplacement: "",
+  Département: "",
   Etat: "",
 
  

@@ -280,8 +280,8 @@ const Team = () => {
       cellClassName: "name-column--cell",
     },
     {
-      field: "Emplacement",
-      headerName: "Emplacement",
+      field: "Département",
+      headerName: "Département",
       type: "String",
       headerAlign: "center",
       align: "center",
@@ -305,7 +305,7 @@ const Team = () => {
     {
       field: "Actions",
       headerName: "Actions",
-      flex: 4,
+      flex: 3.9,
       headerAlign: "center",
       align: "center",
       renderCell: renderActionCell,
@@ -362,12 +362,12 @@ const Team = () => {
           },
         }}
       >
-              <div style={{ height: 450, width: '100%' }}>
+              <div style={{ height: 495, width: '100%' }}>
       <DataGrid
         rows={equipData}
         columns={columns}
         loading={loading}
-        pageSize={8}
+        pageSize={9}
         getRowId={(row) => row.id} // Assurez-vous que `id` correspond à la clé unique dans vos données de ping
       />
     </div>

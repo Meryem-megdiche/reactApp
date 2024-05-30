@@ -96,25 +96,19 @@ const Sidebar = () => {
           {!isCollapsed && (
             <Box mb="25px">
               <Box display="flex" justifyContent="center" alignItems="center">
-                <img
-                 
-                  width="100px"
-                  height="100px"
-                  src={`${process.env.PUBLIC_URL}/icons\reseau.jpg(1).png`}
-                  style={{ cursor: "pointer", borderRadius: "50%" }}
-                />
+                
               </Box>
               <Box textAlign="center">
                 <Typography
-                  variant="h2"
-                  color={colors.grey[100]}
+                  variant="h3"
+                  color={colors.greenAccent[500]}
                   fontWeight="bold"
                   sx={{ m: "10px 0 0 0" }}
                 >
-                  
+                 IntraTrack
                 </Typography>
                 <Typography variant="h5" color={colors.greenAccent[500]}>
-                  VP Fancy Admin
+                  
                 </Typography>
               </Box>
             </Box>

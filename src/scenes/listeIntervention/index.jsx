@@ -99,7 +99,7 @@ const Listes = () => {
 
   const columns = [
     { field: "equipmentName", 
-    headerName: "Equipment", 
+    headerName: "Nom de l'équipement", 
     flex: 1,
     headerAlign: "center",
     align: "center",
