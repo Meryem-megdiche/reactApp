@@ -467,7 +467,7 @@ return (
      <Box sx={{ position: 'fixed', bottom: 0, right: 0, m: 2 }}> 
 </Box>
   <Box display="flex" justifyContent="space-between" alignItems="center">
-     <Header title="DASHBOARD"  />
+     <Header   />
         <CollapsibleAlertBox alerts={alerts} />
         <Box gridColumn="span 12" p="20px">
         </Box>
