@@ -16,7 +16,7 @@ const checkoutSchema = yup.object().shape({
   RFID: yup.string().required("Champ requis"),
   Département: yup.string().required("Champ requis"),
   Etat: yup.string().required("Champ requis"),
-
+ 
 });
 
 // Composant de l'interface de modification
@@ -58,7 +58,7 @@ const ModifyEquipment = () => {
 
   const handleModifyEquipment = async (values) => {
     try {
-      const response = await axios.put(`https://nodeapp-0ome.onrender.com/equip/equipe/${id}`, values);
+      const response = await axios.put(`https://nodeapp-0ome.onrender.com/equip/equipe/equip/${id}`, values);
   
       if (response.data.success) {
         setSuccessMessage("Équipement modifié avec succès");
@@ -139,13 +139,10 @@ const ModifyEquipment = () => {
       </>
     );
   };
-  const navigateToConfigList = () => {
-    navigate('/team'); // Remplacez par le chemin correct
-  };
+
   return (
     <Box m="20px">
-      <Header title="Modifier un équipement" subtitle="Retour à la liste des équipements"
-      onSubtitleClick={navigateToConfigList} />
+      <Header title="Modifier un équipement" subtitle="Retour à la liste des équipements" />
       {loading && <p>Loading...</p>}
       
       {!loading && (
@@ -254,9 +251,9 @@ const ModifyEquipment = () => {
                   helperText={touched.Etat && errors.Etat}
                   sx={{ gridColumn: "span 4" }}
                 />
-                
-                 
                
+                  
+                
                 <Button type="submit" variant="contained" color="primary">
                   Modifier l'équipement
                 </Button>

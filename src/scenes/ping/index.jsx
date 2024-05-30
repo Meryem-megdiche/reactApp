@@ -6,15 +6,13 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { tokens } from "../../theme";
 import { useNavigate } from 'react-router-dom';
-
-
 const Ping = () => {
   const navigate = useNavigate(); 
   const { equipmentId } = useParams();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [pingResults, setPingResults] = useState([]);
-  // Récupérer l'ID de l'équipement depuis l'URL
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -23,7 +21,7 @@ const Ping = () => {
           return;
         }
         
-        const response = await axios.get(`https://nodeapp-0ome.onrender.com/api/pingResults/equip/${equipmentId}`);
+        const response = await axios.get(`https://nodeapp-ectt.onrender.com/api/pingResults/equip/${equipmentId}`);
         if (response.status === 200) {
           const data = response.data;
           console.log('Ping Results:', data);
@@ -38,50 +36,61 @@ const Ping = () => {
   
     fetchData();
   }, [equipmentId]);
-  // Utiliser l'ID de l'équipement comme dépendance du useEffect
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  };
 
   const columns = [
     {
       field: "status",
       headerName: "Statut",
-      flex: 2,
+      flex: 1,
+      align: 'left',
+      headerAlign: 'left',
+      width: 30,
       renderCell: (params) => (
         <div style={{ color: params.row.success ? "green" : "red" }}>
           {params.row.success ? "Success" : "Failed"}
-        </div> ),
+        </div>
+      ),
     },
-
-  
     {
       field: "size",
       headerName: "Size",
-      flex: 2,
+      flex: 1,
       align: 'left',
       headerAlign: 'left',
-      cellClassName: "name-column--cell",
+      cellClassName: "name-column--cell"
+     
     },
- 
     {
       field: "TTL",
       headerName: "TTL",
       type: "[number]",
       headerAlign: "left",
       align: "left",
-      width: 50,
-      flex: 2,
+    
+      flex: 1.5,
       renderCell: (params) => (
         params.row.success ? params.value.join(", ") : "[]"
       )
     },
- 
     {
       field: "latency",
       headerName: "latency",
       type: "[number]",
       headerAlign: "left",
       align: "left",
-      width: 50,
-      flex: 2,
+     
+      flex: 1.5,
       renderCell: (params) => (
         params.row.success ? params.value.join(", ") : "[]"
       )
@@ -90,21 +99,20 @@ const Ping = () => {
       field: "packetsSent",
       headerName: "Packets Sent",
       type: 'number',
+      cellClassName: "name-column--cell",
       align: 'left',
       headerAlign: 'left',
       flex: 2,
-      cellClassName: "name-column--cell",
     },
     {
       field: "packetsReceived",
       headerName: "Packets Received",
       type: 'number',
+      cellClassName: "name-column--cell",
       align: 'left',
       headerAlign: 'left',
       flex: 2,
-      cellClassName: "name-column--cell",
     },
-  
     {
       field: "packetsLost",
       headerName: "Packets Lost",
@@ -120,6 +128,9 @@ const Ping = () => {
       align: 'left',
       headerAlign: 'left',
       flex: 2, // Adjust the width as needed
+      renderCell: (params) => (
+        params.value === 0 ? "-" : params.value
+      )
     },
     {
       field: "maximumTime",
@@ -128,6 +139,9 @@ const Ping = () => {
       align: 'left',
       headerAlign: 'left',
       flex: 2, // Adjust the width as needed
+      renderCell: (params) => (
+        params.value === 0 ? "-" : params.value
+      )
     },
     {
       field: "averageTime",
@@ -135,28 +149,29 @@ const Ping = () => {
       type: 'number',
       align: 'left',
       headerAlign: 'left',
+      align: 'left',
+      headerAlign: 'left',
       flex: 2, // Adjust the width as needed
+      renderCell: (params) => (
+        params.value === 0 ? "-" : params.value
+      )
     },
-    
-
-
     {
       field: "timestamp",
       headerName: "Timestamp",
       align: 'left',
       headerAlign: 'left',
-      flex: 2,
+      flex: 1,
+   flex:2,
+      renderCell: (params) => formatDate(params.value),
     },
-  
-    
   ];
   const navigateToConfigList = () => {
     navigate('/team'); // Remplacez par le chemin correct
   };
   return (
     <Box m="20px">
-   
-      <Header title="Historique de ping" subtitle="Voir la liste des équipements" 
+        <Header title="Historique de ping" subtitle="Voir la liste des équipements" 
       onSubtitleClick={navigateToConfigList}/>
       <Box
         m="40px 0 0 0"
