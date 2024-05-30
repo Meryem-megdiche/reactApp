@@ -61,14 +61,11 @@ const ModifyConfig = () => {
   if (loading) {
     return <p>Chargement...</p>;
   }
-  const navigateToConfigList = () => {
-    navigate('/config'); // Remplacez par le chemin correct
-  };
+
 
   return (
     <Box m="20px">
-      <Header title="Modifier une configuration" subtitle="Retour à la liste des configurations" 
-       onSubtitleClick={navigateToConfigList} />
+      <Header title="Modifier une configuration" subtitle="Retour à la liste des configurations" />
       {loading && <p>Loading...</p>}
       {!loading && (
         <>
@@ -91,7 +88,7 @@ const ModifyConfig = () => {
           >
         {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
           <form onSubmit={handleSubmit}>
-        
+          {/* Type de donnée avec Select */}
           <FormControl variant="filled" fullWidth>
             <InputLabel>Type de donnée</InputLabel>
             <Select
@@ -139,7 +136,7 @@ const ModifyConfig = () => {
             />
            <Box mt="20px">
               <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>
-                Modifier 
+                Modifier la configuration
               </Button>
               {successMessage && <Box mt={2} color="green">{successMessage}</Box>}
               {errorMessage && <Box mt={2} color="red">{errorMessage}</Box>}
