@@ -8,58 +8,39 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 const Config = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [configs, setConfigs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(
     JSON.parse(localStorage.getItem("user")) || null
   );
-  const navigate = useNavigate(); 
-
-
+  
+  const navigate = useNavigate();
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchConfigs = async () => {
       try {
         const response = await axios.get("https://nodeapp-0ome.onrender.com/config");
-        console.log(response.data);
-        setConfigs(response.data);
-  
-        const equipconfigs = await Promise.all(response.data.map(async (config) => {
-          try {
-            const equipResponse = await axios.get(`https://nodeapp-0ome.onrender.com/config/equip/${config.equipment} `);
-           
-            if (equipResponse.data && equipResponse.data.Nom) {
-              
-              config.equipmentName = equipResponse.data.Nom;
-            } else { // En cas de réponse incorrecte, définissez le nom de l'équipement sur "Unavailable"
-              config.equipmentName = 'Unavailable';
-            }
-            return config;
-          } catch (error) {
-            console.error('Failed to fetch equipment details:', error);
-            // En cas d'erreur, définissez le nom de l'équipement sur "Unavailable"
-            config.equipmentName = 'Unavailable';
-            return config;
-          }
-        }));
-        setConfigs(equipconfigs);
-    } catch (error) {
-      console.error("Error fetching configs:", error);
-    }
-  };
+        const transformedData = response.data.map((row) => ({
+            ...row,
+            id: row._id,
+          }));
+          setConfigs(transformedData);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données :", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchData();
-}, []);
-
+    fetchConfigs();
+  }, []);
   const handleEditClick = (id) => {
     const configToEdit = configs.find((config) => config.id === id);
     // Naviguer vers la page de modification avec les valeurs de la configuration à modifier
     navigate(`/Modify-config${id}`, { state: { config: configToEdit } });
   };
-
-
 
   const deleteConfig = async (id) => {
     try {
@@ -75,7 +56,8 @@ const Config = () => {
   const handleDeleteClick = (id) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this configuration?");
     if (confirmDelete) {
-      deleteConfig(id);
+      deleteConfig(id)
+;
     }
   };
   
@@ -84,14 +66,11 @@ const Config = () => {
   };
 
   const columns = [
-   
+
     {
-      field: "equipmentName",
+      field: "equipment",
       headerName: "equipment",
       flex: 1,
-    
-      headerAlign: "center",
-      align: "center",
       cellClassName: "name-column--cell",
     },
     {
@@ -100,52 +79,39 @@ const Config = () => {
       flex: 0.5,
       headerAlign: "left",
       align: "left",
-      headerAlign: "center",
-      align: "center",
-      cellClassName: "name-column--cell",
     },
     {
       field: "seuil",
       headerName: "seuil",
       flex: 0.5,
-      headerAlign: "center",
-      align: "center",
-      cellClassName: "name-column--cell",
     },
    
     {
       field: "adresseMail",
       headerName: "addresseMail",
       flex: 1,
-      headerAlign: "center",
-      align: "center",
-      cellClassName: "name-column--cell",
     },
     {
       field: "activité",
       headerName: "activité",
       sortable: false,
-      flex: 1.1,
-      headerAlign: "center",
-      align: "center",
-      cellClassName: "name-column--cell",
+      flex: 1.65,
       renderCell: (params) => {
         return (
-          <Box display="flex" justifyContent="center">
+          <Box>
+          
             <Link to={`/modify-config/${params.row.id}`} state={{ initialValues: params.row }}>
   <Button
    startIcon={<EditIcon />}
-  
-  variant="contained" color="secondary"
-  disabled={currentUser?.role === 'technicienReseau'}>Modifier</Button>
+   disabled={currentUser?.role === 'technicienReseau'}
+  variant="contained" color="secondary">
+    Modifier</Button>
 </Link>
             <Button 
             startIcon={<DeleteIcon />}
-            
-            variant="contained" onClick={() => handleDeleteClick(params.row.id)} color="error"
-            disabled={currentUser?.role === 'technicienReseau'}>Supprimer</Button>
-            <Button 
-            startIcon={<VisibilityIcon /> }variant="contained" onClick={() => handleWatchClick(params.row.id)} color="secondary"  
+            disabled={currentUser?.role === 'technicienReseau'}
+            variant="contained" onClick={() => handleDeleteClick(params.row.id)} color="error">Supprimer</Button>
+            <Button variant="contained" onClick={() => handleWatchClick(params.row.id)} color="secondary"  
               component={Link}
               to={`/alert/${params.row.equipment}`}>
               Surveiller
@@ -195,7 +161,7 @@ const Config = () => {
       >
         <DataGrid
           rows={configs}
-      
+          loading={loading}
           columns={columns}
           getRowId={(row) => row._id}
           components={{ Toolbar: GridToolbar }}
