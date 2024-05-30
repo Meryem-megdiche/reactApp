@@ -152,16 +152,16 @@ const Team = () => {
     const equipId = row.id;
 
     try {
-      const response = await axios.post(`https://nodeapp-0ome.onrender.com/pingtest/manual`, { ip: equipIp, equipId });
+      const response = await axios.post(`http://localhost:3001/pingtest/manual`, { ip: equipIp, equipId });
   
       if (response.status === 200) {
         if (response.data.success) {
-          enqueueSnackbar(`Ping successful for equipment with IP: ${equipIp}`, { variant: 'success' });
+          enqueueSnackbar(`Ping successful `, { variant: 'success' });
         } else {
-          enqueueSnackbar(`Ping failed: ${response.data.message}`, { variant: 'error' });
+          enqueueSnackbar(`Ping failed`, { variant: 'error' });
         }
       } else {
-        enqueueSnackbar(`Ping failed with status code: ${response.status}`, { variant: 'error' });
+        enqueueSnackbar(`Ping failed `, { variant: 'error' });
       }
     } catch (error) {
       enqueueSnackbar("Error occurred while pinging equipment.", { variant: 'error' });
@@ -305,7 +305,7 @@ const Team = () => {
     {
       field: "Actions",
       headerName: "Actions",
-      flex: 4.2,
+      flex: 4,
       headerAlign: "center",
       align: "center",
       renderCell: renderActionCell,

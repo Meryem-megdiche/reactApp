@@ -78,7 +78,7 @@ const Ping = () => {
       headerAlign: "left",
       align: "left",
     
-      flex: 1.5,
+      flex: 1.6,
       renderCell: (params) => (
         params.row.success ? params.value.join(", ") : "[]"
       )

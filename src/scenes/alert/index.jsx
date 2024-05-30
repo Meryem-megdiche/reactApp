@@ -1,22 +1,21 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import axios from "axios";
-import { DialogContentText, DialogActions } from "@mui/material";
-import { useParams } from 'react-router-dom';
+import {  DialogContentText, DialogActions } from "@mui/material";
+import { useParams, } from 'react-router-dom';
 import { Stack, Toolbar, Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { Box, Button, TextField, Dialog, DialogTitle, DialogContent, FormControlLabel, Checkbox } from "@mui/material";
 import { useTheme } from "@mui/material";
 import { Link, useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import Header from "../../components/Header";
+import { useLocation } from 'react-router-dom'
 const Alert = () => {
-  const location = useLocation();
+  const location = useLocation(); // <-- This is how you should access the location object
   const navigate = useNavigate();
   const [threshold, setThreshold] = useState('');
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [startDate, setStartDate] = useState("");
+  const [startDate, setStartDate] = useState("");// Déclaration de l'état pour la date de fin
   const [endDate, setEndDate] = useState("");
   const [dataDialogOpen, setDataDialogOpen] = useState(false);
   const [pingResultAttributes, setPingResultAttributes] = useState([]);
@@ -25,13 +24,18 @@ const Alert = () => {
   const [config, setConfig] = useState(null);
   const [pingResults, setPingResults] = useState([]);
   const [showAlertModal, setShowAlertModal] = useState(false);
-
+  const [selectedData, setSelectedData] = useState({
+    startDate: "",
+    endDate: "",
+    threshold: "",
+    attributes: []
+  });
   const handleStartDateChange = (event) => {
-    setStartDate(event.target.value);
+    setStartDate(event.target.value); // Mise à jour de la date de début
   };
 
   const handleEndDateChange = (event) => {
-    setEndDate(event.target.value);
+    setEndDate(event.target.value); // Mise à jour de la date de fin
   };
 
   const handleShowAlerts = async () => {
@@ -40,7 +44,7 @@ const Alert = () => {
       return;
     }
     try {
-      const response = await axios.get(`https://nodeapp-ectt.onrender.com/api/pingResults/alert/${equipmentId}`, {
+      const response = await axios.get(`https://nodeapp-0ome.onrender.com/api/pingResults/alert/${equipmentId}`, {
         params: { startDate, endDate }
       });
 
@@ -48,7 +52,10 @@ const Alert = () => {
       const seuil = parseFloat(threshold);
 
       const transformedData = response.data.map((row) => {
-        const attributesToCheck = ['TTL', 'latency', 'minimumTime', 'maximumTime', 'averageTime'];
+        // Ajoutez ici la logique pour vérifier si le seuil est dépassé pour chaque attribut
+        console.log('Processing row:', row);
+
+        const attributesToCheck = ['TTL', 'latency', 'minimumTime', 'maximumTime', 'averageTime']; // Mettez à jour cette liste selon les besoins
         let alerts = {};
 
         for (let attr of attributesToCheck) {
@@ -58,13 +65,16 @@ const Alert = () => {
           if (color === 'red') {
             isThresholdExceeded = true;
           }
+          console.log(`Attribute ${attr}: ${value}, Color: ${color}`);
         }
+        console.log(`Alerts for row ID ${row._id}:`, alerts);
         return {
           ...row,
           id: row._id,
           ...alerts
         };
       });
+      console.log(`Transformed Data: ${JSON.stringify(transformedData)}`);
 
       setShowAlertModal(isThresholdExceeded);
       setPingResults(transformedData);
@@ -72,6 +82,8 @@ const Alert = () => {
       console.error('Error fetching filtered data:', error);
     }
   };
+ 
+
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -93,22 +105,28 @@ const Alert = () => {
   const getCellColor = (value, attribute) => {
     if (!selectedAttributes.includes(attribute)) return 'default';
   
-    const seuil = parseFloat(threshold);
-    const warningThreshold = seuil * 0.9;
+    const seuil = parseFloat(threshold); // Utilisez `threshold` de l'état local
+    const warningThreshold = seuil * 0.9; // 80% du seuil pour la couleur orange
+  
+    console.log(`Valeur de ${attribute}: ${value}, Seuil: ${seuil}`);
   
     if (value > seuil) {
-      return 'red';
+      console.log(`Rouge: ${value} est supérieure au seuil.`);
+      return 'red'; // Supérieure au seuil
     } else if (value > warningThreshold) {
-      return 'orange';
+      console.log(`Orange: ${value} est proche du seuil.`);
+      return 'orange'; // Proche du seuil
     } else {
-      return 'green';
+      console.log(`Vert: ${value} est inférieure au seuil.`);
+      return 'green'; // Inférieure au seuil
     }
   };
   
+  // Récupérer les configurations lors du montage du composant
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await axios.get(`https://nodeapp-ectt.onrender.com/api/config/equip/${equipmentId}`);
+        const response = await axios.get(`https://nodeapp-0ome.onrender.com/api/config/equip/${equipmentId}`);
         setConfig(response.data);
       } catch (error) {
         console.error('Error fetching configuration:', error);
@@ -118,10 +136,14 @@ const Alert = () => {
     fetchConfig();
   }, [equipmentId]);
   
+
+
   const handleViewChartClick = async () => {
     if (equipmentId && startDate && endDate && threshold && selectedAttributes.length > 0) {
+      // Ajouter `selectedAttributes` et `attr` aux paramètres
       const statsResponse = await fetchStatsFromServer(threshold, selectedAttributes, selectedAttributes[0]);
       if (statsResponse) {
+        console.log(statsResponse); // Log the stats to verify them
         navigate(`/pie/${equipmentId}`, {
           state: {
             stats: statsResponse,
@@ -138,11 +160,12 @@ const Alert = () => {
   
   const fetchStatsFromServer = async (threshold, selectedAttributes, attr) => {
     try {
-      const response = await axios.get(`https://nodeapp-ectt.onrender.com/api/pingResults/stats/${equipmentId}`, {
-        params: { startDate, endDate, threshold, attr },
+      const response = await axios.get(`https://nodeapp-0ome.onrender.com/api/pingResults/stats/${equipmentId}`, {
+        params: { startDate, endDate, threshold, attr }, // Inclure `attr` ici
       });
       if (response.status === 200) {
-        return response.data;
+        console.log(`Statistiques reçues:`, response.data);
+        return response.data; // Les statistiques sont renvoyées ici
       } else {
         throw new Error('Échec de la récupération des statistiques');
       }
@@ -151,10 +174,15 @@ const Alert = () => {
       alert('Erreur lors de la récupération des statistiques');
     }
   };
-
+  
+  
   useEffect(() => {
-    console.log(location.state);
+    console.log(location.state); // Log to see what's being passed in
   }, []);
+  
+
+
+
 
   const columns = [
     {
@@ -166,12 +194,15 @@ const Alert = () => {
           {params.row.success ? "Success" : "Failed"}
         </div> ),
     },
+    
+    
     {
       field: "size",
       headerName: "Size",
       flex: 1.5,
       cellClassName: "name-column--cell",
     },
+ 
     {
       field: "TTL",
       headerName: "TTL",
@@ -181,7 +212,7 @@ const Alert = () => {
       renderCell: (params) => {
         const averageTTL = getAverage(params.row.TTL.filter(value => !isNaN(value)));
         return (
-          <div style={{ backgroundColor: getCellColor(averageTTL, 'TTL') }}>
+          <div style={{ backgroundColor: selectedAttributes.includes('TTL') && (isNaN(averageTTL) || averageTTL === 0) ? 'red' : getCellColor(averageTTL, 'TTL') }}>
             {isNaN(averageTTL) ? "NaN" : averageTTL.toFixed(2)}
           </div>
         );
@@ -189,6 +220,7 @@ const Alert = () => {
       cellClassName: "name-column--cell",
       flex: 2,
     },
+ 
     {
       field: "latency",
       headerName: "latency",
@@ -198,11 +230,12 @@ const Alert = () => {
       renderCell: (params) => {
         const averageLatency = getAverage(params.row.latency);
         return (
-          <div style={{ backgroundColor: getCellColor(averageLatency, 'latency') }}>
-            {averageLatency.toFixed(2)} 
+          <div style={{ backgroundColor: selectedAttributes.includes('latency') && (isNaN(averageLatency) || averageLatency === 0) ? 'red' : getCellColor(averageLatency, 'latency') }}>
+            {isNaN(averageLatency) ? "NaN" : averageLatency.toFixed(2)}
           </div>
         );
       },
+
       cellClassName: "name-column--cell",
       flex: 2,
     },
@@ -212,9 +245,11 @@ const Alert = () => {
       type: 'number',
       align: 'left',
       headerAlign: 'left',
+      
       flex: 1.7,
       cellClassName: "name-column--cell",
     },
+
     {
       field: "packetsReceived",
       headerName: "Packets Received",
@@ -229,6 +264,7 @@ const Alert = () => {
       flex: 1.7,
       cellClassName: "name-column--cell",
     },
+  
     {
       field: "packetsLost",
       headerName: "Packets Lost",
@@ -240,27 +276,29 @@ const Alert = () => {
           {params.value}
         </div>
       ),
-      flex: 1.7,
+      flex: 1.7, // Adjust the width as needed
     },
+
     {
       field: "minimumTime",
       headerName: "Minimum Time",
       type: 'number',
       align: 'left',
       renderCell: (params) => (
-        <div style={{ backgroundColor: getCellColor(params.value, 'minimumTime') }}>
+        <div style={{ backgroundColor: selectedAttributes.includes('minimumTime') && params.value === 0 ? 'red' : getCellColor(params.value, 'minimumTime') }}>
           {params.value === 0 ? "-" : params.value}
         </div>
       ),
       headerAlign: 'left',
       flex: 1.7, 
     },
+
     {
       field: "maximumTime",
       headerName: "Maximum Time",
       type: 'number',
       renderCell: (params) => (
-        <div style={{ backgroundColor: getCellColor(params.value, 'maximumTime') }}>
+        <div style={{ backgroundColor: selectedAttributes.includes('maximumTime') && params.value === 0 ? 'red' : getCellColor(params.value, 'maximumTime') }}>
           {params.value === 0 ? "-" : params.value}
         </div>
       ),
@@ -268,19 +306,24 @@ const Alert = () => {
       headerAlign: 'left',
       flex: 1.7, 
     },
+
     {
       field: "averageTime",
       headerName: "Average Time",
       type: 'number',
       renderCell: (params) => (
-        <div style={{ backgroundColor: getCellColor(params.value, 'averageTime') }}>
+        <div style={{ backgroundColor: selectedAttributes.includes('averageTime') && params.value === 0 ? 'red' : getCellColor(params.value, 'averageTime') }}>
           {params.value === 0 ? "-" : params.value}
         </div>
       ),
       align: 'left',
       headerAlign: 'left',
       flex: 1.7,
+       // Adjust the width as needed
     },
+    
+
+
     {
       field: "timestamp",
       headerName: "Timestamp",
@@ -289,7 +332,10 @@ const Alert = () => {
       renderCell: (params) => formatDate(params.value),
       flex: 2.2,
     },
+    
   ];
+
+
 
   useEffect(() => {
     fetchData();
@@ -297,7 +343,7 @@ const Alert = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('https://nodeapp-ectt.onrender.com/api/pingResults');
+      const response = await fetch('https://nodeapp-0ome.onrender.com/api/pingResults');
       if (response.ok) {
         const data = await response.json();
         const attributes = Object.keys(data[0]);
@@ -311,6 +357,7 @@ const Alert = () => {
   };
 
   const handleDataButtonClick = () => {
+   
     setDataDialogOpen(true);
   };
 
@@ -326,16 +373,12 @@ const Alert = () => {
       setSelectedAttributes(selectedAttributes.filter((item) => item !== attribute));
     }
   };
-  const navigateToConfigList = () => {
-    navigate('/config'); // Remplacez par le chemin correct
-  };
+
+
   return (
     <Box m="20px">
-       <Header  subtitle="Retour à la liste des configurations"
-     onSubtitleClick={navigateToConfigList} />
-
-
       <Toolbar sx={{ justifyContent: 'space-between' }}>
+       
         <Stack direction="row" spacing={2}>
           <TextField
             id="start-date"
@@ -348,20 +391,21 @@ const Alert = () => {
             sx={{
               marginRight: "10px",
               "& .MuiInputBase-root": {
-                color: colors.grey[100],
-                borderRadius: "4px",
+                color: '#FFFFFF', // Replace with the actual color from your theme
+                color: colors.grey[100], // Replace with the actual color from your theme
+                borderRadius: "4px", // Keep the borders square
               },
               "& .MuiInputLabel-root": {
-                color: colors.grey[100],
+                color: colors.grey[100],// Replace with the actual color from your theme
               },
               "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: colors.grey[100],
+                borderColor: '#FFFFFF', // Replace with the actual color from your theme
               },
               "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: '#B2B2B2',
+                borderColor: '#B2B2B2', // Lighten the color a bit on hover
               },
               "& .MuiSvgIcon-root": {
-                color: colors.grey[100],
+                color: '#FFFFFF', // Replace with the actual color from your theme
               }
             }}
           />
@@ -373,25 +417,27 @@ const Alert = () => {
             value={endDate}
             onChange={handleEndDateChange}
             InputLabelProps={{ shrink: true }}
-            sx={{
+              sx={{
               marginRight: "10px",
               "& .MuiInputBase-root": {
-                color: colors.grey[100],
-                borderRadius: "4px",
+                color: '#FFFFFF', // Replace with the actual color from your theme
+                color: colors.grey[100], // Replace with the actual color from your theme
+                borderRadius: "4px", // Keep the borders square
               },
               "& .MuiInputLabel-root": {
-                color: colors.grey[100],
+                color: colors.grey[100],// Replace with the actual color from your theme
               },
               "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: colors.grey[100],
+                borderColor: '#FFFFFF', // Replace with the actual color from your theme
               },
               "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: '#B2B2B2',
+                borderColor: '#B2B2B2', // Lighten the color a bit on hover
               },
               "& .MuiSvgIcon-root": {
-                color: colors.grey[100],
+                color: '#FFFFFF', // Replace with the actual color from your theme
               }
             }}
+          
           />
           <TextField
             label="Threshold"
@@ -403,90 +449,97 @@ const Alert = () => {
             sx={{
               marginRight: "10px",
               "& .MuiInputBase-root": {
-                color: colors.grey[100],
-                borderRadius: "4px",
+                color: '#FFFFFF', // Replace with the actual color from your theme
+                color: colors.grey[100], // Replace with the actual color from your theme
+                borderRadius: "4px", // Keep the borders square
               },
               "& .MuiInputLabel-root": {
-                color: colors.grey[100],
+                color: colors.grey[100],// Replace with the actual color from your theme
               },
               "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: colors.grey[100],
+                borderColor: '#FFFFFF', // Replace with the actual color from your theme
               },
               "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: '#B2B2B2',
+                borderColor: '#B2B2B2', // Lighten the color a bit on hover
               },
               "& .MuiSvgIcon-root": {
-                color: colors.grey[100],
+                color: '#FFFFFF', // Replace with the actual color from your theme
               }
             }}
           />
-          <Button
-            sx={{
-              backgroundColor: colors.blueAccent[700],
-              color: colors.grey[100],
-              fontSize: "14px",
-            }}
-            variant="contained"
-            onClick={handleDataButtonClick}
-            color="secondary"
-          >
+        <Button
+        sx={{
+          backgroundColor: colors.blueAccent[700],
+          color: colors.grey[100],
+          fontSize: "14px",
+        
+          
+        }} variant="contained" onClick={handleDataButtonClick} color="secondary">
             Data
           </Button>
-          <Button
-            sx={{
-              backgroundColor: colors.blueAccent[700],
-              color: colors.grey[100],
-              fontSize: "14px",
-              padding: "10px 20px",
-            }}
-            variant="contained"
-            onClick={handleShowAlerts}
-            color="secondary"
-          >
+        <Button 
+         sx={{
+          backgroundColor: colors.blueAccent[700],
+          color: colors.grey[100],
+          fontSize: "14px",
+         
+          padding: "10px 20px",
+        }}variant="contained" onClick={handleShowAlerts} color="secondary">
             Show Alerts
           </Button>
-          <Dialog open={dataDialogOpen} onClose={handleCloseDataDialog}>
-            <DialogTitle>Attributs des données</DialogTitle>
-            <DialogContent>
-              {pingResultAttributes
-                .filter((attribute) => ['TTL', 'latency', 'packetsReceived', 'packetsLost', 'minimumTime', 'averageTime', 'maximumTime'].includes(attribute))
-                .map((attribute, index) => (
-                  <Box key={index} marginBottom={2}> 
-                    <FormControlLabel
-                      control={<Checkbox checked={selectedAttributes.includes(attribute)} onChange={handleCheckboxChange(attribute)} />}
-                      label={attribute}
-                    />
-                  </Box>
-                ))}
-            </DialogContent>
-          </Dialog>
-          <Dialog open={showAlertModal} onClose={() => setShowAlertModal(false)}>
-            <DialogTitle>{"Alerte"}</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Certaines valeurs dépassent le seuil configuré!
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setShowAlertModal(false)} color="primary" autoFocus>
-                Compris
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <Button
-            sx={{
-              backgroundColor: colors.blueAccent[700],
-              color: colors.grey[100],
-              fontSize: "14px",
-              padding: "10px 20px",
-            }}
-            onClick={() => handleViewChartClick(config.equipment)}
-          >
-            View Chart 
-          </Button>
+          
+  <Dialog open={dataDialogOpen} onClose={handleCloseDataDialog}>
+  <DialogTitle>Attributs des données</DialogTitle>
+  <DialogContent>
+    {pingResultAttributes
+      .filter((attribute) => ['TTL', 'latency', 'packetsReceived', 'packetsLost', 'minimumTime', 'averageTime', 'maximumTime'].includes(attribute))
+      .map((attribute, index) => (
+        <Box key={index} marginBottom={2}> 
+        <FormControlLabel
+          control={<Checkbox checked={selectedAttributes.includes(attribute)} onChange={handleCheckboxChange(attribute)} />}
+          label={attribute}
+        />
+      </Box>
+      ))}
+  </DialogContent>
+</Dialog>
+<Dialog
+    open={showAlertModal}
+    onClose={() => setShowAlertModal(false)}
+  >
+    <DialogTitle>{"Alerte"}</DialogTitle>
+    <DialogContent>
+      <DialogContentText>
+        Certaines valeurs dépassent le seuil configuré!
+      </DialogContentText>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={() => setShowAlertModal(false)} color="primary" autoFocus>
+        Compris
+      </Button>
+    </DialogActions>
+  </Dialog>
+    
+   
+       <Button
+          sx={{
+            backgroundColor: colors.blueAccent[700],
+            color: colors.grey[100],
+            fontSize: "14px",
+          
+            padding: "10px 20px",
+          }}
+          
+        
+          onClick={() => handleViewChartClick(config.equipment)}
+        >
+          View Chart 
+        </Button>
         </Stack>
       </Toolbar>
-      <Box
+
+     
+    <Box
         m="40px 0 0 0"
         height="75vh"
         sx={{
@@ -519,13 +572,15 @@ const Alert = () => {
         }}
       >
         <div style={{ height: 450, width: '100%' }}>
-          <DataGrid
-            rows={pingResults}
-            columns={columns}
-            getRowId={(row) => row._id}
-            pageSize={5}
-          />
-        </div>
+      <DataGrid
+       rows={pingResults}
+       columns={columns}
+       getRowId={(row) => row._id}
+        pageSize={5}
+       
+        
+      />
+    </div>
       </Box>
     </Box>
   );
