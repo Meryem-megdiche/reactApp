@@ -305,7 +305,7 @@ const Team = () => {
     {
       field: "Actions",
       headerName: "Actions",
-      flex: 3.2,
+      flex: 3.3,
       headerAlign: "center",
       align: "center",
       renderCell: renderActionCell,
@@ -362,7 +362,7 @@ const Team = () => {
           },
         }}
       >
-              <div style={{ height: 492, width: '100%' }}>
+              <div style={{ height: 490, width: '100%' }}>
       <DataGrid
         rows={equipData}
         columns={columns}
