@@ -5,7 +5,7 @@ import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import axios from "axios";
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 
 const Listes = () => {
@@ -41,7 +41,6 @@ const Listes = () => {
           if (serialNumber) {
             console.log("Numéro de série du tag NFC:", serialNumber);
 
-            // Rechercher l'équipement dans la base de données en utilisant le RFID scanné
             try {
               const response = await axios.get(`https://nodeapp-0ome.onrender.com/equip/find/${serialNumber}`);
               if (response.data.success) {
@@ -70,10 +69,9 @@ const Listes = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get("https://nodeapp-0ome.onrender.com/api/interventions");
-        console.log(response.data);
-        setInterventions(response.data);
+        const interventionsData = response.data;
 
-        const equippedInterventions = await Promise.all(response.data.map(async (intervention) => {
+        const updatedInterventions = await Promise.all(interventionsData.map(async (intervention) => {
           try {
             const equipResponse = await axios.get(`https://nodeapp-0ome.onrender.com/api/interventions/equip/${intervention.equipment}`);
             if (equipResponse.data && equipResponse.data.Nom) {
@@ -81,14 +79,29 @@ const Listes = () => {
             } else {
               intervention.equipmentName = 'Unavailable';
             }
-            return intervention;
           } catch (error) {
             console.error('Failed to fetch equipment details:', error);
             intervention.equipmentName = 'Unavailable';
-            return intervention;
           }
+
+          if (intervention.parentIntervention) {
+            try {
+              const parentResponse = await axios.get(`https://nodeapp-0ome.onrender.com/api/interventions/${intervention.parentIntervention}`);
+              if (parentResponse.data && parentResponse.data.description) {
+                intervention.parentInterventionDescription = parentResponse.data.description;
+              } else {
+                intervention.parentInterventionDescription = 'Unavailable';
+              }
+            } catch (error) {
+              console.error('Failed to fetch parent intervention details:', error);
+              intervention.parentInterventionDescription = 'Unavailable';
+            }
+          }
+
+          return intervention;
         }));
-        setInterventions(equippedInterventions);
+
+        setInterventions(updatedInterventions);
       } catch (error) {
         console.error("Error fetching interventions:", error);
       }
@@ -113,7 +126,7 @@ const Listes = () => {
     { 
       field: "adresseMail", 
       headerName: 'adresseMail', 
-      flex: 1,
+      flex: 0.8,
       headerAlign: "center",
       align: "center",
       cellClassName: "name-column--cell"
@@ -121,7 +134,7 @@ const Listes = () => {
     { 
       field: "equipmentName", 
       headerName: "Nom de l'équipement", 
-      flex: 1,
+      flex: 0.8,
       headerAlign: "center",
       align: "center",
       cellClassName: "name-column--cell" 
@@ -129,7 +142,7 @@ const Listes = () => {
     { 
       field: "type", 
       headerName: "Type", 
-      flex: 1,
+      flex: 0.7,
       headerAlign: "center",
       align: "center",
       cellClassName: "name-column--cell" 
@@ -141,20 +154,20 @@ const Listes = () => {
       headerAlign: "center",
       align: "center",
       cellClassName: "name-column--cell",
-      valueGetter: (params) => formatDate(params.value), // Format the date here
+      valueGetter: (params) => formatDate(params.value),
     },
     { 
       field: 'description',
       headerName: "Description", 
-      flex: 1,
+      flex: 1.2,
       headerAlign: "center",
       align: "center",
       cellClassName: "name-column--cell"
     },
     { 
-      field: "parentIntervention", 
+      field: "parentInterventionDescription", 
       headerName: 'Parent Intervention', 
-      flex: 1,
+      flex: 1.2,
       headerAlign: "center",
       align: "center",
       cellClassName: "name-column--cell"
