@@ -1,6 +1,6 @@
-// ForgotPasswordForm.jsx
+
 import React, { useState, useEffect } from 'react';
-import { FaEnvelope } from "react-icons/fa";
+
 import { useNavigate } from 'react-router-dom';
 import '../LoginForm/LoginForm.css'
 
@@ -50,7 +50,7 @@ const ForgotPasswordForm = () => {
             value={email} 
             onChange={(e) => setEmail(e.target.value)} 
           />
-          <FaEnvelope className='icon' />
+         
         </div>
         <button type="submit">Send Reset Email</button>
       </form>

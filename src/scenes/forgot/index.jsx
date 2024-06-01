@@ -1,6 +1,6 @@
 // ResetPasswordForm.jsx
 import React, { useState, useEffect } from 'react';
-import { FaLock, FaKey } from "react-icons/fa";
+
 import { useNavigate } from 'react-router-dom';
 import '../LoginForm/LoginForm.css'; // Réutilisez le même CSS que pour LoginForm
 
@@ -49,7 +49,7 @@ const ResetPasswordForm = () => {
             value={token} 
             onChange={(e) => setToken(e.target.value)} 
           />
-          <FaKey className='icon' />
+          
         </div>
         <div className="input-box">
           <input 
@@ -59,7 +59,7 @@ const ResetPasswordForm = () => {
             value={newPassword} 
             onChange={(e) => setNewPassword(e.target.value)} 
           />
-          <FaLock className='icon'/>
+         
         </div>
         <button type="submit">Reset Password</button>
       </form>

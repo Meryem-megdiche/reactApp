@@ -56,6 +56,7 @@ const Intervention = () => {
     date: "",
     description: "",
     parentIntervention: "",
+    adresseMail:""
   };
 
   const validationSchema = yup.object().shape({
@@ -64,6 +65,7 @@ const Intervention = () => {
     date: yup.date().required("Le champ date est requis"),
     description: yup.string().required("Le champ description est requis"),
     parentIntervention: yup.string().nullable(),
+    adresseMail:yup.string().email("Veuillez entrer une adresse e-mail valide").required()
   });
 
   const handleAddIntervention = async (values) => {
@@ -148,6 +150,19 @@ const Intervention = () => {
                 onBlur={handleBlur}
                 error={touched.date && Boolean(errors.date)}
                 helperText={touched.date && errors.date}
+                sx={{ gridColumn: "span 4" }}
+              />
+              <TextField
+                fullWidth
+                variant="filled"
+                type="adresseMail"
+                label="adresseMail"
+                name="adresseMail"
+                value={values.adresseMail}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.adresseMail && Boolean(errors.adresseMail)}
+                helperText={touched.adresseMail && errors.adresseMail}
                 sx={{ gridColumn: "span 4" }}
               />
               <TextField
