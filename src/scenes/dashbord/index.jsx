@@ -793,14 +793,14 @@ return (
           gridRow="span 2"
           backgroundColor={colors.primary[400]}
         >
-        <Typography
-                variant="h3"
-                fontWeight="bold"
-                color={colors.greenAccent[300]}
-                align="centre"
-              >
-                BarChart
-              </Typography>
+           <Typography
+            variant="h5"
+            fontWeight="bold"
+            color={colors.greenAccent[500]}
+            sx={{ padding: "30px 30px 0 30px" }}
+          >
+            BarChart
+          </Typography>
           <Box height="250px" mt="-20px">
           {selectedEquipments.length > 0 ? (
       <BarChart
