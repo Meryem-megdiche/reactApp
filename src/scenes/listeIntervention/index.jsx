@@ -97,46 +97,74 @@ const Listes = () => {
     fetchData();
   }, []);
 
+  const formatDate = (dateString) => {
+    const options = { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+    return new Date(dateString).toLocaleString('fr-FR', options);
+  };
+
   const columns = [
-    { field: "equipmentName", 
-    headerName: "Nom de l'équipement", 
-    flex: 1,
-    headerAlign: "center",
-    align: "center",
-    cellClassName: "name-column--cell", },
-    { field: "type", 
-    headerName: "Type", 
-    flex: 1,
-    headerAlign: "center",
-    align: "center",
-    cellClassName: "name-column--cell", },
-    { field: "date", 
-    headerName: "Date", 
-    flex: 1,
-    headerAlign: "center",
-    align: "center",
-    cellClassName: "name-column--cell", },
-   
-    { field: 'description',
-     headerName: "Description", 
-     flex: 1 ,
-     headerAlign: "center",
+    { 
+      field: "adresseMail", 
+      headerName: 'adresseMail', 
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell"
+    },
+    { 
+      field: "equipmentName", 
+      headerName: "Nom de l'équipement", 
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell" 
+    },
+    { 
+      field: "type", 
+      headerName: "Type", 
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell" 
+    },
+    { 
+      field: "date", 
+      headerName: "Date", 
+      flex: 1,
+      headerAlign: "center",
       align: "center",
       cellClassName: "name-column--cell",
+      valueGetter: (params) => formatDate(params.value), // Format the date here
     },
-    { field: "parentIntervention", 
-    headerName: 'Parent Intervention', 
-    flex: 1 ,
-    headerAlign: "center",
-    align: "center",
-    cellClassName: "name-column--cell",},
+    { 
+      field: 'description',
+      headerName: "Description", 
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell"
+    },
+    { 
+      field: "parentIntervention", 
+      headerName: 'Parent Intervention', 
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      cellClassName: "name-column--cell"
+    },
   ];
 
   return (
     <Box m="20px">
       <Header title="Liste des interventions" />
       <Box display="flex" gap="20px" mb="20px">
-        
         <Button
           onClick={readNfcTagForIntervention}
           sx={{
