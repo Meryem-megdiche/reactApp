@@ -88,7 +88,7 @@ const Intervention = () => {
       } else {
         setSuccessMessage(response.data.message || "Ajout réussi");
         setErrorMessage(null);
-        setTimeout(() => navigate('/liste'), 800);
+        setTimeout(() => navigate('/liste'), 1600);
       }
     
     } catch (error) {
