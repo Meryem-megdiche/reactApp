@@ -164,9 +164,9 @@ const getColorByTTL = (TTL) => {
   console.log("Determining color for TTL:", TTL);
   if (TTL <= 46) {
     return "green";
-  } else if (TTL > 46 && TTL <= 48) {
+  } else if (TTL > 46 && TTL <48) {
     return "orange";
-  } else if (TTL > 48 && TTL < 113) {
+  } else if (TTL >= 48 && TTL < 113) {
     return "red";
   } else {
     console.error("Unexpected TTL value:", TTL);
