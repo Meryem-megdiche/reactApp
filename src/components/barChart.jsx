@@ -162,11 +162,11 @@ const getDateFormat = (startDate, endDate) => {
 
 const getColorByTTL = (TTL) => {
   console.log("Determining color for TTL:", TTL);
-  if (TTL < 56) {
+  if (TTL < 48) {
     return "green";
-  } else if (TTL >= 56 && TTL <= 113) {
+  } else if (TTL >= 48 && TTL <= 50) {
     return "orange";
-  } else if (TTL > 113) {
+  } else if (TTL >= 113) {
     return "red";
   } else {
     console.error("Unexpected TTL value:", TTL);
