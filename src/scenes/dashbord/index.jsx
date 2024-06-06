@@ -729,7 +729,7 @@ return (
     onClick={() => generateAndDownloadReport('pdf')}
     disabled={isGenerating}
   >
-    {isGenerating ? 'Génération rapport en cours...' : 'Télécharger rapport en  PDF'}
+    {isGenerating ? 'Génération rapport en cours...' : 'Télécharger rapport des interventions'}
   </Button>
 </div>
           <Box
