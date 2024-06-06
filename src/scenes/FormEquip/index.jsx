@@ -89,34 +89,7 @@ const Contacts = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const navigate = useNavigate();
 
-  const readNfcTag = async (setFieldValue) => {
-    if ("NDEFReader" in window) {
-      try {
-        const reader = new NDEFReader();
-        await reader.scan();
-        console.log("En attente de la lecture du tag NFC...");
-
-        reader.onreading = event => {
-          console.log("Tag NFC détecté !");
-          const serialNumber = event.serialNumber;
-          if (serialNumber) {
-            console.log("Numéro de série du tag NFC:", serialNumber);
-            setFieldValue('RFID', serialNumber);
-            enqueueSnackbar(`RFID scanné avec succès: ${serialNumber}`, { variant: 'success' });
-            if (navigator.vibrate) {
-              navigator.vibrate(200); // Vibration de 200 ms
-            }
-          } else {
-            console.error("Aucune donnée scannée.");
-            enqueueSnackbar("Aucune donnée scannée.", { variant: 'warning' });
-          }
-        };
-      } catch (error) {
-        console.error(`Erreur de lecture du tag NFC: ${error.message}`);
-        enqueueSnackbar(`Erreur de lecture du tag NFC: ${error.message}`, { variant: 'error' });
-      }
-    }
-  };
+  
 
   const handleAddEquipment = async (values) => {
     try {
@@ -255,12 +228,8 @@ const Contacts = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => readNfcTag(setFieldValue)} color="primary">
-                        <NfcIcon />
-                        <Typography variant="body2" sx={{ ml: 1 }}>
-                          Scanner RFID
-                        </Typography>
-                      </IconButton>
+                      <RfidScanner setFieldValue={setFieldValue} />
+                      
                     </InputAdornment>
                   ),
                 }}

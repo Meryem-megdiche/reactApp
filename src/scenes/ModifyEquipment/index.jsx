@@ -21,6 +21,7 @@ const checkoutSchema = yup.object().shape({
 
 // Composant pour scanner le RFID
 const RfidScanner = ({ setFieldValue }) => {
+  
   const { enqueueSnackbar } = useSnackbar();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -148,10 +149,13 @@ const ModifyEquipment = () => {
       setSuccessMessage(null);
     }
   };
-
+  const navigateTouserList = () => {
+    navigate('/team'); // Remplacez par le chemin correct
+  };
   return (
     <Box m="20px">
-      <Header title="Modifier un équipement" subtitle="Retour à la liste des équipements" />
+      <Header title="Modifier un équipement" subtitle="Retour à la liste des équipements"
+      onSubtitleClick={navigateTouserList} />
       {loading && <p>Loading...</p>}
       
       {!loading && (
