@@ -27,6 +27,7 @@ const RfidScanner = ({ setFieldValue }) => {
     }
   }, [enqueueSnackbar]);
 
+
   const handleClose = () => {
     setOpen(false);
   };
