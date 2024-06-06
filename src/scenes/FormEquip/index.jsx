@@ -10,7 +10,7 @@ import { useSnackbar } from 'notistack';
 import NfcIcon from '@mui/icons-material/Nfc'; // Importer l'icône NFC
 
 const RfidScanner = ({ setFieldValue }) => {
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [nfcSupported, setNfcSupported] = useState(false);
@@ -47,6 +47,7 @@ const RfidScanner = ({ setFieldValue }) => {
             setFieldValue('RFID', serialNumber);
             setMessage(`RFID scanné avec succès: ${serialNumber}`);
             setOpen(true);
+            closeSnackbar(); // Fermer toutes les notifications précédentes
             enqueueSnackbar(`RFID scanné avec succès: ${serialNumber}`, { variant: 'success' });
             if (navigator.vibrate) {
               navigator.vibrate(200); // Vibration de 200 ms
