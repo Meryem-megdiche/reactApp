@@ -46,7 +46,7 @@ const User = () => {
       try {
         await axios.delete(`https://nodeapp-0ome.onrender.com/user/users/${id}`);
         setUsers(users.filter((user) => user.id !== id));
-        console.log("useru deleted successfully");
+        console.log("Utilisateur supprimé avec succès ");
       } catch (error) {
         console.error("Error deleting user:", error);
       }
@@ -54,7 +54,7 @@ const User = () => {
     
     
     const handleDeleteClick = (id) => {
-      const confirmDelete = window.confirm("Are you sure you want to delete this user ?");
+      const confirmDelete = window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?");
       if (confirmDelete) {
         deleteuser(id);
       }

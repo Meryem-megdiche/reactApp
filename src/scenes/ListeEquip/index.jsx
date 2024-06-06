@@ -99,7 +99,7 @@ const Team = () => {
   const handleButton2Click = async (row) => {
     try {
       // Show a confirmation prompt
-      const confirmDelete = window.confirm("Are you sure you want to delete this equipment?");
+      const confirmDelete = window.confirm("Êtes-vous sûr de vouloir supprimer cet équipement ?");
       if (!confirmDelete) {
         return;
       }
