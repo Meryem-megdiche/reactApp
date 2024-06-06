@@ -110,7 +110,7 @@ const Alert = () => {
   
     console.log(`Valeur de ${attribute}: ${value}, Seuil: ${seuil}`);
   
-    if (value > seuil) {
+    if (value >= seuil) {
       console.log(`Rouge: ${value} est supérieure au seuil.`);
       return 'red'; // Supérieure au seuil
     } else if (value > warningThreshold) {
