@@ -66,14 +66,7 @@ const Dashboard = () => {
                     image: imageData,
                     width: 500
                 },
-                { text: 'Interprétation des résultats', style: 'subheader' },
-                {
-                    ul: [
-                        'Les pings sont réguliers et montrent une bonne stabilité de la connexion.',
-                        'Le nombre d\'interventions est cohérent avec les alertes reçues.',
-                        'Aucune alerte résolue pour cette période, nécessitant peut-être une analyse plus approfondie.'
-                    ]
-                },
+               
                 { text: 'Détails des interventions récentes', style: 'subheader' },
                 {
                     table: {

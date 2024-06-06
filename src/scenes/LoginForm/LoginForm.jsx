@@ -36,6 +36,7 @@ const LoginForm = () =>
          } else if (userRole === 'adminSystem') {
            navigate('/user');
          }
+         window.location.reload();
       } else if (response.status === 401) {
         // Code d'état HTTP 401 indique une authentification non réussie (mauvais identifiant ou mot de passe)
         alert('Login failed: Incorrect email or password.');
