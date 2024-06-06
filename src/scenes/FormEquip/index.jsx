@@ -27,7 +27,6 @@ const RfidScanner = ({ setFieldValue }) => {
     }
   }, [enqueueSnackbar]);
 
-
   const handleClose = () => {
     setOpen(false);
   };
@@ -68,6 +67,15 @@ const RfidScanner = ({ setFieldValue }) => {
     }
   };
 
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(() => {
+        setOpen(false);
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
   return (
     <>
       <IconButton onClick={readNfcTag} color="primary">
@@ -88,8 +96,6 @@ const Contacts = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const navigate = useNavigate();
-
-  
 
   const handleAddEquipment = async (values) => {
     try {
@@ -140,6 +146,7 @@ const Contacts = () => {
     };
     fetchEquipments();
   }, []);
+
   return (
     <Box m="20px">
       <Header title="Ajouter un équipement" subtitle="Voir la liste des équipements" />
@@ -229,7 +236,6 @@ const Contacts = () => {
                   endAdornment: (
                     <InputAdornment position="end">
                       <RfidScanner setFieldValue={setFieldValue} />
-                      
                     </InputAdornment>
                   ),
                 }}
@@ -261,9 +267,6 @@ const Contacts = () => {
                 helperText={touched.Etat && errors.Etat}
                 sx={{ gridColumn: "span 4" }}
               />
-             
-            
-              
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button type="submit" color="secondary" variant="contained">
@@ -287,8 +290,6 @@ const checkoutSchema = yup.object().shape({
   RFID: yup.string().required("required"),
   Département: yup.string().required("required"),
   Etat: yup.string().required("required"),
- 
- 
 });
 
 const initialValues = {
