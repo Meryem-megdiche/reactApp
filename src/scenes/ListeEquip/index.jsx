@@ -295,8 +295,8 @@ const Team = () => {
       flex: 1,
       renderCell: (params) => (
         <span style={{ color: params.row.Etat === 'dysfonctionnel' ? 'red' : 
-                              params.row.Etat === 'problème réseau' ? 'orange' :
-                              params.row.Etat === 'en bon état' ? 'green' :
+                              params.row.Etat === 'Problème de réseau' ? 'orange' :
+                              params.row.Etat === 'En bon état' ? 'green' :
                               'blue' }}>
           {params.row.Etat}
         </span>
