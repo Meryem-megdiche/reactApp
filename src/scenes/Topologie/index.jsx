@@ -30,7 +30,7 @@ const Topologi = () => {
 
   useEffect(() => {
     fetchScannedEquipments();
-    const interval = setInterval(fetchScannedEquipments, 50000000);
+    const interval = setInterval(fetchScannedEquipments, 50000);
     return () => clearInterval(interval);
   }, []);
 
