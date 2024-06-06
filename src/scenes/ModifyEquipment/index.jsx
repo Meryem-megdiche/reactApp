@@ -138,7 +138,7 @@ const ModifyEquipment = () => {
         setErrorMessage(null);
         setTimeout(() => {
           navigate('/team'); 
-        }, 800);
+        }, 1200);
       } else {
         setErrorMessage(response.data.message || "Erreur inattendue lors de la modification de l'équipement");
         setSuccessMessage(null);

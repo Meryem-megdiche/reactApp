@@ -31,7 +31,7 @@ const Form = () => {
         // Ajout d'une temporisation avant de rediriger l'utilisateur
         setTimeout(() => {
           navigate('/user'); // Remplacez ceci par le chemin réel de votre liste d'équipements
-        }, 800);
+        }, 1600);
     } catch (error) {
       console.error('Erreur lors de l\'ajout de l\'utilisateur :', error);
       if (error.response && error.response.status === 400) {

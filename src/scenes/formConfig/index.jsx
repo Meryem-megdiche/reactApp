@@ -39,7 +39,7 @@ console.log("Initial values for form:", initialValues);
       setSuccessMessage("Configuration ajoutée avec succès !");
       setTimeout(() => {
         navigate('/config'); // Remplacez ceci par le chemin réel de votre liste d'équipements
-      }, 800); 
+      }, 1600); 
       setErrorMessage(""); // Réinitialiser le message d'erreur s'il y en avait un
     } catch (error) {
       console.error('Erreur lors de l\'ajout de la configuration :', error);
