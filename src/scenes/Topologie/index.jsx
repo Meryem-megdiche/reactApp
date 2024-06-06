@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, Snackbar, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +13,6 @@ const Topologi = () => {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-  const [selectedEquipmentId, setSelectedEquipmentId] = useState(null);
 
   useEffect(() => {
     const fetchEquipments = async () => {
@@ -30,7 +28,7 @@ const Topologi = () => {
 
   useEffect(() => {
     fetchScannedEquipments();
-    const interval = setInterval(fetchScannedEquipments, 50000);
+    const interval = setInterval(fetchScannedEquipments, 5000); // Intervalle de 5 secondes
     return () => clearInterval(interval);
   }, []);
 
@@ -208,7 +206,7 @@ const Topologi = () => {
     <Box m="20px">
       <Typography variant="h3" mb="20px">Topologie réseau </Typography>
       <Button variant="contained" color="primary" onClick={handleRFIDScan}>
-        commencer l'installation 
+        Commencer l'installation 
       </Button>
       {scannedEquipments.length > 0 && (
         <Box mt="20px">
